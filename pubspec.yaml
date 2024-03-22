@@ -49,6 +49,9 @@ flutter:
     - family: Montagu Slab
       fonts: 
         - asset: assets/fonts/Montagu_Slab/MontaguSlab.ttf
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat/Montserrat.ttf
 flutter_launcher_icons:
   android: true
   ios: true

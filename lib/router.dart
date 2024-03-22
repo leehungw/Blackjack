@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:card/main_menu/login_screen.dart';
+import 'package:card/main_menu/signup_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +24,12 @@ final router = GoRouter(
       builder: (context, state) => const LoginScreen(key: Key('login screen')),
       routes: [
         GoRoute(
-          path: 'play',
+          path: 'signup',
           pageBuilder: (context, state) => buildMyTransition<void>(
-            key: ValueKey('play'),
-            color: context.watch<Palette>().backgroundPlaySession,
-            child: const PlaySessionScreen(
-              key: Key('level selection'),
+            key: ValueKey('signup'),
+            color: context.watch<Palette>().backgroundMain,
+            child: const SignupScreen(
+              key: Key('signup'),
             ),
           ),
           routes: [
