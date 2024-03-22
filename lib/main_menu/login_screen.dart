@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -185,6 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   "Enter your email:",
                                                   style: TextStyle(
                                                       color: Colors.white,
+                                                      fontFamily: "Montserrat",
                                                       fontSize: 16),
                                                 ),
                                               ),
@@ -303,8 +305,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             child: Text(
                               'Forgot password?',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 15),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontFamily: "Montserrat"),
                             ),
                           ),
                         ),
@@ -328,10 +332,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   "Log In",
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                  ),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                      color: Colors.white,
+                                      fontFamily: "Montserrat"),
                                 ),
                               )),
                           onTap: () {
@@ -344,16 +348,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         text: TextSpan(
                             style: TextStyle(color: Colors.white, fontSize: 16),
                             children: <TextSpan>[
-                              const TextSpan(text: "Create new account? "),
+                              const TextSpan(
+                                  text: "Create new account? ",
+                                  style: TextStyle(fontFamily: "Montserrat")),
                               TextSpan(
                                   text: "Sign Up",
                                   style: TextStyle(
                                       color: Colors.blue,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: "Montserrat"),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
-                                      //TODO: handle Sign up logic
+                                      GoRouter.of(context).go('/signup');
                                     })
                             ]),
                       ),

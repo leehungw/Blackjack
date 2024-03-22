@@ -31,7 +31,7 @@ class Palette {
   Color get accept => const Color(0xff15a44d);
   Color get backgroundMain => const Color(0xffffd7ff);
   Color get backgroundLevelSelection => const Color(0xffa2dcc7);
-  Color get backgroundPlaySession => const Color(0xffffebb5);
+  Color get backgroundPlaySession => const Color(0xffBC3737);
   Color get background4 => const Color(0xffffffd1);
   Color get backgroundSettings => const Color(0xffbfc8e3);
   Color get trueWhite => const Color(0xffffffff);
