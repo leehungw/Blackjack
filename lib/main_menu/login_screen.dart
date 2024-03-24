@@ -325,7 +325,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Colors.transparent,
                                 image: DecorationImage(
                                     image: AssetImage(
-                                        "assets/images/button_background.png"),
+                                        "assets/images/button_background_inactive.png"),
                                     fit: BoxFit.fill),
                               ),
                               child: Center(
