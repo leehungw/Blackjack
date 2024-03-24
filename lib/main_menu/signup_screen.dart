@@ -1,8 +1,6 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -286,7 +284,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               color: Colors.transparent,
                               image: DecorationImage(
                                   image: AssetImage(
-                                      "assets/images/button_background.png"),
+                                      "assets/images/button_background_inactive.png"),
                                   fit: BoxFit.fill),
                             ),
                             child: Center(
@@ -301,6 +299,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             )),
                         onTap: () {
                           //TODO: handle sign up logic
+                          GoRouter.of(context).go('/signup/verification');
                         }),
                   ),
                 ]),
