@@ -5,14 +5,15 @@ import 'game_player.dart';
 
 final class GameOfflineManager{
   static final GameOfflineManager _instance = GameOfflineManager();
-  static get instance => _instance;
+  static GameOfflineManager get instance => _instance;
 
   // Offline Manager
   List<GamePlayer> _players = [];
-  List<Card> _deck = [];
+  List<GameCard> _deck = [];
   bool _start = false;
   GamePlayer? _currentPlayer = null;
   GamePlayer? _dealer;
+  int _revealedCount = 0;
 
   GamePlayer? get currentPlayer {
     if (_currentPlayer == null){
@@ -38,8 +39,12 @@ final class GameOfflineManager{
   }
 
   void newOfflineGame(){
+    _players.clear();
+    _currentPlayer = null;
+    _dealer = null;
+    _revealedCount = 0;
     for (int i = 0; i < 6; i++){
-      _players.add(GamePlayer(i,i));
+      _players.add(GamePlayer(i,i + 1));
     }
     _deck = GameFactory.createDeck(6);
     _players.last.becomeDealer();
@@ -48,8 +53,26 @@ final class GameOfflineManager{
   }
 
   void startOfflineGame(){
-    for (GamePlayer player in _players){
+    for (GamePlayer player in _players) {
       player.ready();
+    }
+    for (int i = 0; i < 2; i++){
+      for (GamePlayer player in _players){
+        GameCard card = _deck.removeAt(0);
+        player.getDistributedCard(card);
+      }
+    }
+    for (GamePlayer player in _players){
+      player.waitForTurn();
+    }
+    _start = true;
+    CheckBlackjack();
+    if (_start){
+      _currentPlayer = _players.first;
+      if (_currentPlayer!.state != PlayerState.wait){
+        _currentPlayer = _getNextPlayer(_currentPlayer!);
+      }
+      _currentPlayer?.startTurn();
     }
   }
 
@@ -61,6 +84,14 @@ final class GameOfflineManager{
     if (_start){
 
     }
+  }
+
+  bool TryEndOfflineGame(){
+    if (_revealedCount == _players.length){
+      EndOfflineGame();
+      return true;
+    }
+    return false;
   }
 
   void distributeCard(){
@@ -128,6 +159,17 @@ final class GameOfflineManager{
       EndOfflineGame();
       return true;
     }
+
+    // player got ban_ban or ban_luck
+    for (GamePlayer player in ban_luck_players){
+      player.win();
+      _revealedCount++;
+    }
+    for (GamePlayer player in ban_ban_players){
+      player.win();
+      _revealedCount++;
+    }
+
     // All is normal
     return false;
   }
@@ -149,20 +191,46 @@ final class GameOfflineManager{
     if (currentPlayer == null){
       return;
     }
-    currentPlayer?.hit(_deck.first);
-
+    GameCard card = _deck.removeAt(0);
+    currentPlayer?.hit(card);
+    if (_currentPlayer == _dealer){
+      if (_dealer!.isBurn() || _dealer!.isDragon()){
+        dealerExecuteAll();
+      }
+      TryEndOfflineGame();
+    }
   }
 
   void playerEndTurn(){
     if (currentPlayer?.isDealer() == false){
-      if (currentPlayer == _players.last){
-        _currentPlayer?.stand();
-        _currentPlayer = _players.first;
-        _currentPlayer?.startTurn();
-      } else {
-        _currentPlayer = _players[(_currentPlayer?.seat ?? -1) + 1];
-      }
+      _currentPlayer?.stand();
+      _currentPlayer = _getNextPlayer(_currentPlayer!);
+      _currentPlayer?.startTurn();
     }
+  }
+
+  GamePlayer _getNextPlayer(GamePlayer player){
+    GamePlayer result;
+    if (player == _players.last){
+      result = _players.first;
+    } else {
+      result = _players[(player.seat ?? -1)];
+    }
+    return result.state == PlayerState.wait || result.isDealer() ? result : _getNextPlayer(player);
+  }
+
+  bool playerCanEndTurn(){
+    if (!_start || _currentPlayer == _dealer){
+      return false;
+    }
+    return currentPlayer != null && currentPlayer!.getTotalValues() > 15;
+  }
+
+  bool playerCanDraw(){
+    if (!_start){
+      return false;
+    }
+    return currentPlayer != null && currentPlayer!.isBurn() == false && currentPlayer!.getTotalValues() != 21;
   }
 
   void dealerExecutePlayer(int seatNumber){
@@ -170,5 +238,24 @@ final class GameOfflineManager{
       return;
     }
     _players[seatNumber].reveal(_dealer!);
+    _revealedCount ++;
+    TryEndOfflineGame();
+  }
+
+  void dealerExecuteAll(){
+    for (GamePlayer player in _players){
+      if (player.state == PlayerState.revealed || player.isDealer()){
+        continue;
+      }
+      player.reveal(_dealer!);
+    }
+  }
+
+  bool dealerCanExecutePlayer(){
+    if (!_start){
+      return false;
+    }
+    return dealer != null && dealer?.state == PlayerState.onTurn && dealer!.getTotalValues() > 16;
   }
 }
+

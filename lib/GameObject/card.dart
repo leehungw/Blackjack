@@ -8,13 +8,13 @@ enum CardType{
   unknown
 }
 
-class Card {
+class GameCard {
   int _rank = 0;
   CardType _type = CardType.unknown;
   bool _hide = true;
   bool _alwaysVisible = true;
 
-  Card (this._rank,this._type,this._hide,this._alwaysVisible);
+  GameCard (this._rank,this._type,this._hide,this._alwaysVisible);
 
   int get rank{
     return _rank;
@@ -39,7 +39,7 @@ class Card {
   Image getImage(double width, double height){
     if (_hide && !_alwaysVisible){
       return
-        Image(image: AssetImage('assets/images/card/card_back.png'),
+        Image(image: AssetImage("assets/images/cards/card_back.png"),
           width: width,
           height: height
         );
@@ -77,14 +77,14 @@ class Card {
         break;
       case CardType.unknown:
         return
-          Image(image: AssetImage('assets/images/card/card_back.png'),
+          Image(image: AssetImage("assets/images/cards/card_back.png"),
             width: width,
             height: height
           );
     }
     return
       Image(
-        image: AssetImage('assets/images/card/${rank_text}_of_${type_text}.png'),
+        image: AssetImage("assets/images/cards/${rank_text}_of_${type_text}.png"),
         width: width,
         height: height,
       );

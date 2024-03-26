@@ -30,7 +30,7 @@ enum PlayerResult {
 class GamePlayer {
   int _userId = -1;
   int _seat = -1;
-  List<Card> _cards = [];
+  List<GameCard> _cards = [];
   PlayerState _state = PlayerState.none;
   PlayerResult _result = PlayerResult.uncheck;
 
@@ -56,7 +56,7 @@ class GamePlayer {
     return _cards.length;
   }
 
-  List<Card> get cards{
+  List<GameCard> get cards{
     return _cards;
   }
 
@@ -77,29 +77,31 @@ class GamePlayer {
   int getTotalValues(){
     int sum = 0;
     int acesCount = 0;
-    for (Card card in _cards){
+    for (GameCard card in _cards){
       if (card.getValue() == 1){
         acesCount ++;
       } else {
         sum += card.getValue();
       }
     }
-    switch (_cards.length){
-      case 2:
-        sum += 11;
-        break;
-      case 3:
-      case 4:
-      case 5:
-        sum += acesCount - 1;
-        if (sum + 11 <= 21){
+    if (acesCount > 0){
+      switch (_cards.length){
+        case 2:
           sum += 11;
-        } else if (sum + 10 <= 21){
-          sum += 10;
-        } else {
-          sum += 1;
-        }
-        break;
+          break;
+        case 3:
+        case 4:
+        case 5:
+          sum += acesCount - 1;
+          if (sum + 11 <= 21){
+            sum += 11;
+          } else if (sum + 10 <= 21){
+            sum += 10;
+          } else {
+            sum += 1;
+          }
+          break;
+      }
     }
     return sum;
   }
@@ -119,11 +121,12 @@ class GamePlayer {
   }
 
   void startTurn(){
-    _state = PlayerState.onTurn;
+    if (_state == PlayerState.wait)
+      _state = PlayerState.onTurn;
   }
 
   void stand(){
-    _state = PlayerState.stand;
+      _state = PlayerState.stand;
   }
 
   void becomeDealer(){
@@ -132,29 +135,45 @@ class GamePlayer {
 
   void win(){
     _result = PlayerResult.win;
+    flipCards();
+    _state = PlayerState.revealed;
   }
 
   void lose(){
     _result = PlayerResult.lose;
+    flipCards();
+    _state = PlayerState.revealed;
   }
 
   void tie(){
     _result = PlayerResult.tie;
+    flipCards();
+    _state = PlayerState.revealed;
   }
 
   void flipCards(){
-    for (Card card in _cards){
-      card.flip();
+    for (GameCard card in _cards){
+      if (card.hide){
+        card.flip();
+      }
     }
   }
 
   void reveal(GamePlayer dealer){
     flipCards();
-    if (dealer.result != PlayerResult.dealer || _result != PlayerResult.uncheck){
+
+    if (dealer.isDealer() == false || _result != PlayerResult.uncheck){
       return;
     }
-    if (getTotalValues() > 21){
-      _result = dealer.getTotalValues() > 21 ? PlayerResult.tie : PlayerResult.lose;
+
+    if (isBurn()){
+      _result = dealer.isBurn() ? PlayerResult.tie : PlayerResult.lose;
+      return;
+    }
+
+    if (dealer.isBurn()){
+      _result = PlayerResult.win;
+      return;
     }
 
     // Dragon
@@ -196,7 +215,7 @@ class GamePlayer {
     return getTotalValues() - dealer.getTotalValues();
   }
 
-  bool hit(Card card){
+  bool hit(GameCard card){
     if (_state != PlayerState.onTurn){
       return false;
     }
@@ -207,7 +226,7 @@ class GamePlayer {
     return false;
   }
 
-  bool getDistributedCard(Card card){
+  bool getDistributedCard(GameCard card){
     if (_state != PlayerState.ready){
       return false;
     }
