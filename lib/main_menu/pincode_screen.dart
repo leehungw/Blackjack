@@ -8,7 +8,8 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class PincodeScreen extends StatefulWidget {
-  const PincodeScreen({super.key});
+  const PincodeScreen(String text, String text2, String text3, String text4,
+      {super.key});
 
   @override
   State<PincodeScreen> createState() => _PincodeScreenState();
