@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:card/main.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,6 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,6 +19,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  String pass = "";
   final emailController = TextEditingController();
   FocusNode emailFocus = FocusNode();
   bool firstEnterEmailTF = false;
@@ -78,6 +83,20 @@ class _LoginScreenState extends State<LoginScreen> {
   void signUpTextTapped(BuildContext context) {
     Navigator.of(context, rootNavigator: true)
         .push(MaterialPageRoute(builder: (context) => const SignupScreen()));
+  }
+
+  void sendResetPasswordRequest(BuildContext context) {
+    String email = emailForgotPasswordController.text;
+
+    FirebaseAuth.instance.sendPasswordResetEmail(email: email).then((_) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Reset password email sent to $email"),
+      ));
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Failed to send reset password email: $error"),
+      ));
+    });
   }
 
   @override
@@ -230,152 +249,176 @@ class _LoginScreenState extends State<LoginScreen> {
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      content: Container(
-                                        height: 230,
-                                        width: 324,
-                                        constraints: const BoxConstraints(),
-                                        padding: const EdgeInsets.all(8.0),
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            gradient: LinearGradient(
-                                                colors: const [
-                                                  Color(0xFF5D0000),
-                                                  Color(0xFFD40000)
-                                                ],
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter)),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: const [
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 38, left: 32),
-                                                  child: Text(
-                                                    "Enter your email:",
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontFamily:
-                                                            "Montserrat",
-                                                        fontSize: 16),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 32, top: 13, right: 32),
-                                              child: TextField(
-                                                controller:
-                                                    emailForgotPasswordController,
-                                                keyboardType:
-                                                    TextInputType.emailAddress,
-                                                // onTap: () =>
-                                                //     {firstEnterEmailTF = true},
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyLarge!
-                                                    .copyWith(
-                                                        color:
-                                                            Color(0xFF97FF9B)),
-                                                decoration: InputDecoration(
-                                                  filled: true,
-                                                  fillColor: Color.fromARGB(
-                                                      80, 217, 217, 217),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(
-                                                                  width: 0,
-                                                                  color: Colors
-                                                                      .black),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                          borderSide:
-                                                              BorderSide(
-                                                                  width: 1,
-                                                                  color: Colors
-                                                                      .black),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                  helperText: " ",
-                                                ),
-                                                obscureText: false,
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 9, left: 32, right: 32),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    style: TextButton.styleFrom(
-                                                      foregroundColor:
-                                                          Colors.black,
-                                                      backgroundColor:
-                                                          Color(0xFF969292),
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                        side: BorderSide(
-                                                            color: Color(
-                                                                0xFF969292)),
-                                                      ),
+                                    return GestureDetector(
+                                      onTap: () {
+                                        FocusScope.of(context).unfocus();
+                                      },
+                                      child: AlertDialog(
+                                        content: Container(
+                                          height: 230,
+                                          width: 324,
+                                          constraints: const BoxConstraints(),
+                                          padding: const EdgeInsets.all(8.0),
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              gradient: LinearGradient(
+                                                  colors: const [
+                                                    Color(0xFF5D0000),
+                                                    Color(0xFFD40000)
+                                                  ],
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter)),
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                children: const [
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        top: 38, left: 32),
+                                                    child: Text(
+                                                      "Enter your email:",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontFamily:
+                                                              "Montserrat",
+                                                          fontSize: 16),
                                                     ),
-                                                    child: SizedBox(
-                                                        width: 70,
-                                                        child: Center(
-                                                            child: Text(
-                                                                'Cancel'))),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      // TODO: handle confirm forgot pw logic
-                                                    },
-                                                    style: TextButton.styleFrom(
-                                                      foregroundColor:
-                                                          Colors.white,
-                                                      backgroundColor:
-                                                          Color(0xFF440682),
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                        side: BorderSide(
-                                                            color: Color(
-                                                                0xFF440682)),
-                                                      ),
-                                                    ),
-                                                    child: SizedBox(
-                                                        width: 70,
-                                                        child: Center(
-                                                            child: Text(
-                                                                'Confirm'))),
                                                   ),
                                                 ],
                                               ),
-                                            )
-                                          ],
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 32,
+                                                    top: 13,
+                                                    right: 32),
+                                                child: TextField(
+                                                  controller:
+                                                      emailForgotPasswordController,
+                                                  keyboardType: TextInputType
+                                                      .emailAddress,
+                                                  // onTap: () =>
+                                                  //     {firstEnterEmailTF = true},
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge!
+                                                      .copyWith(
+                                                          color: Color(
+                                                              0xFF97FF9B)),
+                                                  decoration: InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Color.fromARGB(
+                                                        80, 217, 217, 217),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    width: 0,
+                                                                    color: Colors
+                                                                        .black),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    width: 1,
+                                                                    color: Colors
+                                                                        .black),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                    helperText: " ",
+                                                  ),
+                                                  obscureText: false,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 9,
+                                                    left: 32,
+                                                    right: 32),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      style:
+                                                          TextButton.styleFrom(
+                                                        foregroundColor:
+                                                            Colors.black,
+                                                        backgroundColor:
+                                                            Color(0xFF969292),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          side: BorderSide(
+                                                              color: Color(
+                                                                  0xFF969292)),
+                                                        ),
+                                                      ),
+                                                      child: SizedBox(
+                                                          width: 70,
+                                                          child: Center(
+                                                              child: Text(
+                                                                  'Cancel'))),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        if (emailForgotPasswordController
+                                                            .text.isNotEmpty) {
+                                                          sendResetPasswordRequest(
+                                                              context);
+                                                        } else {
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(SnackBar(
+                                                                  content: Text(
+                                                                      'Please enter your email')));
+                                                        }
+                                                        Navigator.pop(context);
+                                                      },
+                                                      style:
+                                                          TextButton.styleFrom(
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        backgroundColor:
+                                                            Color(0xFF440682),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          side: BorderSide(
+                                                              color: Color(
+                                                                  0xFF440682)),
+                                                        ),
+                                                      ),
+                                                      child: SizedBox(
+                                                          width: 70,
+                                                          child: Center(
+                                                              child: Text(
+                                                                  'Confirm'))),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          ),
                                         ),
+                                        contentPadding: EdgeInsets.all(0.0),
                                       ),
-                                      contentPadding: EdgeInsets.all(0.0),
                                     );
                                   },
                                 );
