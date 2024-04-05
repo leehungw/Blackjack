@@ -182,8 +182,7 @@ class _SignupScreenState extends State<SignupScreen> {
       }
       if (result == false) {
         // Chuyển hướng sang PINCODE page để xác thực tài khoản
-        Navigator.of(context, rootNavigator: true)
-            .pushAndRemoveUntil(_createRoute(), (route) => false);
+        Navigator.of(context).push(_createRoute());
       } else if (_ExceptionText != null) {
         String? message = _ExceptionText;
         ScaffoldMessenger.of(context as BuildContext)
@@ -581,7 +580,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               )),
                           onTap: () {
                             _RegisterButton(context);
-                            // GoRouter.of(context).go('/signup/verification');
+                            //GoRouter.of(context).go('/signup/verification');
                           }),
                     ),
                   ]),
@@ -600,7 +599,8 @@ class _SignupScreenState extends State<SignupScreen> {
           yourNameController.value.text,
           userNameController.value.text,
           emailController.value.text,
-          passwordController.value.text),
+          passwordController.value.text,
+          _imageFile),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
