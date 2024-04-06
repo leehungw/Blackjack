@@ -30,18 +30,18 @@ final router = GoRouter(
               key: Key('signup'),
             ),
           ),
-          routes: [
-            GoRoute(
-              path: 'verification',
-              pageBuilder: (context, state) => buildMyTransition<void>(
-                key: ValueKey('verification'),
-                color: context.watch<Palette>().backgroundPlaySession,
-                child: const PincodeScreen(
-                  key: Key('verification'),
-                ),
-              ),
-            )
-          ],
+          // routes: [
+          //   GoRoute(
+          //     path: 'verification',
+          //     pageBuilder: (context, state) => buildMyTransition<void>(
+          //       key: ValueKey('verification'),
+          //       color: context.watch<Palette>().backgroundPlaySession,
+          //       child: const PincodeScreen(
+          //         key: Key('verification'),
+          //       ),
+          //     ),
+          //   )
+          // ],
         ),
         GoRoute(
           path: 'settings',

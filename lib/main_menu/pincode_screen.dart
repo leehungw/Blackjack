@@ -1,14 +1,42 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:card/main_menu/signup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
+Future<UserCredential?> registerWithEmailAndPassword(
+    String email, String password, String displayName, String avatar) async {
+  try {
+    UserCredential userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    await userCredential.user!.updateDisplayName(displayName);
+
+    return userCredential;
+  } catch (e) {
+    print('Error creating user: $e');
+    return null;
+  }
+}
+
 class PincodeScreen extends StatefulWidget {
-  const PincodeScreen({super.key});
+  final String name;
+  final String uname;
+  final String email;
+  final String pass;
+  final String imagefile;
+  PincodeScreen(this.name, this.uname, this.email, this.pass, this.imagefile);
 
   @override
   State<PincodeScreen> createState() => _PincodeScreenState();
@@ -22,6 +50,78 @@ class _PincodeScreenState extends State<PincodeScreen> {
   StreamController<ErrorAnimationType> errorController =
       StreamController<ErrorAnimationType>();
   TextEditingController textEditingController = TextEditingController();
+  bool _verifySuccess = false;
+
+  String generateRandomCode() {
+    Random random = Random();
+    String code = '';
+    for (int i = 0; i < 6; i++) {
+      code += random.nextInt(10).toString();
+    }
+    return code;
+  }
+
+  void sendConfirmationCode(String code) async {
+    String username = "personalschedulemanager@gmail.com";
+    String password = "myocgxvnvsdybuhr";
+
+    final smtpServer = gmail(username, password);
+
+    final message = Message()
+      ..from = Address(username)
+      ..recipients.add('${widget.email}')
+      ..subject = 'Confirmation Code'
+      ..text = 'Your confirmation code is: $code';
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void resendConfirmationCode() {
+    pinCode = generateRandomCode();
+    sendConfirmationCode(pinCode);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _verifySuccess = false;
+    pinCode = generateRandomCode();
+    sendConfirmationCode(pinCode);
+  }
+
+  bool _canPop = false;
+  void _backButton(BuildContext context) async {
+    if (!_verifySuccess) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Cảnh báo'),
+          content: Text(
+              'Hành động này sẽ chuyển bạn về trang đăng ký ! \n Bạn có chắc chắn không ?'),
+          actions: [
+            FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Hủy')),
+            FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: Text('Đồng ý'))
+          ],
+        ),
+      );
+    } else {
+      Navigator.of(context, rootNavigator: true).push(_createRoute());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +149,9 @@ class _PincodeScreenState extends State<PincodeScreen> {
                     child: Row(
                       children: [
                         IconButton(
-                          onPressed: () => {Navigator.pop(context)},
+                          onPressed: () {
+                            _backButton(context);
+                          },
                           icon: Icon(
                             Icons.arrow_back,
                             size: 30,
@@ -93,8 +195,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       image: DecorationImage(
-                        image: AssetImage(
-                            "assets/images/default_profile_picture.png"),
+                        image: AssetImage(widget.imagefile),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -110,7 +211,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
                   ),
                   Gap(10),
                   GradientText(
-                    'Your Name',
+                    widget.name,
                     style: TextStyle(
                         fontSize: 26.0,
                         fontFamily: 'Montagu Slab',
@@ -201,6 +302,16 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           },
                         )),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                    child: Text(
+                      hasError ? "*Please fill up all the cells properly" : "",
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ),
                   Gap(40),
                   GestureDetector(
                       child: Container(
@@ -216,7 +327,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              "Sign Up",
+                              "Confirm Code",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
@@ -224,8 +335,49 @@ class _PincodeScreenState extends State<PincodeScreen> {
                                   fontFamily: "Montserrat"),
                             ),
                           )),
-                      onTap: () {
-                        //TODO: handle verification logic
+                      onTap: () async {
+                        if (currentText == pinCode) {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              });
+                          UserCredential? userCredential =
+                              await registerWithEmailAndPassword(widget.email,
+                                  widget.pass, widget.uname, widget.imagefile);
+                          if (userCredential != null) {
+                            String userID = userCredential.user!.uid;
+
+                            print("Account created successfully!");
+                          } else {
+                            print('Account creation failed!');
+                          }
+                          _verifySuccess = true;
+                          Navigator.of(context, rootNavigator: true).pop();
+                          setState(() {});
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Thông báo'),
+                                content: Text(
+                                  'MÃ XÁC NHẬN KHÔNG CHÍNH XÁC!!!',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('Đóng'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
                       }),
                 ]),
               ),
@@ -233,6 +385,29 @@ class _PincodeScreenState extends State<PincodeScreen> {
           ),
         );
       }),
+    );
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const SignupScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        final tween = Tween(begin: begin, end: end);
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: curve,
+        );
+
+        return SlideTransition(
+          position: tween.animate(curvedAnimation),
+          child: child,
+        );
+      },
     );
   }
 }
