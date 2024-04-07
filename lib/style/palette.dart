@@ -23,16 +23,36 @@ import 'package:flutter/material.dart';
 /// we could allow players to customize colors, for example,
 /// or even get the colors from the network.
 class Palette {
-  Color get pen => const Color(0xff1d75fb);
-  Color get darkPen => const Color(0xFF0050bc);
-  Color get redPen => const Color(0xFFd10841);
-  Color get inkFullOpacity => const Color(0xff352b42);
-  Color get ink => const Color(0xee352b42);
-  Color get accept => const Color(0xff15a44d);
-  Color get backgroundMain => const Color(0xffffd7ff);
-  Color get backgroundLevelSelection => const Color(0xffa2dcc7);
-  Color get backgroundPlaySession => const Color(0xffBC3737);
-  Color get background4 => const Color(0xffffffd1);
-  Color get backgroundSettings => const Color(0xffbfc8e3);
-  Color get trueWhite => const Color(0xffffffff);
+  static const Color titleTextGradientTop = Color(0xFFFEE60F);
+  static const Color titleTextGradientBottom = Color(0xFFF4FD8B);
+  static const Color textFieldBorderFocus = Color(0xFF2CFF35);
+  static const Color textFieldBorderUnfocus = Color(0xFF97FF9B);
+  static const Color primaryText = Color(0xFFFFFFFF);
+  static const Color accountBackgroundGradientTop = Color(0xFF5F1313);
+  static const Color accountBackgroundGradientBottom = Color(0xFFDD4444);
+  static const Color buttonConfirmBackground = Color(0xFF440682);
+  static const Color black = Color(0xFF000101);
+  static const Color homeBackgroundGradientBottom = Color(0xFF8A88FE);
+  static const Color homeBackgroundGradientTop = Color(0xFFFF6D6D);
+  static const Color numberText = Color(0xFF262398);
+  static const Color buttonStartBackgroundGradientTop = Color(0xFF02C9E5);
+  static const Color buttonStartBackgroundGradientBottom = Color(0xFF054A7B);
+  static const Color buttonPracticeBackgroundGradientBottom = Color(0xFF0F7B05);
+  static const Color buttonExitBackgroundGradientTop = Color(0xFF6E6D6C);
+  static const Color buttonExitBackgroundGradientBottom = Color(0xFFAB9C8B);
+  static const Color homeDialogBackgroundGradientTop = Color(0xFF4996B8);
+  static const Color homeDialogBackgroundGradientBottom = Color(0xFFFCABF9);
+  static const Color homeDialogPrimaryButtonBackgroundGradientTop =
+      Color(0xFFD87500);
+  static const Color homeDialogPrimaryButtonBackgroundGradientBottom =
+      Color(0xFFFBB958);
+  static const Color homeDialogSecondaryButtonBackgroundGradientTop =
+      Color(0xFFD800CF);
+  static const Color homeDialogSecondaryButtonBackgroundGradientBottom =
+      Color(0xFFFF7EFA);
+  static const Color settingText = Color(0xFF1D0070);
+  static const Color settingDialogButtonBackgroundGradientTop =
+      Color(0xFFFFD779);
+  static const Color settingDialogButtonBackgroundGradientBottom =
+      Color(0xFFFEEDC2);
 }

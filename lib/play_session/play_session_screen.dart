@@ -45,8 +45,6 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.watch<Palette>();
-
     return MultiProvider(
       providers: [
         Provider.value(value: _boardState),
@@ -55,7 +53,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
         // Ignore all input during the celebration animation.
         ignoring: _duringCelebration,
         child: Scaffold(
-          backgroundColor: palette.backgroundPlaySession,
+          backgroundColor: Palette.accountBackgroundGradientBottom,
           // The stack is how you layer widgets on top of each other.
           // Here, it is used to overlay the winning confetti animation on top
           // of the game.
