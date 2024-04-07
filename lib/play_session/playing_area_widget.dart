@@ -32,11 +32,11 @@ class _PlayingAreaWidgetState extends State<PlayingAreaWidget> {
         aspectRatio: 1 / 1,
         child: DragTarget<PlayingCardDragData>(
           builder: (context, candidateData, rejectedData) => Material(
-            color: isHighlighted ? palette.accept : palette.trueWhite,
+            color: isHighlighted ? Palette.black : Palette.primaryText,
             shape: CircleBorder(),
             clipBehavior: Clip.hardEdge,
             child: InkWell(
-              splashColor: palette.redPen,
+              splashColor: Palette.accountBackgroundGradientBottom,
               onTap: _onAreaTap,
               child: StreamBuilder(
                 // Rebuild the card stack whenever the area changes

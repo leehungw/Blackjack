@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:card/main_menu/signup_screen.dart';
+import 'package:card/style/palette.dart';
+import 'package:card/style/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -138,7 +140,10 @@ class _PincodeScreenState extends State<PincodeScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: const [Color(0xFFDD4444), Color(0xFF5F1313)],
+                  colors: const [
+                    Palette.accountBackgroundGradientBottom,
+                    Palette.accountBackgroundGradientTop
+                  ],
                 ),
               ),
               child: Center(
@@ -155,7 +160,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           icon: Icon(
                             Icons.arrow_back,
                             size: 30,
-                            color: Colors.white,
+                            color: Palette.primaryText,
                           ),
                         ),
                         Padding(
@@ -165,23 +170,12 @@ class _PincodeScreenState extends State<PincodeScreen> {
                                   54)),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Text(
                                 "VERIFY YOUR",
-                                style: TextStyle(
-                                    fontFamily: "Montserrat",
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 32,
-                                    color: Colors.white),
+                                style: TextStyles.screenTitle,
                               ),
-                              Text(
-                                "ACCOUNT",
-                                style: TextStyle(
-                                    fontFamily: "Montserrat",
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 32,
-                                    color: Colors.white),
-                              ),
+                              Text("ACCOUNT", style: TextStyles.screenTitle),
                             ],
                           ),
                         )
@@ -203,35 +197,25 @@ class _PincodeScreenState extends State<PincodeScreen> {
                   Gap(26),
                   Text(
                     "Welcome",
-                    style: TextStyle(
-                        fontFamily: "Montserrat",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Colors.white),
+                    style: TextStyles.defaultStyle
+                        .copyWith(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   Gap(10),
                   GradientText(
                     widget.name,
-                    style: TextStyle(
-                        fontSize: 26.0,
-                        fontFamily: 'Montagu Slab',
-                        fontWeight: FontWeight.bold),
+                    style: TextStyles.appTitle,
                     colors: const [
-                      Color(0xFFFEE60F),
-                      Color(0xFFF4FD8B),
+                      Palette.titleTextGradientTop,
+                      Palette.titleTextGradientBottom,
                     ],
                   ),
                   Gap(40),
                   Row(
-                    children: const [
+                    children: [
                       Gap(33),
                       Text(
                         "Enter Your Code",
-                        style: TextStyle(
-                            fontFamily: "Montserrat",
-                            fontWeight: FontWeight.normal,
-                            fontSize: 20,
-                            color: Colors.white),
+                        style: TextStyles.defaultStyle.copyWith(fontSize: 20),
                       ),
                     ],
                   ),
@@ -243,10 +227,10 @@ class _PincodeScreenState extends State<PincodeScreen> {
                             vertical: 8.0, horizontal: 30),
                         child: PinCodeTextField(
                           appContext: context,
-                          pastedTextStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          pastedTextStyle: TextStyles.defaultStyle.copyWith(
+                              color: Palette.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20),
                           length: 6,
                           obscureText: false,
                           animationType: AnimationType.fade,
@@ -262,8 +246,9 @@ class _PincodeScreenState extends State<PincodeScreen> {
                             borderRadius: BorderRadius.circular(5),
                             fieldHeight: 50,
                             fieldWidth: 50,
-                            activeFillColor:
-                                hasError ? Colors.green : Colors.white,
+                            activeFillColor: hasError
+                                ? Palette.textFieldBorderFocus
+                                : Palette.primaryText,
                             selectedColor: Theme.of(context)
                                 .colorScheme
                                 .onTertiaryContainer,
@@ -284,7 +269,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           boxShadows: const [
                             BoxShadow(
                               offset: Offset(0, 1),
-                              color: Colors.black12,
+                              color: Palette.black,
                               blurRadius: 10,
                             )
                           ],
@@ -306,10 +291,9 @@ class _PincodeScreenState extends State<PincodeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 30.0),
                     child: Text(
                       hasError ? "*Please fill up all the cells properly" : "",
-                      style: TextStyle(
-                          color: Colors.red,
+                      style: TextStyles.defaultStyle.copyWith(
                           fontSize: 12,
-                          fontWeight: FontWeight.w400),
+                          color: Palette.accountBackgroundGradientBottom),
                     ),
                   ),
                   Gap(40),
@@ -328,11 +312,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           child: Center(
                             child: Text(
                               "Confirm Code",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                  fontFamily: "Montserrat"),
+                              style: TextStyles.bigButtonText,
                             ),
                           )),
                       onTap: () async {

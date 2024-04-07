@@ -22,9 +22,9 @@ class PlayingCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.watch<Palette>();
-    final textColor =
-        card.suit.color == CardSuitColor.red ? palette.redPen : palette.ink;
+    final textColor = card.suit.color == CardSuitColor.red
+        ? Palette.homeDialogBackgroundGradientBottom
+        : Palette.black;
 
     final cardWidget = DefaultTextStyle(
       style: Theme.of(context).textTheme.bodyMedium!.apply(color: textColor),
@@ -32,8 +32,8 @@ class PlayingCardWidget extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: palette.trueWhite,
-          border: Border.all(color: palette.ink),
+          color: Palette.primaryText,
+          border: Border.all(color: Palette.black),
           borderRadius: BorderRadius.circular(5),
         ),
         child: Center(

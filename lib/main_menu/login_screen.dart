@@ -1,13 +1,13 @@
-import 'dart:math';
 import 'package:card/main.dart';
+import 'package:card/main_menu/forgot_password_dialog.dart';
 import 'package:card/main_menu/signup_screen.dart';
+import 'package:card/style/palette.dart';
+import 'package:card/style/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server/gmail.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: emailController.value.text,
           password: passwordController.value.text);
-    } on FirebaseAuthException {
+    } on Exception {
       // ignore: use_build_context_synchronously
       return false;
     }
@@ -110,28 +110,31 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Builder(builder: (context) {
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          backgroundColor: Colors.transparent,
-          body: GestureDetector(
-            onTap: () {
-              FocusScope.of(context).unfocus();
-            },
-            child: SingleChildScrollView(
-              reverse: true,
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: const [Color(0xFFDD4444), Color(0xFF5F1313)],
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            resizeToAvoidBottomInset: true,
+            backgroundColor: Colors.transparent,
+            body: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+              },
+              child: SingleChildScrollView(
+                reverse: true,
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: const [
+                        Palette.accountBackgroundGradientBottom,
+                        Palette.accountBackgroundGradientTop
+                      ],
+                    ),
                   ),
-                ),
-                child: Center(
-                  child: Column(
-                    children: [
+                  child: Center(
+                    child: Column(children: [
                       Gap(157),
                       Row(
                         children: [
@@ -149,25 +152,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             children: [
                               GradientText(
                                 'Welcome To',
-                                style: TextStyle(
-                                    fontSize: 26.0,
-                                    fontFamily: 'Montagu Slab',
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyles.appTitle,
                                 colors: const [
-                                  Color(0xFFFEE60F),
-                                  Color(0xFFF4FD8B),
+                                  Palette.titleTextGradientTop,
+                                  Palette.titleTextGradientBottom,
                                 ],
                               ),
                               Gap(5),
                               GradientText(
                                 'Lucky Card',
-                                style: TextStyle(
-                                    fontSize: 26.0,
-                                    fontFamily: 'Montagu Slab',
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyles.appTitle,
                                 colors: const [
-                                  Color(0xFFF4FD8B),
-                                  Color(0xFFFEE60F),
+                                  Palette.titleTextGradientTop,
+                                  Palette.titleTextGradientBottom,
                                 ],
                               ),
                             ],
@@ -182,26 +179,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           focusNode: emailFocus,
                           keyboardType: TextInputType.emailAddress,
                           onTap: () => {firstEnterEmailTF = true},
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: Color(0xFF97FF9B)),
+                          style: TextStyles.textFieldStyle,
                           decoration: InputDecoration(
                             enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    width: 2, color: Color(0xFF97FF9B)),
+                                    width: 2,
+                                    color: Palette.textFieldBorderUnfocus),
                                 borderRadius: BorderRadius.circular(10)),
                             focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    width: 3, color: Color(0xFF2CFF35)),
+                                    width: 3,
+                                    color: Palette.textFieldBorderFocus),
                                 borderRadius: BorderRadius.circular(10)),
                             labelText: "Email",
-                            labelStyle: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(color: Color(0xFF97FF9B)),
+                            labelStyle: TextStyles.textFieldStyle,
                             prefixIcon: const Icon(Icons.email_outlined),
-                            prefixIconColor: Color(0xFF97FF9B),
+                            prefixIconColor: Palette.textFieldBorderUnfocus,
                             helperText: " ",
                           ),
                           obscureText: false,
@@ -214,54 +207,46 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: passwordController,
                           focusNode: passwordFocus,
                           onTap: () => {firstEnterPasswordTF = true},
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: Color(0xFF97FF9B)),
+                          style: TextStyles.textFieldStyle,
                           decoration: InputDecoration(
                             enabledBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    width: 2, color: Color(0xFF97FF9B)),
+                                    width: 2,
+                                    color: Palette.textFieldBorderUnfocus),
                                 borderRadius: BorderRadius.circular(10)),
                             focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                    width: 3, color: Color(0xFF2CFF35)),
+                                    width: 3,
+                                    color: Palette.textFieldBorderFocus),
                                 borderRadius: BorderRadius.circular(10)),
                             labelText: "Password",
-                            labelStyle: Theme.of(context)
-                                .textTheme
-                                .bodyLarge!
-                                .copyWith(color: Color(0xFF97FF9B)),
+                            labelStyle: TextStyles.textFieldStyle,
                             prefixIcon: const Icon(Icons.lock_outlined),
-                            prefixIconColor: Color(0xFF97FF9B),
+                            prefixIconColor: Palette.textFieldBorderUnfocus,
                           ),
                           obscureText: true,
                           obscuringCharacter: '*',
                         ),
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          child: TextButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return ForgotPasswordDialog(
-                                      emailForgotPasswordController:
-                                          emailForgotPasswordController);
-                                },
-                              );
-                            },
-                            child: Text(
-                              'Forgot password?',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontFamily: "Montserrat"),
-
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            child: TextButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return ForgotPasswordDialog(
+                                        emailForgotPasswordController:
+                                            emailForgotPasswordController);
+                                  },
+                                );
+                              },
+                              child: Text(
+                                'Forgot password?',
+                                style: TextStyles.linkLable,
+                              ),
                             ),
                           ),
                         ],
@@ -283,11 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Center(
                                   child: Text(
                                     "Log In",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                        color: Colors.white,
-                                        fontFamily: "Montserrat"),
+                                    style: TextStyles.bigButtonText,
                                   ),
                                 )),
                             onTap: () {
@@ -298,34 +279,32 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14.0),
                         child: RichText(
                           text: TextSpan(
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                              children: <TextSpan>[
-                                const TextSpan(
-                                    text: "Create new account? ",
-                                    style: TextStyle(fontFamily: "Montserrat")),
-                                TextSpan(
-                                    text: "Sign Up",
-                                    style: TextStyle(
-                                        color: Colors.blue,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: "Montserrat"),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        GoRouter.of(context).go('/signup');
-                                      })
-                              ]),
+                            style: TextStyles.linkLable,
+                            children: <TextSpan>[
+                              const TextSpan(
+                                text: "Create new account? ",
+                              ),
+                              TextSpan(
+                                text: "Sign Up",
+                                style: TextStyles.linkLable
+                                    .copyWith(color: Palette.numberText),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    GoRouter.of(context).go('/signup');
+                                  },
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                    ],
+                    ]),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 
