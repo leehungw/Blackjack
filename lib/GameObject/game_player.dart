@@ -1,4 +1,10 @@
-import 'card.dart';
+import 'dart:io';
+
+import 'package:card/GameObject/game_factory.dart';
+import 'package:card/models/PlayerModel.dart';
+import 'package:card/models/Validator.dart';
+
+import 'game_card.dart';
 
 enum PlayerState {
   onTurn,
@@ -28,47 +34,27 @@ enum PlayerResult {
 }
 
 class GamePlayer {
-  int _userId = -1;
-  int _seat = -1;
-  List<GameCard> _cards = [];
-  PlayerState _state = PlayerState.none;
-  PlayerResult _result = PlayerResult.uncheck;
+  int userId = -1;
+  int seat = -1;
+  List<GameCard> cards = [];
+  PlayerState state = PlayerState.none;
+  PlayerResult result = PlayerResult.uncheck;
 
-  GamePlayer(this._userId, this._seat);
-
-  int get userId{
-    return _userId;
-  }
-
-  int get seat{
-    return _seat;
-  }
-
-  PlayerState get state{
-    return _state;
-  }
-
-  PlayerResult get result{
-    return _result;
-  }
-
+  GamePlayer(this.userId, this.seat);
+  
   int get cardCount{
-    return _cards.length;
-  }
-
-  List<GameCard> get cards{
-    return _cards;
+    return cards.length;
   }
 
   PlayerCardState CheckBlackjack(){
-    if (_cards.length < 2){
+    if (cards.length < 2){
       return PlayerCardState.error;
     }
-    if (_cards[0].getValue() == 1 && _cards[1].getValue() == 1){
+    if (cards[0].getValue() == 1 && cards[1].getValue() == 1){
       return PlayerCardState.ban_ban;
     }
-    if ((_cards[0].getValue() == 10 && _cards[1].getValue() == 1)
-        || (_cards[0].getValue() == 1 && _cards[1].getValue() == 10)) {
+    if ((cards[0].getValue() == 10 && cards[1].getValue() == 1)
+        || (cards[0].getValue() == 1 && cards[1].getValue() == 10)) {
       return PlayerCardState.ban_luck;
     }
     return PlayerCardState.normal;
@@ -77,7 +63,10 @@ class GamePlayer {
   int getTotalValues(){
     int sum = 0;
     int acesCount = 0;
-    for (GameCard card in _cards){
+    for (GameCard card in cards){
+      if (card.hide){
+        continue;
+      }
       if (card.getValue() == 1){
         acesCount ++;
       } else {
@@ -85,7 +74,7 @@ class GamePlayer {
       }
     }
     if (acesCount > 0){
-      switch (_cards.length){
+      switch (cards.length){
         case 2:
           sum += 11;
           break;
@@ -108,51 +97,52 @@ class GamePlayer {
 
   // property
   bool isDealer(){
-    return _result == PlayerResult.dealer;
+    return result == PlayerResult.dealer;
   }
 
   // Behavior
   void ready(){
-    _state = PlayerState.ready;
+    state = PlayerState.ready;
   }
 
   void waitForTurn(){
-    _state = PlayerState.wait;
+    state = PlayerState.wait;
   }
 
   void startTurn(){
-    if (_state == PlayerState.wait)
-      _state = PlayerState.onTurn;
+    if (state == PlayerState.wait) {
+      state = PlayerState.onTurn;
+    }
   }
 
   void stand(){
-      _state = PlayerState.stand;
+      state = PlayerState.stand;
   }
 
   void becomeDealer(){
-    _result = PlayerResult.dealer;
+    result = PlayerResult.dealer;
   }
 
   void win(){
-    _result = PlayerResult.win;
+    result = PlayerResult.win;
     flipCards();
-    _state = PlayerState.revealed;
+    state = PlayerState.revealed;
   }
 
   void lose(){
-    _result = PlayerResult.lose;
+    result = PlayerResult.lose;
     flipCards();
-    _state = PlayerState.revealed;
+    state = PlayerState.revealed;
   }
 
   void tie(){
-    _result = PlayerResult.tie;
+    result = PlayerResult.tie;
     flipCards();
-    _state = PlayerState.revealed;
+    state = PlayerState.revealed;
   }
 
   void flipCards(){
-    for (GameCard card in _cards){
+    for (GameCard card in cards){
       if (card.hide){
         card.flip();
       }
@@ -162,17 +152,17 @@ class GamePlayer {
   void reveal(GamePlayer dealer){
     flipCards();
 
-    if (dealer.isDealer() == false || _result != PlayerResult.uncheck){
+    if (dealer.isDealer() == false || result != PlayerResult.uncheck){
       return;
     }
 
     if (isBurn()){
-      _result = dealer.isBurn() ? PlayerResult.tie : PlayerResult.lose;
+      result = dealer.isBurn() ? PlayerResult.tie : PlayerResult.lose;
       return;
     }
 
     if (dealer.isBurn()){
-      _result = PlayerResult.win;
+      result = PlayerResult.win;
       return;
     }
 
@@ -181,26 +171,26 @@ class GamePlayer {
       if (dealer.isDragon()){
         int compareResult = compare(dealer);
         if (compareResult < 0){
-          _result = PlayerResult.win;
+          result = PlayerResult.win;
         } else if (compareResult > 0){
-          _result = PlayerResult.lose;
+          result = PlayerResult.lose;
         } else {
-          _result = PlayerResult.tie;
+          result = PlayerResult.tie;
         }
       } else {
-        _result = PlayerResult.win;
+        result = PlayerResult.win;
       }
       return;
     }
     int compareResult = compare(dealer);
     if (compareResult > 0){
-      _result = PlayerResult.win;
+      result = PlayerResult.win;
     } else if (compareResult < 0){
-      _result = PlayerResult.lose;
+      result = PlayerResult.lose;
     } else {
-      _result = PlayerResult.tie;
+      result = PlayerResult.tie;
     }
-    _state = PlayerState.revealed;
+    state = PlayerState.revealed;
   }
 
   bool isDragon(){
@@ -216,22 +206,22 @@ class GamePlayer {
   }
 
   bool hit(GameCard card){
-    if (_state != PlayerState.onTurn){
+    if (state != PlayerState.onTurn){
       return false;
     }
-    if (_cards.length < 5){
-      _cards.add(card);
+    if (cards.length < 5){
+      cards.add(card);
       return true;
     }
     return false;
   }
 
   bool getDistributedCard(GameCard card){
-    if (_state != PlayerState.ready){
+    if (state != PlayerState.ready){
       return false;
     }
-    if (_cards.length < 2){
-      _cards.add(card);
+    if (cards.length < 2){
+      cards.add(card);
       return true;
     }
     return false;

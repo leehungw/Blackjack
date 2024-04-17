@@ -89,4 +89,65 @@ class GameCard {
         height: height,
       );
   }
+
+  // Online Method
+
+  @override
+  String toString(){
+    String type;
+    switch(_type) {
+      case CardType.clubs:
+        type = "clubs";
+        break;
+      case CardType.diamonds:
+        type = "diamonds";
+        break;
+      case CardType.hearts:
+        type = "hearts";
+        break;
+      case CardType.spades:
+        type = "spades";
+        break;
+      case CardType.unknown:
+        return "";
+    }
+
+    return "${type}_$_rank";
+  }
+
+  static GameCard? parse(String cardString, bool hide, bool alwaysVisible){
+    CardType type;
+    int rank;
+
+    List<String> cardData = cardString.split("_");
+    if (cardData.length != 2){
+      return null;
+    }
+
+    switch(cardData[0]) {
+      case "clubs":
+        type = CardType.clubs;
+        break;
+      case "diamonds":
+        type = CardType.diamonds;
+        break;
+      case "hearts":
+        type = CardType.hearts;
+        break;
+      case "spades":
+        type = CardType.spades;
+        break;
+      default:
+        return null;
+    }
+
+    try {
+      rank = int.parse(cardData[1]);
+    }
+    catch (e){
+      return null;
+    }
+
+    return GameCard(rank, type, hide, alwaysVisible);
+  }
 }

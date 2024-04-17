@@ -1,6 +1,6 @@
 import 'package:card/GameObject/game_factory.dart';
 
-import 'card.dart';
+import 'game_card.dart';
 import 'game_player.dart';
 
 final class GameOfflineManager{
@@ -46,7 +46,7 @@ final class GameOfflineManager{
     for (int i = 0; i < 6; i++){
       _players.add(GamePlayer(i,i + 1));
     }
-    _deck = GameFactory.createDeck(6);
+    _deck = GameFactory.createDeck();
     _players.last.becomeDealer();
     _dealer = _players.last;
     _start = false;

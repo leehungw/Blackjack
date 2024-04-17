@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../GameObject/card.dart';
+import '../GameObject/game_card.dart';
 import '../GameObject/game_player.dart';
 
 class DemoScreen extends StatefulWidget {
