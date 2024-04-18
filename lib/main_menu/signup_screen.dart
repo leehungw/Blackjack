@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -10,20 +13,28 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  String _avtPath = "assets/images/default_profile_picture.png";
+  bool isSignUpButtonActive = false;
+
   final yourNameController = TextEditingController();
   FocusNode yourNameFocusNode = FocusNode();
+  bool isYourNameValid = true;
 
   final userNameController = TextEditingController();
   FocusNode userNameFocusNode = FocusNode();
+  bool isUserNameValid = true;
 
   final emailController = TextEditingController();
   FocusNode emailFocusNode = FocusNode();
+  bool isEmailValid = true;
 
   final passwordController = TextEditingController();
   FocusNode passwordFocusNode = FocusNode();
+  bool isPasswordValid = true;
 
   final confirmPasswordController = TextEditingController();
   FocusNode confirmPasswordFocusNode = FocusNode();
+  bool isConfirmPasswordValid = true;
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +91,15 @@ class _SignupScreenState extends State<SignupScreen> {
                         height: 80.0,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: AssetImage(
-                                "assets/images/default_profile_picture.png"),
-                            fit: BoxFit.cover,
-                          ),
+                          image: _avtPath.isNotEmpty
+                              ? DecorationImage(
+                                  image: FileImage(File(_avtPath)),
+                                  fit: BoxFit.cover,
+                                )
+                              : DecorationImage(
+                                  image: AssetImage(_avtPath),
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       ),
                       Positioned(
@@ -92,7 +107,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         right: -12.0,
                         child: IconButton(
                           onPressed: () {
-                            //TODO: Handle add img logic
+                            _getImage(context);
                           },
                           icon: Icon(Icons.camera_alt),
                           color: Colors.white,
@@ -104,11 +119,20 @@ class _SignupScreenState extends State<SignupScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 35),
                     child: TextField(
+                      onTapOutside: (event) {
+                        yourNameFocusNode.unfocus();
+                      },
                       controller: yourNameController,
                       focusNode: yourNameFocusNode,
                       keyboardType: TextInputType.name,
                       onTap: () => {
                         //do sth
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          isYourNameValid = _validateName(value);
+                        });
+                        _checkSignUpButtonState();
                       },
                       style: Theme.of(context)
                           .textTheme
@@ -116,8 +140,11 @@ class _SignupScreenState extends State<SignupScreen> {
                           .copyWith(color: Colors.white),
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 2, color: Color(0xFF97FF9B)),
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: isYourNameValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                             borderRadius: BorderRadius.circular(10)),
                         focusedBorder: OutlineInputBorder(
                             borderSide:
@@ -127,10 +154,17 @@ class _SignupScreenState extends State<SignupScreen> {
                         labelStyle: Theme.of(context)
                             .textTheme
                             .bodyLarge!
-                            .copyWith(color: Color(0xFF97FF9B)),
+                            .copyWith(
+                                color: isYourNameValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                         prefixIcon: const Icon(Icons.account_circle),
                         prefixIconColor: Color(0xFF97FF9B),
-                        helperText: " ",
+                        helperText: isYourNameValid ? " " : "Tên không hợp lệ",
+                        helperStyle: TextStyle(
+                            color: isYourNameValid
+                                ? Color(0xFF97FF9B)
+                                : Colors.black),
                       ),
                       obscureText: false,
                     ),
@@ -139,11 +173,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 35),
                     child: TextField(
+                      onTapOutside: (event) {
+                        userNameFocusNode.unfocus();
+                      },
                       controller: userNameController,
                       focusNode: userNameFocusNode,
                       keyboardType: TextInputType.name,
-                      onTap: () => {
-                        //do sth
+                      onChanged: (value) {
+                        setState(() {
+                          isUserNameValid = _validateUserName(value);
+                        });
+                        _checkSignUpButtonState();
                       },
                       style: Theme.of(context)
                           .textTheme
@@ -151,21 +191,36 @@ class _SignupScreenState extends State<SignupScreen> {
                           .copyWith(color: Colors.white),
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 2, color: Color(0xFF97FF9B)),
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: isUserNameValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                             borderRadius: BorderRadius.circular(10)),
                         focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 3, color: Color(0xFF2CFF35)),
+                            borderSide: BorderSide(
+                                width: 3,
+                                color: isUserNameValid
+                                    ? Color(0xFF2CFF35)
+                                    : Colors.black),
                             borderRadius: BorderRadius.circular(10)),
-                        labelText: "User Name",
+                        labelText: "Name In Game",
                         labelStyle: Theme.of(context)
                             .textTheme
                             .bodyLarge!
-                            .copyWith(color: Color(0xFF97FF9B)),
+                            .copyWith(
+                                color: isUserNameValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                         prefixIcon: const Icon(Icons.account_circle),
                         prefixIconColor: Color(0xFF97FF9B),
-                        helperText: " ",
+                        helperText: isUserNameValid
+                            ? " "
+                            : "Tên không hợp lệ hoặc quá dài",
+                        helperStyle: TextStyle(
+                            color: isUserNameValid
+                                ? Color(0xFF97FF9B)
+                                : Colors.black),
                       ),
                       obscureText: false,
                     ),
@@ -174,33 +229,55 @@ class _SignupScreenState extends State<SignupScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 35),
                     child: TextField(
+                      onTapOutside: (event) {
+                        emailFocusNode.unfocus();
+                      },
                       controller: emailController,
                       focusNode: emailFocusNode,
                       keyboardType: TextInputType.emailAddress,
                       onTap: () => {
                         //do sth
                       },
+                      onChanged: (value) {
+                        setState(() {
+                          isEmailValid = _validateEmail(value);
+                        });
+                        _checkSignUpButtonState();
+                      },
                       style: Theme.of(context)
                           .textTheme
                           .bodyLarge!
                           .copyWith(color: Colors.white),
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 2, color: Color(0xFF97FF9B)),
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: isEmailValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                             borderRadius: BorderRadius.circular(10)),
                         focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 3, color: Color(0xFF2CFF35)),
+                            borderSide: BorderSide(
+                                width: 3,
+                                color: isEmailValid
+                                    ? Color(0xFF2CFF35)
+                                    : Colors.black),
                             borderRadius: BorderRadius.circular(10)),
                         labelText: "Email Address",
                         labelStyle: Theme.of(context)
                             .textTheme
                             .bodyLarge!
-                            .copyWith(color: Color(0xFF97FF9B)),
+                            .copyWith(
+                                color: isEmailValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                         prefixIcon: const Icon(Icons.email),
                         prefixIconColor: Color(0xFF97FF9B),
-                        helperText: " ",
+                        helperText: isEmailValid ? " " : "Email không hợp lệ",
+                        helperStyle: TextStyle(
+                            color: isEmailValid
+                                ? Color(0xFF97FF9B)
+                                : Colors.black),
                       ),
                       obscureText: false,
                     ),
@@ -209,44 +286,19 @@ class _SignupScreenState extends State<SignupScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 35),
                     child: TextField(
+                      onTapOutside: (event) {
+                        passwordFocusNode.unfocus();
+                      },
                       controller: passwordController,
                       focusNode: passwordFocusNode,
                       onTap: () => {
                         //do sth
                       },
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge!
-                          .copyWith(color: Colors.white),
-                      decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 2, color: Color(0xFF97FF9B)),
-                            borderRadius: BorderRadius.circular(10)),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 3, color: Color(0xFF2CFF35)),
-                            borderRadius: BorderRadius.circular(10)),
-                        labelText: "Password",
-                        labelStyle: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Color(0xFF97FF9B)),
-                        prefixIcon: const Icon(Icons.lock_outlined),
-                        prefixIconColor: Color(0xFF97FF9B),
-                      ),
-                      obscureText: true,
-                      obscuringCharacter: '*',
-                    ),
-                  ),
-                  Gap(38),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 35),
-                    child: TextField(
-                      controller: confirmPasswordController,
-                      focusNode: confirmPasswordFocusNode,
-                      onTap: () => {
-                        //do sth
+                      onChanged: (value) {
+                        setState(() {
+                          isPasswordValid = value.length > 6;
+                        });
+                        _checkSignUpButtonState();
                       },
                       style: Theme.of(context)
                           .textTheme
@@ -254,20 +306,96 @@ class _SignupScreenState extends State<SignupScreen> {
                           .copyWith(color: Colors.white),
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 2, color: Color(0xFF97FF9B)),
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: isPasswordValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                             borderRadius: BorderRadius.circular(10)),
                         focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(width: 3, color: Color(0xFF2CFF35)),
+                            borderSide: BorderSide(
+                                width: 3,
+                                color: isPasswordValid
+                                    ? Color(0xFF2CFF35)
+                                    : Colors.black),
+                            borderRadius: BorderRadius.circular(10)),
+                        labelText: "Password",
+                        labelStyle: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(
+                                color: isPasswordValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
+                        prefixIcon: const Icon(Icons.lock_outlined),
+                        prefixIconColor: Color(0xFF97FF9B),
+                        helperText: isPasswordValid
+                            ? " "
+                            : "Mật khẩu phải có ít nhất 6 ký tự",
+                        helperStyle: TextStyle(
+                            color: isPasswordValid
+                                ? Color(0xFF97FF9B)
+                                : Colors.black),
+                      ),
+                      obscureText: true,
+                      obscuringCharacter: '*',
+                    ),
+                  ),
+                  Gap(10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 35),
+                    child: TextField(
+                      onTapOutside: (event) {
+                        confirmPasswordFocusNode.unfocus();
+                      },
+                      controller: confirmPasswordController,
+                      focusNode: confirmPasswordFocusNode,
+                      onTap: () => {
+                        //do sth
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          isConfirmPasswordValid =
+                              value == passwordController.text;
+                        });
+                        _checkSignUpButtonState();
+                      },
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyLarge!
+                          .copyWith(color: Colors.white),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                width: 2,
+                                color: isConfirmPasswordValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
+                            borderRadius: BorderRadius.circular(10)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                width: 3,
+                                color: isConfirmPasswordValid
+                                    ? Color(0xFF2CFF35)
+                                    : Colors.black),
                             borderRadius: BorderRadius.circular(10)),
                         labelText: "Confirm Password",
                         labelStyle: Theme.of(context)
                             .textTheme
                             .bodyLarge!
-                            .copyWith(color: Color(0xFF97FF9B)),
+                            .copyWith(
+                                color: isConfirmPasswordValid
+                                    ? Color(0xFF97FF9B)
+                                    : Colors.black),
                         prefixIcon: const Icon(Icons.lock_outlined),
                         prefixIconColor: Color(0xFF97FF9B),
+                        helperText: isConfirmPasswordValid
+                            ? " "
+                            : "Mật khẩu không khớp",
+                        helperStyle: TextStyle(
+                            color: isConfirmPasswordValid
+                                ? Color(0xFF97FF9B)
+                                : Colors.black),
                       ),
                       obscureText: true,
                       obscuringCharacter: '*',
@@ -283,8 +411,11 @@ class _SignupScreenState extends State<SignupScreen> {
                               borderRadius: BorderRadius.circular(13),
                               color: Colors.transparent,
                               image: DecorationImage(
-                                  image: AssetImage(
-                                      "assets/images/button_background_inactive.png"),
+                                  image: isSignUpButtonActive
+                                      ? AssetImage(
+                                          "assets/images/button_background_active.png")
+                                      : AssetImage(
+                                          "assets/images/button_background_inactive.png"),
                                   fit: BoxFit.fill),
                             ),
                             child: Center(
@@ -309,5 +440,49 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       }),
     );
+  }
+
+  void _getImage(BuildContext context) async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedImage != null) {
+      setState(() {
+        _avtPath = pickedImage.path;
+      });
+      print(pickedImage.path);
+    }
+  }
+
+  void _checkSignUpButtonState() {
+    setState(() {
+      isSignUpButtonActive = yourNameController.text.isNotEmpty &&
+          userNameController.text.isNotEmpty &&
+          emailController.text.isNotEmpty &&
+          passwordController.text.isNotEmpty &&
+          confirmPasswordController.text.isNotEmpty &&
+          isConfirmPasswordValid &&
+          isPasswordValid &&
+          isEmailValid &&
+          isUserNameValid &&
+          isYourNameValid;
+    });
+  }
+
+  bool _validateName(String name) {
+    final RegExp nameRegex = RegExp(r'^[a-zA-Z\s]*$');
+    return nameRegex.hasMatch(name);
+  }
+
+  bool _validateUserName(String userName) {
+    final RegExp vietnameseRegex = RegExp(r'[^\u0000-\u007F]');
+    return !vietnameseRegex.hasMatch(userName) && userName.length <= 14;
+  }
+
+  bool _validateEmail(String email) {
+    final RegExp emailRegex = RegExp(
+        r"^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$");
+
+    return emailRegex.hasMatch(email);
   }
 }
