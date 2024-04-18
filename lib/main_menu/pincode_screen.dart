@@ -5,10 +5,8 @@ import 'package:card/main_menu/signup_screen.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -38,7 +36,7 @@ class PincodeScreen extends StatefulWidget {
   final String email;
   final String pass;
   final String imagefile;
-  PincodeScreen(this.name, this.uname, this.email, this.pass, this.imagefile);
+  const PincodeScreen(this.name, this.uname, this.email, this.pass, this.imagefile, {super.key});
 
   @override
   State<PincodeScreen> createState() => _PincodeScreenState();
@@ -71,13 +69,13 @@ class _PincodeScreenState extends State<PincodeScreen> {
 
     final message = Message()
       ..from = Address(username)
-      ..recipients.add('${widget.email}')
+      ..recipients.add(widget.email)
       ..subject = 'Confirmation Code'
       ..text = 'Your confirmation code is: $code';
 
     try {
       final sendReport = await send(message, smtpServer);
-      print('Message sent: ' + sendReport.toString());
+      print('Message sent: $sendReport');
     } catch (e) {
       print('Error: $e');
     }
@@ -96,7 +94,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
     sendConfirmationCode(pinCode);
   }
 
-  bool _canPop = false;
+  final bool _canPop = false;
   void _backButton(BuildContext context) async {
     if (!_verifySuccess) {
       await showDialog(

@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
@@ -6,7 +5,6 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:card/main_menu/pincode_screen.dart';
@@ -187,7 +185,7 @@ class _SignupScreenState extends State<SignupScreen> {
         Navigator.of(context).push(_createRoute());
       } else if (_ExceptionText != null) {
         String? message = _ExceptionText;
-        ScaffoldMessenger.of(context as BuildContext)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(message.toString())));
       }
     }
@@ -202,9 +200,9 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _selectImageFromGallery() async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
     final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.gallery);
+        await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
         _imageFile = pickedImage.path;
