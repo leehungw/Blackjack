@@ -9,9 +9,9 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'settings/settings_screen.dart';
-import 'style/my_transition.dart';
-import 'style/palette.dart';
+import '../settings/settings_screen.dart';
+import '../style/my_transition.dart';
+import '../style/palette.dart';
 
 /// The router describes the game's navigational hierarchy, from the main
 /// screen through settings screens all the way to each individual level.
@@ -25,7 +25,7 @@ final router = GoRouter(
           path: 'signup',
           pageBuilder: (context, state) => buildMyTransition<void>(
             key: ValueKey('signup'),
-            color: context.watch<Palette>().backgroundPlaySession,
+            color: Palette.accountBackgroundGradientBottom,
             child: const SignupScreen(
               key: Key('signup'),
             ),

@@ -4,7 +4,7 @@
 
 import 'dart:developer' as dev;
 
-import 'package:card/firebase_options.dart';
+import 'package:card/config/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +15,7 @@ import 'package:provider/provider.dart';
 import 'app_lifecycle/app_lifecycle.dart';
 import 'audio/audio_controller.dart';
 import 'player_progress/player_progress.dart';
-import 'router.dart';
+import 'config/router.dart';
 import 'settings/settings.dart';
 import 'style/palette.dart';
 
@@ -80,17 +80,15 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: Builder(builder: (context) {
-          final palette = context.watch<Palette>();
-
           return MaterialApp.router(
-            title: 'My Flutter Game',
+            title: 'Lucky Card',
             theme: ThemeData.from(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: palette.darkPen,
-                surface: palette.backgroundMain,
+                seedColor: Palette.black,
+                surface: Palette.homeBackgroundGradientBottom,
               ),
               textTheme: TextTheme(
-                bodyMedium: TextStyle(color: palette.ink),
+                bodyMedium: TextStyle(color: Palette.black),
               ),
               useMaterial3: true,
             ).copyWith(

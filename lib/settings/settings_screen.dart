@@ -21,10 +21,9 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsController>();
-    final palette = context.watch<Palette>();
 
     return Scaffold(
-      backgroundColor: palette.backgroundSettings,
+      backgroundColor: Palette.homeDialogBackgroundGradientBottom,
       body: ResponsiveScreen(
         squarishMainArea: ListView(
           children: [

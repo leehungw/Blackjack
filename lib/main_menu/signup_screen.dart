@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:card/style/palette.dart';
+import 'package:card/style/text_styles.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -321,7 +323,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: const [Color(0xFFDD4444), Color(0xFF5F1313)],
+                    colors: const [
+                      Palette.accountBackgroundGradientBottom,
+                      Palette.accountBackgroundGradientTop
+                    ],
                   ),
                 ),
                 child: Center(
@@ -336,18 +341,14 @@ class _SignupScreenState extends State<SignupScreen> {
                             icon: Icon(
                               Icons.arrow_back,
                               size: 30,
-                              color: Colors.white,
+                              color: Palette.primaryText,
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 55),
                             child: Text(
                               "REGISTER",
-                              style: TextStyle(
-                                  fontFamily: "Montserrat",
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 32,
-                                  color: Colors.white),
+                              style: TextStyles.screenTitle,
                             ),
                           )
                         ],
@@ -376,7 +377,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           child: IconButton(
                             onPressed: _selectImageFromGallery,
                             icon: Icon(Icons.camera_alt),
-                            color: Colors.white,
+                            color: Palette.primaryText,
                           ),
                         ),
                       ],
@@ -391,26 +392,23 @@ class _SignupScreenState extends State<SignupScreen> {
                         onTap: () => {
                           //do sth
                         },
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Colors.white),
+                        style: TextStyles.textFieldStyle
+                            .copyWith(color: Palette.primaryText),
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 2, color: Color(0xFF97FF9B)),
+                                  width: 2,
+                                  color: Palette.textFieldBorderUnfocus),
                               borderRadius: BorderRadius.circular(10)),
                           focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 3, color: Color(0xFF2CFF35)),
+                                  width: 3,
+                                  color: Palette.textFieldBorderFocus),
                               borderRadius: BorderRadius.circular(10)),
                           labelText: "Your Name",
-                          labelStyle: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: Color(0xFF97FF9B)),
+                          labelStyle: TextStyles.textFieldStyle,
                           prefixIcon: const Icon(Icons.account_circle),
-                          prefixIconColor: Color(0xFF97FF9B),
+                          prefixIconColor: Palette.textFieldBorderUnfocus,
                           helperText: " ",
                         ),
                         obscureText: false,
@@ -426,26 +424,23 @@ class _SignupScreenState extends State<SignupScreen> {
                         onTap: () => {
                           //do sth
                         },
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Colors.white),
+                        style: TextStyles.textFieldStyle
+                            .copyWith(color: Palette.primaryText),
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 2, color: Color(0xFF97FF9B)),
+                                  width: 2,
+                                  color: Palette.textFieldBorderUnfocus),
                               borderRadius: BorderRadius.circular(10)),
                           focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 3, color: Color(0xFF2CFF35)),
+                                  width: 3,
+                                  color: Palette.textFieldBorderFocus),
                               borderRadius: BorderRadius.circular(10)),
                           labelText: "User Name",
-                          labelStyle: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: Color(0xFF97FF9B)),
+                          labelStyle: TextStyles.textFieldStyle,
                           prefixIcon: const Icon(Icons.account_circle),
-                          prefixIconColor: Color(0xFF97FF9B),
+                          prefixIconColor: Palette.textFieldBorderUnfocus,
                           helperText: " ",
                         ),
                         obscureText: false,
@@ -461,26 +456,23 @@ class _SignupScreenState extends State<SignupScreen> {
                         onTap: () => {
                           //do sth
                         },
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Colors.white),
+                        style: TextStyles.textFieldStyle
+                            .copyWith(color: Palette.primaryText),
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 2, color: Color(0xFF97FF9B)),
+                                  width: 2,
+                                  color: Palette.textFieldBorderUnfocus),
                               borderRadius: BorderRadius.circular(10)),
                           focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 3, color: Color(0xFF2CFF35)),
+                                  width: 3,
+                                  color: Palette.textFieldBorderFocus),
                               borderRadius: BorderRadius.circular(10)),
                           labelText: "Email Address",
-                          labelStyle: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: Color(0xFF97FF9B)),
+                          labelStyle: TextStyles.textFieldStyle,
                           prefixIcon: const Icon(Icons.email),
-                          prefixIconColor: Color(0xFF97FF9B),
+                          prefixIconColor: Palette.textFieldBorderUnfocus,
                           helperText: " ",
                         ),
                         obscureText: false,
@@ -495,26 +487,23 @@ class _SignupScreenState extends State<SignupScreen> {
                         onTap: () => {
                           //do sth
                         },
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Colors.white),
+                        style: TextStyles.textFieldStyle
+                            .copyWith(color: Palette.primaryText),
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 2, color: Color(0xFF97FF9B)),
+                                  width: 2,
+                                  color: Palette.textFieldBorderUnfocus),
                               borderRadius: BorderRadius.circular(10)),
                           focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 3, color: Color(0xFF2CFF35)),
+                                  width: 3,
+                                  color: Palette.textFieldBorderFocus),
                               borderRadius: BorderRadius.circular(10)),
                           labelText: "Password",
-                          labelStyle: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: Color(0xFF97FF9B)),
+                          labelStyle: TextStyles.textFieldStyle,
                           prefixIcon: const Icon(Icons.lock_outlined),
-                          prefixIconColor: Color(0xFF97FF9B),
+                          prefixIconColor: Palette.textFieldBorderUnfocus,
                         ),
                         obscureText: true,
                         obscuringCharacter: '*',
@@ -529,26 +518,23 @@ class _SignupScreenState extends State<SignupScreen> {
                         onTap: () => {
                           //do sth
                         },
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyLarge!
-                            .copyWith(color: Colors.white),
+                        style: TextStyles.textFieldStyle
+                            .copyWith(color: Palette.primaryText),
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 2, color: Color(0xFF97FF9B)),
+                                  width: 2,
+                                  color: Palette.textFieldBorderUnfocus),
                               borderRadius: BorderRadius.circular(10)),
                           focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                  width: 3, color: Color(0xFF2CFF35)),
+                                  width: 3,
+                                  color: Palette.textFieldBorderFocus),
                               borderRadius: BorderRadius.circular(10)),
                           labelText: "Confirm Password",
-                          labelStyle: Theme.of(context)
-                              .textTheme
-                              .bodyLarge!
-                              .copyWith(color: Color(0xFF97FF9B)),
+                          labelStyle: TextStyles.textFieldStyle,
                           prefixIcon: const Icon(Icons.lock_outlined),
-                          prefixIconColor: Color(0xFF97FF9B),
+                          prefixIconColor: Palette.textFieldBorderUnfocus,
                         ),
                         obscureText: true,
                         obscuringCharacter: '*',
@@ -571,11 +557,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               child: Center(
                                 child: Text(
                                   "Sign Up",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                      fontFamily: "Montserrat"),
+                                  style: TextStyles.bigButtonText,
                                 ),
                               )),
                           onTap: () {
