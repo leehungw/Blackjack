@@ -28,6 +28,7 @@ class Palette {
   static const Color textFieldBorderFocus = Color(0xFF2CFF35);
   static const Color textFieldBorderUnfocus = Color(0xFF97FF9B);
   static const Color primaryText = Color(0xFFFFFFFF);
+  static const Color buttonContainerBg = Color(0xFFC3B6B6);
   static const Color accountBackgroundGradientTop = Color(0xFF5F1313);
   static const Color accountBackgroundGradientBottom = Color(0xFFDD4444);
   static const Color buttonConfirmBackground = Color(0xFF440682);
@@ -55,4 +56,6 @@ class Palette {
       Color(0xFFFFD779);
   static const Color settingDialogButtonBackgroundGradientBottom =
       Color(0xFFFEEDC2);
+  static const Color rollCallIcon = Color(0xFF1102BE);
+  static const Color coinGrind = Color(0xFFF4B325);
 }
