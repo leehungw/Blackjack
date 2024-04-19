@@ -1,5 +1,5 @@
 import 'package:card/main.dart';
-import 'package:card/main_menu/forgot_password_dialog.dart';
+import 'package:card/widgets/forgot_password_dialog.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';

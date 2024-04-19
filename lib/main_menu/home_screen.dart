@@ -3,6 +3,7 @@ import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:card/widgets/custom_elevated_button.dart';
 import 'package:card/widgets/custom_icon_button.dart';
+import 'package:card/widgets/start_game_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
@@ -212,7 +213,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               onPressed: () {
-                                //TODO: Start onpressed handle
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return StartGameDialog();
+                                  },
+                                );
                               },
                               text: "Bắt Đầu",
                             ),
