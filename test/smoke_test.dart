@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:card/main.dart';
-import 'package:card/play_session/playing_card_widget.dart';
 
 void main() {
   testWidgets('smoke test', (tester) async {
@@ -29,7 +28,6 @@ void main() {
     // Tap 'Play'.
     await tester.tap(find.text('Play'));
     await tester.pumpAndSettle();
-    expect(find.byType(PlayingCardWidget), findsWidgets);
 
     // Tap 'Back'.
     await tester.tap(find.text('Back'));

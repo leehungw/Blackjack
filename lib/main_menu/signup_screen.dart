@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
@@ -6,7 +5,6 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:card/main_menu/pincode_screen.dart';
@@ -62,6 +60,7 @@ class _SignupScreenState extends State<SignupScreen> {
         });
     Navigator.of(context).push(_createRoute());
 
+<<<<<<< HEAD
     // result = await _checkIfEmailInUse(emailController.value.text);
     // Navigator.of(context).pop();
     // if (result == true) {
@@ -75,6 +74,37 @@ class _SignupScreenState extends State<SignupScreen> {
     //   ScaffoldMessenger.of(context as BuildContext)
     //       .showSnackBar(SnackBar(content: Text(message.toString())));
     // }
+=======
+      showDialog(
+          context: context as BuildContext,
+          barrierDismissible: false,
+          builder: (context) {
+            return const Center(child: CircularProgressIndicator());
+          });
+
+      result = await _checkIfEmailInUse(emailController.value.text);
+      Navigator.of(context).pop();
+      if (result == true) {
+        _EmailValidateText = 'Email đã được sử dụng';
+      }
+      if (result == false) {
+        // Chuyển hướng sang PINCODE page để xác thực tài khoản
+        Navigator.of(context).push(_createRoute());
+      } else if (_ExceptionText != null) {
+        String? message = _ExceptionText;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message.toString())));
+      }
+    }
+
+    setState(() {
+      _firstEnterConfirmPasswordField = true;
+      _firstEnterEmailField = true;
+      _firstEnterPasswordField = true;
+      _firstEnterNameField = true;
+      _firstEnterUserNameField = true;
+    });
+>>>>>>> 7a6d2d90404340d9745f8278819ced2e33cca076
   }
 
   // Future<bool?> _checkIfEmailInUse(String emailAddress) async {
@@ -100,9 +130,9 @@ class _SignupScreenState extends State<SignupScreen> {
   // }
 
   Future<void> _selectImageFromGallery() async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
     final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.gallery);
+        await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
         _imageFile = pickedImage.path;
