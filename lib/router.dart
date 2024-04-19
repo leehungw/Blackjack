@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'game_screen/demo_screen.dart';
+import 'game_screen/demo_screen_online.dart';
 import 'settings/settings_screen.dart';
 import 'style/my_transition.dart';
 import 'style/palette.dart';
@@ -27,7 +28,7 @@ final router = GoRouter(
           pageBuilder: (context, state) => buildMyTransition<void>(
             key: ValueKey('signup'),
             color: context.watch<Palette>().backgroundPlaySession,
-            child: const DemoScreen(
+            child: const DemoScreenOnline(
               key: Key('signup'),
             ),
           ),

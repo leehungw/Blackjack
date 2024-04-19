@@ -31,10 +31,16 @@ class PlayerModel {
     'seat': seat,
     'state': state,
     'result': result,
-    'cards': cards
+    'cards': cards.toString()
   };
 
   static PlayerModel fromJson(String key, Map<String, dynamic> json) {
+
+    String cardsString = json['cards'] as String;
+    cardsString = cardsString.replaceAll("[", "");
+    cardsString = cardsString.replaceAll("]", "");
+    cardsString = cardsString.replaceAll(" ", "");
+    List<String> cardsList = cardsString.split(",");
 
     return PlayerModel(
         key: key,
@@ -43,14 +49,14 @@ class PlayerModel {
         seat: json['seat'] as int,
         state: json['state'] as String,
         result: json['result'] as String,
-        cards: json['cards'] as List<String>
+        cards: cardsList
     );
   }
 
-  static PlayerModel? getPlayerByID(List<PlayerModel> list, String id){
+  static PlayerModel? getPlayerByID(List<PlayerModel> list, int id){
     try {
       PlayerModel player =
-          list.where((playerCheck) => playerCheck.playerID! == id)
+          list.where((playerCheck) => playerCheck.playerID == id)
               .first;
       return player;
     } catch (e) {

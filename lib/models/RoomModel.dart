@@ -1,3 +1,4 @@
+import 'dart:convert';
 
 class RoomModel {
 
@@ -25,9 +26,9 @@ class RoomModel {
 
   Map<String, dynamic> toJson() => {
     'roomID': roomID,
-    'players': players,
+    'players': players.toString(),
     'dealer': dealer,
-    'deck': deck,
+    'deck': deck.toString(),
     'status': status,
     'currentPlayer': currentPlayer
   };
@@ -45,13 +46,29 @@ class RoomModel {
   }
 
   static RoomModel fromJson(String key, Map<String, dynamic> json) {
+    String playersString = json['players'] as String;
+    playersString = playersString.replaceAll("[", "");
+    playersString = playersString.replaceAll("]", "");
+    playersString = playersString.replaceAll(" ", "");
+    List<String> playersList = playersString.split(",");
+    List<int> newPlayers = [];
+    for (var element in playersList)
+    {
+      newPlayers.add(int.parse(element));
+    }
+
+    String deckString = json['deck'] as String;
+    deckString = deckString.replaceAll("[", "");
+    deckString = deckString.replaceAll("]", "");
+    deckString = deckString.replaceAll(" ", "");
+    List<String> deckList = deckString.split(",");
 
     return RoomModel(
         key: key,
         roomID: json['roomID'] as int,
-        players: json['players'] as List<int>,
+        players:  newPlayers,
         dealer: json['dealer'] as int,
-        deck: json['deck'] as List<String>,
+        deck: deckList,
         status: json['status'] as String,
         currentPlayer: json['currentPlayer'] as int
     );

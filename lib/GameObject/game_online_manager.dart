@@ -64,15 +64,10 @@ final class GameOnlineManager{
     _status = RoomStatus.end;
   }
 
-  void importData(bool overwriteUser){
-    List<PlayerModel> playerModels = FirebaseRequest.readPlayers() as List<PlayerModel>;
-    List<PlayerModel> playersInRoom = [];
-    for (int id in model!.players){
-      if (overwriteUser == false && id == _thisUserID){
-        continue;
-      }
-      playersInRoom.add(playerModels.firstWhere((element) => element.playerID == id));
-    }
+  Future<void> importData(bool overwriteUser) async {
+    model = await FirebaseRequest.refreshRoom(model!);
+    List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(model!.roomID!);
+
     for (PlayerModel playerModel in playersInRoom){
       GamePlayerOnline player = GameFactory.createPlayerOnline(playerModel, playerModel.playerID == _thisUserID);
       _players.add(player);
@@ -85,6 +80,7 @@ final class GameOnlineManager{
     }
 
     _players.sort((a, b) => a.seat - b.seat);
+
     switch (model!.status){
       case "start":
         _status = RoomStatus.start;
@@ -140,7 +136,7 @@ final class GameOnlineManager{
   Future<bool> initialize(int thisUserID, int roomID) async {
     _thisUserID = thisUserID;
     _clear();
-
+    _thisUserID = thisUserID;
     bool success;
     if (roomID < 0){
       success = await initializeNewHostRoom();
@@ -149,7 +145,7 @@ final class GameOnlineManager{
     }
 
     if (success){
-      importData(true);
+      await importData(true);
     }
 
     return success;
@@ -158,9 +154,9 @@ final class GameOnlineManager{
   Future<bool> initializeNewHostRoom() async {
     _status = RoomStatus.init;
     RoomModel roomModel = RoomModel(
-        roomID: Database.getAvailableRoomID(),
+        roomID: await Database.getAvailableRoomID(),
         players: [_thisUserID],
-        dealer: -1,
+        dealer: _thisUserID,
         deck: [],
         status: "ready",
         currentPlayer: -1
@@ -175,15 +171,15 @@ final class GameOnlineManager{
         cards: []
     );
 
-    model = roomModel.clone();
-    model?.status = "init";
-
     FirebaseRequest.addRoom(roomModel);
     FirebaseRequest.addPlayer(thisUserModel);
-
+    await Future.delayed(Duration(milliseconds: 50));
+    model = await Database.getRoomByID(roomModel.roomID!);
+    await Future.delayed(Duration(milliseconds: 50));
     // Check if room is created or not
     int timeout = 300;
-    while (await FirebaseRequest.refreshRoom(model!) == false || model!.status != "ready"){
+    while (model == null || model?.status != "ready"){
+      model = await Database.getRoomByID(roomModel.roomID!);
       await Future.delayed(Duration(milliseconds: 50));
       timeout--;
       if (timeout <= 0){
@@ -197,7 +193,7 @@ final class GameOnlineManager{
   Future<bool> initializeClientRoom(int roomID) async {
     RoomModel? room;
     int timeout = 300;
-    while ((room = Database.getRoomByID(roomID)) == null){
+    while ((room = await Database.getRoomByID(roomID)) == null){
       await Future.delayed(Duration(milliseconds: 50));
       timeout--;
       if (timeout <= 0){
@@ -218,13 +214,18 @@ final class GameOnlineManager{
     }
 
     model = room;
-    importData(true);
 
     return true;
   }
 
   bool canStartOnlineGame(){
+    if (_players.length <= 1){
+      return false;
+    }
     for (GamePlayerOnline player in _players) {
+      if (player == _dealer){
+        continue;
+      }
       if (player.state != PlayerState.ready){
         return false;
       }
@@ -241,63 +242,144 @@ final class GameOnlineManager{
     // create deck
     _deck = GameFactory.createDeck();
     uploadData();
-
+    await Future.delayed(Duration(milliseconds: 50));
     _status = RoomStatus.distributing;
     for (int i = 0; i < 2; i++){
       for (GamePlayerOnline player in _players){
         GameCard card = _deck.removeAt(0);
         player.getDistributedCard(card);
+        uploadData();
+        await Future.delayed(Duration(milliseconds: 100));
       }
     }
     for (GamePlayerOnline player in _players){
       player.waitForTurn();
     }
-    _status = RoomStatus.start;
-    checkBlackjack();
+
+    uploadData();
+    await Future.delayed(Duration(milliseconds: 50));
+
+    await checkBlackjack();
+    await Future.delayed(Duration(milliseconds: 50));
+
     if (_status == RoomStatus.start){
-      _currentPlayer = _players.first;
-      if (_currentPlayer!.state != PlayerState.wait){
-        _currentPlayer = _getNextPlayer(_currentPlayer!);
+      _status = RoomStatus.start;
+      for (int i = 0; i < _players.length; i++){
+        if (_players[i].isDealer()){
+          if (i == _players.length - 1){
+            _currentPlayer = _players.first;
+          } else {
+            _currentPlayer = _players[i + 1];
+          }
+        }
       }
       _currentPlayer?.startTurn();
+
+      uploadData();
+      await Future.delayed(Duration(milliseconds: 50));
     }
   }
 
-  void endOnlineGame(){
+  Future<void> endOnlineGame() async {
     _status = RoomStatus.end;
+    uploadData();
+    await Future.delayed(Duration(milliseconds: 50));
   }
+
+  // UPDATE METHODS
 
   Future<void> onlineGameUpdate() async {
-    if (model == null){
+    if (model == null || _thisPlayer == null){
       return;
     }
-    if (_currentPlayer?.userId != _thisUserID){
+    _updatePhaseWaitToStart();
+    _updatePhaseDistributing();
+    _updatePhaseWaitToTurn();
+    _updatePhaseOnTurn();
+    _updatePhaseStand();
+    _updatePhaseEndGame();
+  }
+
+  Future<void> _updatePhaseWaitToStart() async{
+    if (_status == RoomStatus.ready){
       await FirebaseRequest.refreshRoom(model!);
-      importData(true);
+      importData(false);
+      uploadThisUser();
+      await Future.delayed(Duration(milliseconds: 50));
     }
   }
 
-  bool tryEndOnlineGame(){
+  Future<void> _updatePhaseDistributing() async{
+    if (_status == RoomStatus.distributing){
+      if (_thisPlayer!.isDealer()){
+        // This case being handled by startOnlineGame()
+      } else {
+        await FirebaseRequest.refreshRoom(model!);
+        importData(true);
+        await Future.delayed(Duration(milliseconds: 50));
+      }
+    }
+  }
+
+  Future<void> _updatePhaseWaitToTurn() async{
+    if (_status == RoomStatus.start){
+      await FirebaseRequest.refreshRoom(model!);
+      importData(true);
+      await Future.delayed(Duration(milliseconds: 50));
+    }
+  }
+
+  Future<void> _updatePhaseOnTurn() async{
+    if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.onTurn){
+      await FirebaseRequest.refreshRoom(model!);
+      uploadData();
+      await Future.delayed(Duration(milliseconds: 50));
+    }
+  }
+
+  Future<void> _updatePhaseStand() async{
+    if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.stand){
+      await FirebaseRequest.refreshRoom(model!);
+      importData(true);
+      await Future.delayed(Duration(milliseconds: 50));
+    }
+  }
+
+  Future<void> _updatePhaseEndGame() async{
+    if (_status == RoomStatus.end){
+      await FirebaseRequest.refreshRoom(model!);
+      if (_thisPlayer!.isDealer()){
+        uploadData();
+      } else {
+        importData(true);
+      }
+      await Future.delayed(Duration(milliseconds: 50));
+    }
+  }
+
+  // ================================================
+
+  Future<bool> tryEndOnlineGame() async {
     if (_revealedCount == _players.length){
-      endOnlineGame();
+      await endOnlineGame();
       return true;
     }
     return false;
   }
 
-  void distributeCard(){
-    for (int i = 0; i < 2; i++){
-      for (GamePlayerOnline player in _players){
-        player.getDistributedCard(_deck.first);
-        _deck.remove(_deck.first);
-        if (player.cardCount == 2){
-          player.waitForTurn();
-        }
-      }
-    }
-  }
+  // void distributeCard(){
+  //   for (int i = 0; i < 2; i++){
+  //     for (GamePlayerOnline player in _players){
+  //       player.getDistributedCard(_deck.first);
+  //       _deck.remove(_deck.first);
+  //       if (player.cardCount == 2){
+  //         player.waitForTurn();
+  //       }
+  //     }
+  //   }
+  // }
 
-  bool checkBlackjack(){
+  Future<bool> checkBlackjack() async {
     List<GamePlayerOnline> ban_ban_players = [];
     List<GamePlayerOnline> ban_luck_players = [];
     List<GamePlayerOnline> normal_players = [];
@@ -345,7 +427,7 @@ final class GameOnlineManager{
       for (GamePlayerOnline player in normal_players){
         player.lose();
       }
-      endOnlineGame();
+      await endOnlineGame();
       return true;
     }
 
@@ -360,6 +442,8 @@ final class GameOnlineManager{
     }
 
     // All is normal
+    uploadData();
+    await Future.delayed(Duration(milliseconds: 50));
     return false;
   }
 
@@ -399,31 +483,42 @@ final class GameOnlineManager{
   }
 
   GamePlayerOnline _getNextPlayer(GamePlayerOnline player){
-    GamePlayerOnline result;
-    if (player == _players.last){
-      result = _players.first;
-    } else {
-      result = _players[(player.seat ?? -1)];
+    GamePlayerOnline result = _players.first;
+    for (int i = 0; i < _players.length; i++){
+      if (_players[i] == player){
+        if (i == _players.length - 1){
+          result = _players.first;
+        } else {
+          result = _players[i + 1];
+        }
+      }
     }
-    return result.state == PlayerState.wait || result.isDealer() ? result : _getNextPlayer(player);
+    return result;
   }
 
   bool playerCanEndTurn(){
     if (_status != RoomStatus.start || _currentPlayer == _dealer){
       return false;
     }
-    return currentPlayer != null && currentPlayer!.getTotalValues() > 15;
+    return
+      _thisPlayer != null
+      && _thisPlayer == _currentPlayer
+      && _thisPlayer!.getTotalValues() > 15;
   }
 
   bool playerCanDraw(){
     if (_status != RoomStatus.start){
       return false;
     }
-    return currentPlayer != null && currentPlayer!.isBurn() == false && currentPlayer!.getTotalValues() != 21;
+    return
+      _thisPlayer != null
+      && _thisPlayer! == _currentPlayer
+      && _thisPlayer!.isBurn() == false
+      && _thisPlayer!.getTotalValues() != 21;
   }
 
   void dealerExecutePlayer(int seatNumber){
-    if (_players[seatNumber].isDealer() || _dealer?.state != PlayerState.onTurn){
+    if (_thisPlayer != _dealer || _thisPlayer != _currentPlayer){
       return;
     }
     _players[seatNumber].reveal(_dealer!);
@@ -444,7 +539,75 @@ final class GameOnlineManager{
     if (_status != RoomStatus.start){
       return false;
     }
-    return dealer != null && dealer?.state == PlayerState.onTurn && dealer!.getTotalValues() > 16;
+    return
+      _thisPlayer != null
+      && _thisPlayer == _dealer
+      && _thisPlayer?.state == PlayerState.onTurn
+      && _thisPlayer!.getTotalValues() > 16;
+  }
+
+  // ROOM CONTROL
+
+  bool canStartGame(){
+    return _thisPlayer != null && _thisPlayer! == _dealer && canStartOnlineGame();
+  }
+
+  bool canCleanTable(){
+    return _status == RoomStatus.end;
+  }
+
+  Future<void> cleanTable() async{
+    for (GamePlayerOnline player in _players){
+      player.cards.clear();
+      player.state = PlayerState.none;
+    }
+    _deck.clear();
+    _status = RoomStatus.ready;
+
+    uploadData();
+    await Future.delayed(Duration(milliseconds: 50));
+  }
+
+  bool playerCanReady() {
+    return
+      _status == RoomStatus.ready
+      && _thisPlayer != null
+      && _thisPlayer != _dealer
+      && _thisPlayer!.state == PlayerState.none;
+  }
+
+  bool playerCanCancelReady() {
+    return
+      _status == RoomStatus.ready
+      && _thisPlayer != null
+      && _thisPlayer != _dealer
+      && _thisPlayer!.state == PlayerState.ready;
+  }
+
+  Future<void> playerReady() async {
+    importData(true);
+    await Future.delayed(Duration(milliseconds: 50));
+    if (_thisPlayer == null){
+      return;
+    }
+    if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
+      if (_thisPlayer!.state == PlayerState.none){
+        _thisPlayer!.state == PlayerState.ready;
+      }
+    }
+  }
+
+  Future<void> playerCancelReady() async {
+    importData(true);
+    await Future.delayed(Duration(milliseconds: 50));
+    if (_thisPlayer == null){
+      return;
+    }
+    if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
+      if (_thisPlayer!.state == PlayerState.ready) {
+        _thisPlayer!.state == PlayerState.none;
+      }
+    }
   }
 }
 

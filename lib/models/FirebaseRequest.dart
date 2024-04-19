@@ -36,17 +36,16 @@ class FirebaseRequest {
       .doc(model.key)
       .update(model.toJson());
 
-  static Future<bool> refreshRoom(RoomModel model) async {
+  static Future<RoomModel> refreshRoom(RoomModel model) async {
     DocumentReference docRef = FirebaseFirestore.instance.collection('your_collection_name').doc(model.key);
 
     DocumentSnapshot docSnapshot = await docRef.get();
 
     if (docSnapshot.exists) {
-      model = RoomModel.fromJson(model.key ?? "", docSnapshot.data() as Map<String, dynamic>);
-      return true;
+      return RoomModel.fromJson(model.key ?? "", docSnapshot.data() as Map<String, dynamic>);
     } else {
       print("No such document!");
-      return false;
+      return model;
     }
   }
 
