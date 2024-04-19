@@ -38,6 +38,18 @@ final router = GoRouter(
           //   )
           // ],
         ),
+<<<<<<< HEAD:lib/config/router.dart
+        GoRoute(
+          path: 'settings',
+          builder: (context, state) =>
+              const SettingsScreen(key: Key('settings')),
+        ),
+        GoRoute(
+          path: 'login',
+          builder: (context, state) => const LoginScreen(key: Key('login')),
+        ),
+=======
+>>>>>>> 7a6d2d90404340d9745f8278819ced2e33cca076:lib/router.dart
       ],
     ),
   ],
