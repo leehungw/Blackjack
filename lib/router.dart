@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:card/main_menu/home_screen.dart';
+import 'package:card/main_menu/login_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -38,18 +39,15 @@ final router = GoRouter(
           //   )
           // ],
         ),
-<<<<<<< HEAD:lib/config/router.dart
-        GoRoute(
-          path: 'settings',
-          builder: (context, state) =>
-              const SettingsScreen(key: Key('settings')),
-        ),
+        // GoRoute(
+        //   path: 'settings',
+        //   builder: (context, state) =>
+        //       const SettingsScreen(key: Key('settings')),
+        // ),
         GoRoute(
           path: 'login',
           builder: (context, state) => const LoginScreen(key: Key('login')),
         ),
-=======
->>>>>>> 7a6d2d90404340d9745f8278819ced2e33cca076:lib/router.dart
       ],
     ),
   ],
