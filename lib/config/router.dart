@@ -48,6 +48,10 @@ final router = GoRouter(
           builder: (context, state) =>
               const SettingsScreen(key: Key('settings')),
         ),
+        GoRoute(
+          path: 'login',
+          builder: (context, state) => const LoginScreen(key: Key('login')),
+        ),
       ],
     ),
   ],
