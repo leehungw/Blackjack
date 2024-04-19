@@ -23,183 +23,22 @@ class _SignupScreenState extends State<SignupScreen> {
   //your name field
   final yourNameController = TextEditingController();
   FocusNode yourNameFocusNode = FocusNode();
-  bool _firstEnterNameField = false;
-  bool _nameCorrect = false;
-  String? _NameValidateText;
 
   //user name field
   final userNameController = TextEditingController();
   FocusNode userNameFocusNode = FocusNode();
-  bool _firstEnterUserNameField = false;
-  bool _userNameCorrect = false;
-  String? _UserNameValidateText;
 
   //email field
   final emailController = TextEditingController();
   FocusNode emailFocusNode = FocusNode();
-  bool _firstEnterEmailField = false;
-  bool _emailCorrect = false;
-  String? _EmailValidateText;
 
   //password field
   final passwordController = TextEditingController();
   FocusNode passwordFocusNode = FocusNode();
-  bool _firstEnterPasswordField = false;
-  bool _passwordCorrect = false;
-  String? _PasswordValidateText;
-  bool _PasswordVisible = false;
 
   //confirm password field
   final confirmPasswordController = TextEditingController();
   FocusNode confirmPasswordFocusNode = FocusNode();
-  bool _firstEnterConfirmPasswordField = false;
-  bool _confirmPasswordCorrect = false;
-  String? _ConfirmPasswordValidateText;
-  bool _ConfirmPasswordVisible = false;
-
-  String? _ExceptionText;
-
-  // VALIDATING
-  String? _NameValidating(String value) {
-    String? errorText;
-    if (!_firstEnterNameField) {
-      return null;
-    } else {
-      if (value.isEmpty) {
-        _nameCorrect = false;
-        errorText = "Vui lòng nhập Họ & tên";
-      } else {
-        _nameCorrect = true;
-      }
-    }
-    return yourNameFocusNode.hasFocus ? null : errorText;
-  }
-
-  String? _UserNameValidating(String value) {
-    String? errorText;
-    if (!_firstEnterUserNameField) {
-      return null;
-    } else {
-      if (value.isEmpty) {
-        _userNameCorrect = false;
-        errorText = "Vui lòng nhập tên người dùng";
-      } else {
-        _userNameCorrect = true;
-      }
-    }
-    return userNameFocusNode.hasFocus ? null : errorText;
-  }
-
-  String? _EmailValidating(String value) {
-    String? errorText;
-    if (!_firstEnterEmailField) {
-      return null;
-    } else {
-      if (value.isEmpty) {
-        _emailCorrect = false;
-        errorText = "Vui lòng nhập Email";
-      } else if (!EmailValidator.validate(value)) {
-        _emailCorrect = false;
-        errorText = "Email không hợp lệ";
-      } else {
-        _emailCorrect = true;
-      }
-    }
-    return emailFocusNode.hasFocus ? null : errorText;
-  }
-
-  String? _PasswordValidating(String value) {
-    String? errorText;
-    if (!_firstEnterPasswordField) {
-      return null;
-    } else {
-      if (value.isEmpty) {
-        _passwordCorrect = false;
-        errorText = "Vui lòng nhập mật khẩu";
-      } else if (value.length < 6) {
-        _passwordCorrect = false;
-        errorText = "Mật khẩu phải có ít nhất 6 ký tự";
-      } else {
-        _passwordCorrect = true;
-      }
-    }
-    return passwordFocusNode.hasFocus ? null : errorText;
-  }
-
-  String? _ConfirmPasswordValidating(String value) {
-    String? errorText;
-    if (!_firstEnterConfirmPasswordField) {
-      return null;
-    } else {
-      if (value.isEmpty) {
-        _confirmPasswordCorrect = false;
-        errorText = "Vui lòng xác nhận mật khẩu";
-      } else if (value != passwordController.text) {
-        _confirmPasswordCorrect = false;
-        errorText = "Mật khẩu không khớp";
-      } else {
-        _confirmPasswordCorrect = true;
-      }
-    }
-    return confirmPasswordFocusNode.hasFocus ? null : errorText;
-  }
-
-  // SIGN UP
-
-  void _RegisterButton(context) async {
-    yourNameFocusNode.unfocus();
-    emailFocusNode.unfocus();
-    passwordFocusNode.unfocus();
-    confirmPasswordFocusNode.unfocus();
-    userNameFocusNode.unfocus();
-
-    setState(() {
-      _NameValidateText = _NameValidating(yourNameController.value.text);
-      _EmailValidateText = _EmailValidating(emailController.value.text);
-      _PasswordValidateText =
-          _PasswordValidating(passwordController.value.text);
-      _ConfirmPasswordValidateText =
-          _ConfirmPasswordValidating(confirmPasswordController.value.text);
-      _UserNameValidateText =
-          _UserNameValidating(userNameController.value.text);
-    });
-    if (_nameCorrect &&
-        _emailCorrect &&
-        _passwordCorrect &&
-        _confirmPasswordCorrect &&
-        _userNameCorrect) {
-      bool? result;
-
-      showDialog(
-          context: context as BuildContext,
-          barrierDismissible: false,
-          builder: (context) {
-            return const Center(child: CircularProgressIndicator());
-          });
-
-      result = await _checkIfEmailInUse(emailController.value.text);
-      Navigator.of(context).pop();
-      if (result == true) {
-        _EmailValidateText = 'Email đã được sử dụng';
-      }
-      if (result == false) {
-        // Chuyển hướng sang PINCODE page để xác thực tài khoản
-        Navigator.of(context).push(_createRoute());
-      } else if (_ExceptionText != null) {
-        String? message = _ExceptionText;
-        ScaffoldMessenger.of(context as BuildContext)
-            .showSnackBar(SnackBar(content: Text(message.toString())));
-      }
-    }
-
-    setState(() {
-      _firstEnterConfirmPasswordField = true;
-      _firstEnterEmailField = true;
-      _firstEnterPasswordField = true;
-      _firstEnterNameField = true;
-      _firstEnterUserNameField = true;
-    });
-  }
 
   Future<void> _selectImageFromGallery() async {
     final ImagePicker _picker = ImagePicker();
@@ -210,100 +49,6 @@ class _SignupScreenState extends State<SignupScreen> {
         _imageFile = pickedImage.path;
       });
     }
-  }
-
-  Future<bool?> _checkIfEmailInUse(String emailAddress) async {
-    try {
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailAddress,
-        password: '123456',
-      );
-      await credential.user?.delete();
-      return false;
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        return true;
-      } else {
-        _ExceptionText = e.code;
-        return null;
-      }
-    } catch (e) {
-      _ExceptionText = e.toString();
-      return null;
-    }
-  }
-
-  @override
-  void initState() {
-    _PasswordVisible = false;
-    _ConfirmPasswordVisible = false;
-    _firstEnterNameField = false;
-    _firstEnterEmailField = false;
-    _firstEnterPasswordField = false;
-    _firstEnterConfirmPasswordField = false;
-    _firstEnterUserNameField = false;
-    _nameCorrect = false;
-    _emailCorrect = false;
-    _passwordCorrect = false;
-    _confirmPasswordCorrect = false;
-    _userNameCorrect = false;
-
-    // add listener
-    yourNameFocusNode.addListener(() {
-      if (yourNameFocusNode.hasFocus) {
-        _firstEnterNameField = true;
-        _NameValidateText = null;
-      } else {
-        _NameValidateText = _NameValidating(yourNameController.value.text);
-        setState(() {});
-      }
-    });
-
-    emailFocusNode.addListener(() {
-      if (emailFocusNode.hasFocus) {
-        _EmailValidateText = null;
-        _firstEnterEmailField = true;
-      } else {
-        _EmailValidateText = _EmailValidating(emailController.value.text);
-        setState(() {});
-      }
-    });
-
-    passwordFocusNode.addListener(() {
-      if (passwordFocusNode.hasFocus) {
-        _firstEnterPasswordField = true;
-        _PasswordValidateText = null;
-      } else {
-        _PasswordValidateText =
-            _PasswordValidating(passwordController.value.text);
-        setState(() {});
-      }
-    });
-
-    confirmPasswordFocusNode.addListener(() {
-      if (confirmPasswordFocusNode.hasFocus) {
-        _firstEnterConfirmPasswordField = true;
-        _ConfirmPasswordValidateText = null;
-      } else {
-        _ConfirmPasswordValidateText =
-            _ConfirmPasswordValidating(confirmPasswordController.value.text);
-        setState(() {});
-      }
-    });
-
-    userNameFocusNode.addListener(() {
-      if (userNameFocusNode.hasFocus) {
-        _firstEnterUserNameField = true;
-        _UserNameValidateText = null;
-      } else {
-        _UserNameValidateText =
-            _UserNameValidating(userNameController.value.text);
-        setState(() {});
-      }
-    });
-
-    super.initState();
   }
 
   @override
@@ -561,7 +306,6 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               )),
                           onTap: () {
-                            _RegisterButton(context);
                             //GoRouter.of(context).go('/signup/verification');
                           }),
                     ),
