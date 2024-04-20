@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:card/auth_fucntion.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:card/style/palette.dart';
+import 'package:card/user.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -22,6 +26,7 @@ Future<UserCredential?> registerWithEmailAndPassword(
     );
 
     await userCredential.user!.updateDisplayName(displayName);
+    await userCredential.user!.updatePhotoURL(avatar);
 
     return userCredential;
   } catch (e) {
@@ -36,7 +41,9 @@ class PincodeScreen extends StatefulWidget {
   final String email;
   final String pass;
   final String imagefile;
-  const PincodeScreen(this.name, this.uname, this.email, this.pass, this.imagefile, {super.key});
+  const PincodeScreen(
+      this.name, this.uname, this.email, this.pass, this.imagefile,
+      {super.key});
 
   @override
   State<PincodeScreen> createState() => _PincodeScreenState();
@@ -186,10 +193,16 @@ class _PincodeScreenState extends State<PincodeScreen> {
                     height: 160.0,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: AssetImage(widget.imagefile),
-                        fit: BoxFit.cover,
-                      ),
+                      image: widget.imagefile.isNotEmpty
+                          ? DecorationImage(
+                              image: FileImage(File(widget.imagefile)),
+                              fit: BoxFit.cover,
+                            )
+                          : DecorationImage(
+                              image: AssetImage(
+                                  "assets/images/default_profile_picture.png"),
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                   Gap(26),
@@ -322,13 +335,33 @@ class _PincodeScreenState extends State<PincodeScreen> {
                                 return const Center(
                                     child: CircularProgressIndicator());
                               });
+                          // AuthServices.signUpUser(
+                          //   widget.name,
+                          //   widget.uname,
+                          //   widget.email,
+                          //   widget.pass,
+                          //   widget.imagefile,
+                          //   DateTime.now(),
+                          //   context,
+                          // );
                           UserCredential? userCredential =
-                              await registerWithEmailAndPassword(widget.email,
-                                  widget.pass, widget.uname, widget.imagefile);
+                              await registerWithEmailAndPassword(
+                            widget.email,
+                            widget.pass,
+                            widget.uname,
+                            widget.imagefile,
+                          );
                           if (userCredential != null) {
-                            String userID = userCredential.user!.uid;
-
                             print("Account created successfully!");
+                            Players newUser = Players(
+                              yourName: widget.name,
+                              userName: widget.uname,
+                              email: widget.email,
+                              avatar: widget.imagefile,
+                              startDate: DateTime.now(),
+                            );
+                            addUserToFirestore(newUser);
+                            GoRouter.of(context).go('/login');
                           } else {
                             print('Account creation failed!');
                           }

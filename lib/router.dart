@@ -1,7 +1,6 @@
 // Copyright 2023, the Flutter project authors. Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
-
 import 'package:card/home_features/home_screen.dart';
 import 'package:card/home_features/instruction_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
@@ -39,6 +38,15 @@ final router = GoRouter(
           //     ),
           //   )
           // ],
+        ),
+        // GoRoute(
+        //   path: 'settings',
+        //   builder: (context, state) =>
+        //       const SettingsScreen(key: Key('settings')),
+        // ),
+        GoRoute(
+          path: 'login',
+          builder: (context, state) => const LoginScreen(key: Key('login')),
         ),
       ],
     ),
