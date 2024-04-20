@@ -56,6 +56,7 @@ class Palette {
       Color(0xFFFFD779);
   static const Color settingDialogButtonBackgroundGradientBottom =
       Color(0xFFFEEDC2);
+  static const Color settingDialogButtonText = Color(0xFF049D00);
   static const Color rollCallIcon = Color(0xFF1102BE);
   static const Color coinGrind = Color(0xFFF4B325);
 }
