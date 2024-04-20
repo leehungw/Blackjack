@@ -2,7 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:card/main_menu/home_screen.dart';
+import 'package:card/home_features/home_screen.dart';
+import 'package:card/home_features/instruction_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +15,8 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(key: Key('login screen')),
+      builder: (context, state) =>
+          const InstructionScreen(key: Key('login screen')),
       routes: [
         GoRoute(
           path: 'signup',

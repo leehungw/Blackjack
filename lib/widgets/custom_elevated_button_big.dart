@@ -2,13 +2,13 @@ import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:flutter/material.dart';
 
-class CustomElevatedButton extends StatelessWidget {
+class CustomElevatedButtonBig extends StatelessWidget {
   final Gradient gradient;
   final VoidCallback onPressed;
   final String text;
   final double width;
 
-  const CustomElevatedButton({
+  const CustomElevatedButtonBig({
     super.key,
     required this.gradient,
     required this.onPressed,

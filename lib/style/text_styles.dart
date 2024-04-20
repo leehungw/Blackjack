@@ -46,4 +46,9 @@ class TextStyles {
       color: Palette.primaryText,
       fontWeight: FontWeight.normal,
       fontFamily: GoogleFonts.montserrat().fontFamily);
+  static TextStyle instructions = TextStyle(
+      fontSize: 24,
+      color: Palette.black,
+      fontWeight: FontWeight.normal,
+      fontFamily: GoogleFonts.montserrat().fontFamily);
 }
