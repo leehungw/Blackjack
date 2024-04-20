@@ -1,7 +1,7 @@
 import 'package:card/main.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
-import 'package:card/widgets/custom_elevated_button.dart';
+import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:card/widgets/custom_icon_button.dart';
 import 'package:card/widgets/start_game_dialog.dart';
 import 'package:flutter/material.dart';
@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           Center(
-                            child: CustomElevatedButton(
+                            child: CustomElevatedButtonBig(
                               width: 150,
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,
@@ -276,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           Center(
-                            child: CustomElevatedButton(
+                            child: CustomElevatedButtonBig(
                               width: 150,
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,
@@ -345,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           Center(
-                            child: CustomElevatedButton(
+                            child: CustomElevatedButtonBig(
                               width: 150,
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,

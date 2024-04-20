@@ -1,5 +1,5 @@
 import 'package:card/style/palette.dart';
-import 'package:card/widgets/custom_elevated_button.dart';
+import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:card/widgets/role_picker_dialog.dart';
 import 'package:card/widgets/room_code_dialog.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ class _StartGameDialogState extends State<StartGameDialog> {
             children: [
               const Row(),
               const Gap(30),
-              CustomElevatedButton(
+              CustomElevatedButtonBig(
                 width: 150,
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -53,7 +53,7 @@ class _StartGameDialogState extends State<StartGameDialog> {
                 text: "Vào Phòng",
               ),
               const Gap(30),
-              CustomElevatedButton(
+              CustomElevatedButtonBig(
                 width: 150,
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,

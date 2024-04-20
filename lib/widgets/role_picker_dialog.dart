@@ -1,6 +1,6 @@
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
-import 'package:card/widgets/custom_elevated_button.dart';
+import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -38,7 +38,7 @@ class _RolePickerDialogState extends State<RolePickerDialog> {
                 ],
               ),
               const Gap(15),
-              CustomElevatedButton(
+              CustomElevatedButtonBig(
                 width: 150,
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -54,7 +54,7 @@ class _RolePickerDialogState extends State<RolePickerDialog> {
                 text: "Nhà Cái",
               ),
               const Gap(30),
-              CustomElevatedButton(
+              CustomElevatedButtonBig(
                 width: 150,
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
