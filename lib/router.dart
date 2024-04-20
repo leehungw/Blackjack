@@ -15,7 +15,7 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(key: Key('login screen')),
+      builder: (context, state) => const LoginScreen(key: Key('login screen')),
       routes: [
         GoRoute(
           path: 'signup',

@@ -7,6 +7,7 @@ import 'package:card/main_menu/signup_screen.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/user.dart';
 import 'package:card/style/text_styles.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -17,7 +18,12 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 Future<UserCredential?> registerWithEmailAndPassword(
-    String email, String password, String displayName, String avatar) async {
+  String email,
+  String password,
+  String displayName,
+  String avatar,
+  void Function(String) showErrorMessage,
+) async {
   try {
     UserCredential userCredential =
         await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -29,8 +35,11 @@ Future<UserCredential?> registerWithEmailAndPassword(
     await userCredential.user!.updatePhotoURL(avatar);
 
     return userCredential;
-  } catch (e) {
-    print('Error creating user: $e');
+  } on FirebaseAuthException catch (e) {
+    if (e.code == 'email-already-in-use') {
+      showErrorMessage('Email đã được sử dụng.');
+    }
+
     return null;
   }
 }
@@ -335,39 +344,44 @@ class _PincodeScreenState extends State<PincodeScreen> {
                                 return const Center(
                                     child: CircularProgressIndicator());
                               });
-                          // AuthServices.signUpUser(
-                          //   widget.name,
-                          //   widget.uname,
-                          //   widget.email,
-                          //   widget.pass,
-                          //   widget.imagefile,
-                          //   DateTime.now(),
-                          //   context,
-                          // );
-                          UserCredential? userCredential =
-                              await registerWithEmailAndPassword(
-                            widget.email,
-                            widget.pass,
-                            widget.uname,
-                            widget.imagefile,
-                          );
-                          if (userCredential != null) {
-                            print("Account created successfully!");
-                            Players newUser = Players(
-                              yourName: widget.name,
-                              userName: widget.uname,
+                          try {
+                            UserCredential userCredential = await FirebaseAuth
+                                .instance
+                                .createUserWithEmailAndPassword(
                               email: widget.email,
-                              avatar: widget.imagefile,
-                              startDate: DateTime.now(),
+                              password: widget.pass,
                             );
-                            addUserToFirestore(newUser);
-                            GoRouter.of(context).go('/login');
-                          } else {
-                            print('Account creation failed!');
+
+                            // await userCredential.user!
+                            //     .updateDisplayName(widget.uname);
+
+                            // await userCredential.user!
+                            //     .updatePhotoURL(widget.imagefile);
+
+                            await FirebaseFirestore.instance
+                                .collection("Users")
+                                .doc(userCredential.user!.uid)
+                                .set({
+                              'playerID': userCredential.user!.uid,
+                              'yourName': widget.name,
+                              'userName': widget.uname,
+                              'email': widget.email,
+                              'avatar': widget.imagefile,
+                              'level': 0,
+                              'money': 10000,
+                              'startDate': Timestamp.now(),
+                              'duration': 0,
+                            });
+                          } on FirebaseAuthException catch (e) {
+                            if (e.code == 'email-already-in-use') {
+                              showErrorMessage('Email đã được sử dụng.');
+                            }
+                            print('Error: $e');
                           }
                           _verifySuccess = true;
                           Navigator.of(context, rootNavigator: true).pop();
                           setState(() {});
+                          GoRouter.of(context).go('/login');
                         } else {
                           showDialog(
                             context: context,
@@ -417,6 +431,26 @@ class _PincodeScreenState extends State<PincodeScreen> {
         return SlideTransition(
           position: tween.animate(curvedAnimation),
           child: child,
+        );
+      },
+    );
+  }
+
+  void showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Lỗi'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Đóng'),
+            ),
+          ],
         );
       },
     );

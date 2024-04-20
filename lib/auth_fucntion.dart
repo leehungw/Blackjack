@@ -4,13 +4,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AuthServices {
-  static signUpUser(String name, String uname, String email, String password,
-      String avatar, DateTime startDate, BuildContext buildContext) async {
+  static signUpUser(
+    String name,
+    String uname,
+    String email,
+    String password,
+    String avatar,
+    DateTime startDate,
+    BuildContext buildContext,
+  ) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+      await userCredential.user!.updateDisplayName(uname);
+      await userCredential.user!.updatePhotoURL(avatar);
       String uid = userCredential.user!.uid;
       Players user = Players(
+          playerID: uid,
           yourName: name,
           userName: uname,
           email: email,
