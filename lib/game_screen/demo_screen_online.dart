@@ -109,7 +109,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                         ),
                       )),
                   onTap: () {
-                    if (gameManager.currentPlayer!.isDealer()){
+                    if (gameManager.dealerCanExecutePlayer()){
                       gameManager.dealerExecutePlayer(i);
                       setState(() {});
                     }

@@ -461,13 +461,13 @@ final class GameOnlineManager{
 
   // PLAYER BEHAVIOR
   void playerDrawCard(){
-    if (currentPlayer == null){
+    if (_thisPlayer != _currentPlayer){
       return;
     }
     GameCard card = _deck.removeAt(0);
-    currentPlayer?.hit(card);
-    if (_currentPlayer == _dealer){
-      if (_dealer!.isBurn() || _dealer!.isDragon()){
+    _thisPlayer?.hit(card);
+    if (_thisPlayer == _dealer){
+      if (_thisPlayer!.isBurn() || _thisPlayer!.isDragon()){
         dealerExecuteAll();
       }
       tryEndOnlineGame();

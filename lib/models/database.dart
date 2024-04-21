@@ -9,14 +9,26 @@ class Database {
 
   static Future<void> refreshDB() async {
 
-    await FirebaseRequest.readRooms().forEach((element) { rooms = element; });
+    FirebaseRequest.readRooms().forEach((element) { rooms = element; });
     rooms.sort((a, b) => a.roomID! - b.roomID!);
 
-    await FirebaseRequest.readPlayers().forEach((element) { players = element; });
+    FirebaseRequest.readPlayers().forEach((element) { players = element; });
   }
 
   static Future<int> getAvailableRoomID() async {
-    await refreshDB();
+    int timeout = 10;
+
+    while (timeout > 0){
+      try {
+        await refreshDB();
+        break;
+      } catch (e) {
+        print(e);
+        timeout--;
+        await Future.delayed(Duration(milliseconds: 50));
+      }
+    }
+
     if (rooms.isEmpty){
       return 0;
     }
