@@ -1,6 +1,5 @@
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
-import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 

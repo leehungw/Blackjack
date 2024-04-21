@@ -1,7 +1,6 @@
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:gradient_icon/gradient_icon.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class CustomIconButton extends StatelessWidget {

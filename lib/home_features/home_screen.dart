@@ -4,10 +4,13 @@ import 'package:card/style/text_styles.dart';
 import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:card/widgets/custom_icon_button.dart';
 import 'package:card/widgets/start_game_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:gradient_icon/gradient_icon.dart';
+import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +21,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Future<void> signout() async {
+    FirebaseAuth.instance.signOut();
+    GoRouter.of(context).go('/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -355,9 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Palette.buttonExitBackgroundGradientTop
                                 ],
                               ),
-                              onPressed: () {
-                                //Start onpressed handle
-                              },
+                              onPressed: signout,
                               text: "Thoát",
                             ),
                           ),

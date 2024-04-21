@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:card/auth_fucntion.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:card/style/palette.dart';
-import 'package:card/user.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

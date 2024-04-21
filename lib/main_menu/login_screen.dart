@@ -52,8 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (result) {
       // ignore: use_build_context_synchronously
-      Navigator.of(context, rootNavigator: true)
-          .pushAndRemoveUntil(_createRoute(), (route) => false);
+      GoRouter.of(context).go('/home');
     } else {
       setState(() {
         errorText = "Tài khoản hoặc mật khẩu không chính xác!";
@@ -290,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     .copyWith(color: Palette.numberText),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    GoRouter.of(context).go('/signup');
+                                    GoRouter.of(context).go('/login/signup');
                                   },
                               )
                             ],

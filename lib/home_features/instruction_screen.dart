@@ -2,16 +2,10 @@ import 'package:card/config/game_instructions.dart';
 import 'package:card/main.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
-import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:card/widgets/custom_elevated_button_small.dart';
-import 'package:card/widgets/custom_icon_button.dart';
-import 'package:card/widgets/start_game_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:gradient_icon/gradient_icon.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class InstructionScreen extends StatefulWidget {

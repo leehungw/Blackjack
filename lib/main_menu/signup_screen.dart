@@ -1,11 +1,9 @@
 import 'dart:io';
 
-import 'dart:io';
 
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
