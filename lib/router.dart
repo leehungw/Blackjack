@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 import 'package:card/home_features/home_screen.dart';
 import 'package:card/home_features/instruction_screen.dart';
+import 'package:card/main_menu/login_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
