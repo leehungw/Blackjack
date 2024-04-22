@@ -8,26 +8,53 @@ class Database {
   static List<PlayerModel> players = [];
 
   static Future<void> refreshDB() async {
+    int timeout = 300;
+    bool readRoom = false;
+    bool readPlayer = false;
 
-    FirebaseRequest.readRooms().forEach((element) { rooms = element; });
+    FirebaseRequest.readRooms().listen(
+        (event) {
+          rooms = event;
+        },
+        onError: (err) {
+          print(err);
+          return;
+        },
+        onDone: () {
+          print("get Room success");
+          readRoom = true;
+        }
+    );
+
+    FirebaseRequest.readPlayers().listen(
+        (event) {
+          players = event;
+        },
+        onError: (err) {
+          print(err);
+          return;
+        },
+        onDone: () {
+          print("get Room success");
+          readPlayer = true;
+        }
+    );
+
+    while (timeout > 0 || readRoom == false || readPlayer == false){
+        timeout--;
+        await Future.delayed(Duration(milliseconds: 50));
+    }
+
+    if (timeout <= 0){
+      print("Get data false");
+      return;
+    }
+
     rooms.sort((a, b) => a.roomID! - b.roomID!);
-
-    FirebaseRequest.readPlayers().forEach((element) { players = element; });
   }
 
   static Future<int> getAvailableRoomID() async {
-    int timeout = 10;
-
-    while (timeout > 0){
-      try {
-        await refreshDB();
-        break;
-      } catch (e) {
-        print(e);
-        timeout--;
-        await Future.delayed(Duration(milliseconds: 50));
-      }
-    }
+    await refreshDB();
 
     if (rooms.isEmpty){
       return 0;
@@ -37,6 +64,7 @@ class Database {
 
   static Future<RoomModel?> getRoomByID(int id) async {
     await refreshDB();
+
     try {
       RoomModel room =
           rooms.where((roomCheck) => roomCheck.roomID! == id)

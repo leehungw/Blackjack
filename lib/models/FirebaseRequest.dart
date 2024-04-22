@@ -37,7 +37,7 @@ class FirebaseRequest {
       .update(model.toJson());
 
   static Future<RoomModel> refreshRoom(RoomModel model) async {
-    DocumentReference docRef = FirebaseFirestore.instance.collection('your_collection_name').doc(model.key);
+    DocumentReference docRef = FirebaseFirestore.instance.collection(RoomModel.collectionName).doc(model.key);
 
     DocumentSnapshot docSnapshot = await docRef.get();
 
@@ -59,7 +59,7 @@ class FirebaseRequest {
       .update(model.toJson());
 
   static Future<bool> refreshPlayer(PlayerModel model) async {
-    DocumentReference docRef = FirebaseFirestore.instance.collection('your_collection_name').doc(model.key);
+    DocumentReference docRef = FirebaseFirestore.instance.collection(PlayerModel.collectionName).doc(model.key);
 
     DocumentSnapshot docSnapshot = await docRef.get();
 
