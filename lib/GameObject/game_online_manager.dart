@@ -148,8 +148,8 @@ final class GameOnlineManager{
   }
 
   Future<bool> initialize(int thisUserID, int roomID) async {
-    _thisUserID = thisUserID;
     _clear();
+    _thisUserID = thisUserID;
     bool success;
     if (roomID < 0){
       success = await initializeNewHostRoom();
