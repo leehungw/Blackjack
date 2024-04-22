@@ -17,6 +17,7 @@ class GamePlayerOnline extends GamePlayer {
     // if (!Validator.validatePlayer(model)){
     //   return;
     // }
+    key = model.key!;
     userId = model.playerID;
     seat = model.seat;
 

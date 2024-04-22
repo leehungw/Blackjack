@@ -31,7 +31,7 @@ class Database {
     FirebaseRequest.readPlayers().listen(
         (event) {
           players = event;
-          print("get Room success");
+          print("get Player success");
           readPlayer = true;
         },
         onError: (err) {

@@ -150,7 +150,6 @@ final class GameOnlineManager{
   Future<bool> initialize(int thisUserID, int roomID) async {
     _thisUserID = thisUserID;
     _clear();
-    _thisUserID = thisUserID;
     bool success;
     if (roomID < 0){
       success = await initializeNewHostRoom();
@@ -362,9 +361,12 @@ final class GameOnlineManager{
   // UPDATE METHODS
 
   Future<void> onlineGameUpdate() async {
+    if (_status == RoomStatus.init){
+      return;
+    }
     if (model == null){
       return;
-    } else if (_thisPlayer == null){
+    } else if (_thisPlayer == null || _thisPlayer?.key == ""){
       importData(true);
       return;
     }
