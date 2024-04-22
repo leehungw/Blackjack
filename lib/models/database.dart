@@ -15,32 +15,36 @@ class Database {
     FirebaseRequest.readRooms().listen(
         (event) {
           rooms = event;
+          print("get Room success");
+          readRoom = true;
         },
         onError: (err) {
           print(err);
           return;
         },
-        onDone: () {
-          print("get Room success");
-          readRoom = true;
-        }
+        // onDone: () {
+        //   print("get Room success");
+        //
+        // }
     );
 
     FirebaseRequest.readPlayers().listen(
         (event) {
           players = event;
+          print("get Room success");
+          readPlayer = true;
         },
         onError: (err) {
           print(err);
           return;
         },
-        onDone: () {
-          print("get Room success");
-          readPlayer = true;
-        }
+        // onDone: () {
+        //   print("get Room success");
+        //   readPlayer = true;
+        // }
     );
 
-    while (timeout > 0 || readRoom == false || readPlayer == false){
+    while (timeout > 0 && (readRoom == false || readPlayer == false)){
         timeout--;
         await Future.delayed(Duration(milliseconds: 50));
     }
