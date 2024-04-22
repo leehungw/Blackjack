@@ -213,7 +213,50 @@ final class GameOnlineManager{
       return false;
     }
 
-    model = room;
+    List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(room.roomID!);
+    playersInRoom.sort((a, b) => a.seat - b.seat);
+    // Get available seat
+    int avaiableSeat = -1;
+
+    int tmp = 0;
+    for (int i = 0; i < playersInRoom.length - 1; i++){
+      if (playersInRoom[i+1].seat - playersInRoom[i].seat > 1){
+        avaiableSeat = playersInRoom[i].seat + 1;
+        break;
+      }
+    }
+
+    if (avaiableSeat == -1){
+      avaiableSeat = playersInRoom.length + 1;
+    }
+
+    PlayerModel thisUserModel = PlayerModel(
+        playerID: _thisUserID,
+        roomID: room.roomID!,
+        seat: avaiableSeat,
+        state: "none",
+        result: "uncheck",
+        cards: []
+    );
+
+    room.players.add(_thisUserID);
+
+    FirebaseRequest.addPlayer(thisUserModel);
+    FirebaseRequest.updateRoom(room);
+
+    await Future.delayed(Duration(milliseconds: 50));
+    model = await Database.getRoomByID(room.roomID!);
+    await Future.delayed(Duration(milliseconds: 50));
+    // Check if room is created or not
+    timeout = 300;
+    while (model == null || model?.players.length != room.players.length){
+      model = await Database.getRoomByID(room.roomID!);
+      await Future.delayed(Duration(milliseconds: 50));
+      timeout--;
+      if (timeout <= 0){
+        break;
+      }
+    }
 
     return true;
   }
