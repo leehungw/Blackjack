@@ -68,9 +68,23 @@ final class GameOnlineManager{
     model = await FirebaseRequest.refreshRoom(model!);
     List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(model!.roomID!);
 
+    _players.clear();
+
+    if (!overwriteUser){
+      _players.add(_thisPlayer!);
+    }
+
     for (PlayerModel playerModel in playersInRoom){
+
+      if (!overwriteUser && playerModel.playerID == _thisUserID){
+        continue;
+      }
+
       GamePlayerOnline player = GameFactory.createPlayerOnline(playerModel, playerModel.playerID == _thisUserID);
       _players.add(player);
+      if (player.userId == _thisUserID){
+        _thisPlayer = player;
+      }
       if (player.userId == model!.dealer){
         _dealer = player;
       }
@@ -207,58 +221,74 @@ final class GameOnlineManager{
       return false;
     }
 
-    // Full
-    if (room.players.length == 6){
-      print("Room full");
-      return false;
-    }
+    bool playerExist = false;
 
-    List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(room.roomID!);
-    playersInRoom.sort((a, b) => a.seat - b.seat);
-    // Get available seat
-    int avaiableSeat = -1;
-
-    int tmp = 0;
-    for (int i = 0; i < playersInRoom.length - 1; i++){
-      if (playersInRoom[i+1].seat - playersInRoom[i].seat > 1){
-        avaiableSeat = playersInRoom[i].seat + 1;
-        break;
+    // Check if player already existed
+    for (int id in room.players){
+      if (id == _thisUserID){
+          playerExist = true;
       }
     }
 
-    if (avaiableSeat == -1){
-      avaiableSeat = playersInRoom.length + 1;
-    }
+    if (playerExist){
+      return true;
 
-    PlayerModel thisUserModel = PlayerModel(
-        playerID: _thisUserID,
-        roomID: room.roomID!,
-        seat: avaiableSeat,
-        state: "none",
-        result: "uncheck",
-        cards: []
-    );
+    } else {
 
-    room.players.add(_thisUserID);
+      // Full
+      if (room.players.length == 6){
+        print("Room full");
+        return false;
+      }
 
-    FirebaseRequest.addPlayer(thisUserModel);
-    FirebaseRequest.updateRoom(room);
+      List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(room.roomID!);
+      playersInRoom.sort((a, b) => a.seat - b.seat);
+      // Get available seat
+      int avaiableSeat = -1;
 
-    await Future.delayed(Duration(milliseconds: 50));
-    model = await Database.getRoomByID(room.roomID!);
-    await Future.delayed(Duration(milliseconds: 50));
-    // Check if room is created or not
-    timeout = 300;
-    while (model == null || model?.players.length != room.players.length){
+      int tmp = 0;
+      for (int i = 0; i < playersInRoom.length - 1; i++){
+        if (playersInRoom[i+1].seat - playersInRoom[i].seat > 1){
+          avaiableSeat = playersInRoom[i].seat + 1;
+          break;
+        }
+      }
+
+      if (avaiableSeat == -1){
+        avaiableSeat = playersInRoom.length + 1;
+      }
+
+      PlayerModel thisUserModel = PlayerModel(
+          playerID: _thisUserID,
+          roomID: room.roomID!,
+          seat: avaiableSeat,
+          state: "none",
+          result: "uncheck",
+          cards: []
+      );
+
+      room.players.add(_thisUserID);
+
+      FirebaseRequest.addPlayer(thisUserModel);
+      FirebaseRequest.updateRoom(room);
+
+      await Future.delayed(Duration(milliseconds: 50));
       model = await Database.getRoomByID(room.roomID!);
       await Future.delayed(Duration(milliseconds: 50));
-      timeout--;
-      if (timeout <= 0){
-        break;
+      // Check if player already joined room or not
+      timeout = 300;
+      while (model == null || model?.players.length != room.players.length){
+        model = await Database.getRoomByID(room.roomID!);
+        await Future.delayed(Duration(milliseconds: 50));
+        timeout--;
+        if (timeout <= 0){
+          break;
+        }
       }
+
+      return timeout > 0;
     }
 
-    return true;
   }
 
   bool canStartOnlineGame(){
@@ -332,7 +362,10 @@ final class GameOnlineManager{
   // UPDATE METHODS
 
   Future<void> onlineGameUpdate() async {
-    if (model == null || _thisPlayer == null){
+    if (model == null){
+      return;
+    } else if (_thisPlayer == null){
+      importData(true);
       return;
     }
     _updatePhaseWaitToStart();
