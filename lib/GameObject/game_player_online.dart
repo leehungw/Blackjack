@@ -6,10 +6,9 @@ import 'game_factory.dart';
 
 class GamePlayerOnline extends GamePlayer {
 
-  String key;
   int roomID;
 
-  GamePlayerOnline(this.key, this.roomID, super.userId, super.seat);
+  GamePlayerOnline(this.roomID, super.userId, super.seat);
 
   // Online Method
 
@@ -17,7 +16,6 @@ class GamePlayerOnline extends GamePlayer {
     // if (!Validator.validatePlayer(model)){
     //   return;
     // }
-    key = model.key!;
     userId = model.playerID;
     seat = model.seat;
 
@@ -146,7 +144,6 @@ class GamePlayerOnline extends GamePlayer {
     }
 
     return PlayerModel(
-        key: key,
         playerID: userId,
         roomID:  roomID,
         seat: seat,

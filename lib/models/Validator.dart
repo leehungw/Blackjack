@@ -1,6 +1,8 @@
 import 'package:card/models/PlayerModel.dart';
 import 'package:card/models/RoomModel.dart';
 
+import 'RequestModel.dart';
+
 class Validator{
 
   static bool validateRoom(RoomModel model){
@@ -23,5 +25,33 @@ class Validator{
         return false;
       }
       return true;
+  }
+
+  static bool validatePlayerList(List<PlayerModel> listA, List<PlayerModel> listB){
+    if (listA.length != listB.length) {
+      return false;
+    }
+
+    for (int i = 0; i < listA.length; i++){
+      if (listA[i].isEqual(listB[i]) == false){
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  static bool validateRequestList(List<RequestModel> listA, List<RequestModel> listB){
+    if (listA.length != listB.length) {
+      return false;
+    }
+
+    for (int i = 0; i < listA.length; i++){
+      if (listA[i].isEqual(listB[i]) == false){
+        return false;
+      }
+    }
+
+    return true;
   }
 }

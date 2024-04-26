@@ -1,9 +1,10 @@
 
 import 'package:card/models/RoomModel.dart';
+import 'package:flutter/foundation.dart';
 
 class PlayerModel {
 
-  String? key;
+  //String? key;
   int playerID;
   int roomID;
   int seat;
@@ -15,7 +16,7 @@ class PlayerModel {
 
   PlayerModel(
     {
-      this.key,
+      //this.key,
       required this.playerID,
       required this.roomID,
       required this.seat,
@@ -34,7 +35,7 @@ class PlayerModel {
     'cards': cards.toString()
   };
 
-  static PlayerModel fromJson(String key, Map<String, dynamic> json) {
+  static PlayerModel fromJson(Map<String, dynamic> json) {
 
     String cardsString = json['cards'] as String;
     cardsString = cardsString.replaceAll("[", "");
@@ -43,7 +44,7 @@ class PlayerModel {
     List<String> cardsList = cardsString.split(",");
 
     return PlayerModel(
-        key: key,
+        //key: key,
         playerID: json['playerID'] as int,
         roomID: json['roomID'] as int,
         seat: json['seat'] as int,
@@ -63,5 +64,16 @@ class PlayerModel {
       return null;
     }
 
+  }
+
+  bool isEqual(PlayerModel obj){
+    return
+      playerID == obj.playerID
+      && roomID == obj.roomID
+      && seat == obj.seat
+      && state == obj.state
+      && result == obj.state
+      && listEquals(cards, obj.cards)
+    ;
   }
 }

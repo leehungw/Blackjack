@@ -1,7 +1,9 @@
 import 'package:card/GameObject/game_factory.dart';
 import 'package:card/models/FirebaseRequest.dart';
 import 'package:card/models/PlayerModel.dart';
+import 'package:card/models/RequestModel.dart';
 import 'package:card/models/RoomModel.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/database.dart';
 import 'game_card.dart';
@@ -21,6 +23,8 @@ final class GameOnlineManager{
   static GameOnlineManager get instance => _instance;
 
   RoomModel? model;
+  List<RequestModel> requestList = [];
+
   int _thisUserID = -1;
 
   List<GamePlayerOnline> _players = [];
@@ -64,21 +68,26 @@ final class GameOnlineManager{
     _status = RoomStatus.end;
   }
 
-  Future<void> importData(bool overwriteUser) async {
-    model = await FirebaseRequest.refreshRoom(model!);
-    List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(model!.roomID!);
+  //================================================================
+  // DATABASE INTERACTION
 
-    _players.clear();
+  Future<void> importRoomData(RoomModel newModel) async {
 
-    if (!overwriteUser){
-      _players.add(_thisPlayer!);
+    if (thisUserIsHost()){
+      // This User is host. No need to update data from remote
+      return;
     }
 
-    for (PlayerModel playerModel in playersInRoom){
+    model = newModel;
 
-      if (!overwriteUser && playerModel.playerID == _thisUserID){
-        continue;
-      }
+    _players.clear();
+    _thisPlayer = null;
+
+    for (PlayerModel playerModel in model!.players){
+
+      // if (!overwriteUser && playerModel.playerID == _thisUserID){
+      //   continue;
+      // }
 
       GamePlayerOnline player = GameFactory.createPlayerOnline(playerModel, playerModel.playerID == _thisUserID);
       _players.add(player);
@@ -114,7 +123,11 @@ final class GameOnlineManager{
     }
   }
 
-  void uploadData(){
+  Future<void> uploadData() async {
+    if (thisUserIsHost() == false){
+      print("Not a host! Can't upload data.");
+    }
+
     switch (_status){
       case RoomStatus.start:
         model!.status = "start";
@@ -135,17 +148,39 @@ final class GameOnlineManager{
 
     model!.currentPlayer = _currentPlayer!.userId;
     model!.dealer = _dealer!.userId;
+    model!.players.clear();
 
     for (GamePlayerOnline player in _players){
-      FirebaseRequest.updatePlayer(player.toPlayerModel());
+      model!.players.add(player.toPlayerModel());
     }
 
-    FirebaseRequest.updateRoom(model!);
+    await Database.updateFirestoreFromLocal(model!);
   }
 
-  void uploadThisUser(){
-    FirebaseRequest.updatePlayer(_thisPlayer!.toPlayerModel());
+  void importRequests(List<RequestModel> requestList){
+    this.requestList = requestList;
+
+    if (thisUserIsHost() == false){
+      // This user isn't host. No need to handle requests.
+      return;
+    }
+
+    if (_validateRequest() == false){
+      Database.updateFirestoreFromLocal(model!);
+      return;
+    }
+
+    _requestHandler();
   }
+
+  //================================================================
+
+  // void uploadThisUser(){
+  //   FirebaseRequest.updatePlayer(_thisPlayer!.toPlayerModel());
+  // }
+
+  //================================================================
+  // INITIALIZE
 
   Future<bool> initialize(int thisUserID, int roomID) async {
     _clear();
@@ -158,7 +193,7 @@ final class GameOnlineManager{
     }
 
     if (success){
-      await importData(true);
+      await FirebaseRequest.setRoom(model!);
     }
 
     return success;
@@ -166,129 +201,149 @@ final class GameOnlineManager{
 
   Future<bool> initializeNewHostRoom() async {
     _status = RoomStatus.init;
-    RoomModel roomModel = RoomModel(
-        roomID: await Database.getAvailableRoomID(),
-        players: [_thisUserID],
-        dealer: _thisUserID,
-        deck: [],
-        status: "ready",
-        currentPlayer: -1
-    );
+    int roomID = await Database.getAvailableRoomID();
+    if (roomID == -1){
+      print("Create room failed");
+      return false;
+    }
 
     PlayerModel thisUserModel = PlayerModel(
         playerID: _thisUserID,
-        roomID: roomModel.roomID!,
+        roomID: roomID,
         seat: 1,
         state: "none",
         result: "dealer",
         cards: []
     );
 
-    FirebaseRequest.addRoom(roomModel);
-    FirebaseRequest.addPlayer(thisUserModel);
-    await Future.delayed(Duration(milliseconds: 50));
-    model = await Database.getRoomByID(roomModel.roomID!);
-    await Future.delayed(Duration(milliseconds: 50));
+    RoomModel roomModel = RoomModel(
+        roomID: roomID,
+        players: [thisUserModel],
+        dealer: _thisUserID,
+        deck: [],
+        status: "ready",
+        currentPlayer: -1
+    );
+
+    await FirebaseRequest.setRoom(roomModel);
+
     // Check if room is created or not
     int timeout = 300;
-    while (model == null || model?.status != "ready"){
-      model = await Database.getRoomByID(roomModel.roomID!);
-      await Future.delayed(Duration(milliseconds: 50));
+    while (await FirebaseRequest.checkIfRoomExists(roomID) == false){
       timeout--;
       if (timeout <= 0){
-        break;
+        print("Create room time out.");
+        return false;
       }
     }
 
-    return timeout > 0;
+    Database.initializeDatabase(roomID);
+
+    return true;
   }
 
   Future<bool> initializeClientRoom(int roomID) async {
-    RoomModel? room;
-    int timeout = 300;
-    while ((room = await Database.getRoomByID(roomID)) == null){
-      await Future.delayed(Duration(milliseconds: 50));
-      timeout--;
-      if (timeout <= 0){
-        break;
-      }
-    }
 
     // Not found
-    if (room == null){
+    if (await FirebaseRequest.checkIfRoomExists(roomID) == false){
       print("Room not found");
       return false;
     }
 
-    bool playerExist = false;
+    Database.initializeDatabase(roomID);
 
-    // Check if player already existed
-    for (int id in room.players){
-      if (id == _thisUserID){
-          playerExist = true;
-      }
-    }
+    int timeout = 300;
 
-    if (playerExist){
-      return true;
-
-    } else {
-
-      // Full
-      if (room.players.length == 6){
-        print("Room full");
+    // Check if Room data has been received.
+    while (model == null){
+      await Future.delayed(Duration(milliseconds: 50));
+      timeout --;
+      if (timeout <= 0){
+        Database.dispose();
+        print("Cannot get room data");
         return false;
       }
-
-      List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(room.roomID!);
-      playersInRoom.sort((a, b) => a.seat - b.seat);
-      // Get available seat
-      int avaiableSeat = -1;
-
-      int tmp = 0;
-      for (int i = 0; i < playersInRoom.length - 1; i++){
-        if (playersInRoom[i+1].seat - playersInRoom[i].seat > 1){
-          avaiableSeat = playersInRoom[i].seat + 1;
-          break;
-        }
-      }
-
-      if (avaiableSeat == -1){
-        avaiableSeat = playersInRoom.length + 1;
-      }
-
-      PlayerModel thisUserModel = PlayerModel(
-          playerID: _thisUserID,
-          roomID: room.roomID!,
-          seat: avaiableSeat,
-          state: "none",
-          result: "uncheck",
-          cards: []
-      );
-
-      room.players.add(_thisUserID);
-
-      FirebaseRequest.addPlayer(thisUserModel);
-      FirebaseRequest.updateRoom(room);
-
-      await Future.delayed(Duration(milliseconds: 50));
-      model = await Database.getRoomByID(room.roomID!);
-      await Future.delayed(Duration(milliseconds: 50));
-      // Check if player already joined room or not
-      timeout = 300;
-      while (model == null || model?.players.length != room.players.length){
-        model = await Database.getRoomByID(room.roomID!);
-        await Future.delayed(Duration(milliseconds: 50));
-        timeout--;
-        if (timeout <= 0){
-          break;
-        }
-      }
-
-      return timeout > 0;
     }
 
+    await reqJoinRoom();
+
+    // Check if player already joined
+    timeout = 300;
+    while (thisUserIsInRoom() == false){
+      await reqJoinRoom();
+      await Future.delayed(Duration(milliseconds: 50));
+      timeout --;
+      if (timeout <= 0){
+        Database.dispose();
+        print("Join room failed");
+        return false;
+      }
+    }
+
+    return true;
+
+    // if (playerExist){
+    //
+    //   model = room;
+    //   return true;
+    //
+    // } else {
+    //
+    //   // Full
+    //   if (room.players.length == 6){
+    //     print("Room full");
+    //     return false;
+    //   }
+    //
+    //   List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(room.roomID!);
+    //   playersInRoom.sort((a, b) => a.seat - b.seat);
+    //   // Get available seat
+    //   int avaiableSeat = -1;
+    //
+    //   for (int i = 0; i < playersInRoom.length - 1; i++){
+    //     if (playersInRoom[i+1].seat - playersInRoom[i].seat > 1){
+    //       avaiableSeat = playersInRoom[i].seat + 1;
+    //       break;
+    //     }
+    //   }
+    //
+    //   if (avaiableSeat == -1){
+    //     avaiableSeat = playersInRoom.length + 1;
+    //   }
+    //
+    //   PlayerModel thisUserModel = PlayerModel(
+    //       playerID: _thisUserID,
+    //       roomID: room.roomID!,
+    //       seat: avaiableSeat,
+    //       state: "none",
+    //       result: "uncheck",
+    //       cards: []
+    //   );
+    //
+    //   room.players.add(_thisUserID);
+    //
+    //   FirebaseRequest.addPlayer(thisUserModel);
+    //   FirebaseRequest.updateRoom(room);
+    //
+    //   await Future.delayed(Duration(milliseconds: 50));
+    //   model = await Database.getRoomByID(room.roomID!);
+    //   await Future.delayed(Duration(milliseconds: 50));
+    //   // Check if player already joined room or not
+    //   timeout = 300;
+    //   while (model == null || model?.players.length != room.players.length){
+    //     model = await Database.getRoomByID(room.roomID!);
+    //     await Future.delayed(Duration(milliseconds: 50));
+    //     timeout--;
+    //     if (timeout <= 0){
+    //       break;
+    //     }
+    //   }
+    //
+    //   return timeout > 0;
+    // }
   }
+
+  //================================================================
 
   bool canStartOnlineGame(){
     if (_players.length <= 1){
@@ -313,14 +368,14 @@ final class GameOnlineManager{
 
     // create deck
     _deck = GameFactory.createDeck();
-    uploadData();
+    await uploadData();
     await Future.delayed(Duration(milliseconds: 50));
     _status = RoomStatus.distributing;
     for (int i = 0; i < 2; i++){
       for (GamePlayerOnline player in _players){
         GameCard card = _deck.removeAt(0);
         player.getDistributedCard(card);
-        uploadData();
+        await uploadData();
         await Future.delayed(Duration(milliseconds: 100));
       }
     }
@@ -328,11 +383,9 @@ final class GameOnlineManager{
       player.waitForTurn();
     }
 
-    uploadData();
-    await Future.delayed(Duration(milliseconds: 50));
+    await uploadData();
 
     await checkBlackjack();
-    await Future.delayed(Duration(milliseconds: 50));
 
     if (_status == RoomStatus.start){
       _status = RoomStatus.start;
@@ -347,95 +400,221 @@ final class GameOnlineManager{
       }
       _currentPlayer?.startTurn();
 
-      uploadData();
-      await Future.delayed(Duration(milliseconds: 50));
+      await uploadData();
     }
   }
 
   Future<void> endOnlineGame() async {
     _status = RoomStatus.end;
-    uploadData();
-    await Future.delayed(Duration(milliseconds: 50));
+    await uploadData();
   }
 
   // UPDATE METHODS
 
-  Future<void> onlineGameUpdate() async {
-    if (_status == RoomStatus.init){
-      return;
-    }
-    if (model == null){
-      return;
-    } else if (_thisPlayer == null || _thisPlayer?.key == ""){
-      importData(true);
-      return;
-    }
-    _updatePhaseWaitToStart();
-    _updatePhaseDistributing();
-    _updatePhaseWaitToTurn();
-    _updatePhaseOnTurn();
-    _updatePhaseStand();
-    _updatePhaseEndGame();
-  }
+  // Future<void> onlineGameUpdate() async {
+  //   if (_status == RoomStatus.init){
+  //     return;
+  //   }
+  //   if (model == null){
+  //     return;
+  //   } else if (_thisPlayer == null || _thisPlayer?.key == ""){
+  //     importData(true);
+  //     return;
+  //   }
+  //   _updatePhaseWaitToStart();
+  //   _updatePhaseDistributing();
+  //   _updatePhaseWaitToTurn();
+  //   _updatePhaseOnTurn();
+  //   _updatePhaseStand();
+  //   _updatePhaseEndGame();
+  // }
 
-  Future<void> _updatePhaseWaitToStart() async{
-    if (_status == RoomStatus.ready){
-      await FirebaseRequest.refreshRoom(model!);
-      importData(false);
-      uploadThisUser();
-      await Future.delayed(Duration(milliseconds: 50));
-    }
-  }
+  // Future<void> _updatePhaseWaitToStart() async{
+  //   if (_status == RoomStatus.ready){
+  //     await FirebaseRequest.refreshRoom(model!);
+  //     importData(false);
+  //     uploadThisUser();
+  //     await Future.delayed(Duration(milliseconds: 50));
+  //   }
+  // }
+  //
+  // Future<void> _updatePhaseDistributing() async{
+  //   if (_status == RoomStatus.distributing){
+  //     if (_thisPlayer!.isDealer()){
+  //       // This case being handled by startOnlineGame()
+  //     } else {
+  //       await FirebaseRequest.refreshRoom(model!);
+  //       importData(true);
+  //       await Future.delayed(Duration(milliseconds: 50));
+  //     }
+  //   }
+  // }
+  //
+  // Future<void> _updatePhaseWaitToTurn() async{
+  //   if (_status == RoomStatus.start){
+  //     await FirebaseRequest.refreshRoom(model!);
+  //     importData(true);
+  //     await Future.delayed(Duration(milliseconds: 50));
+  //   }
+  // }
+  //
+  // Future<void> _updatePhaseOnTurn() async{
+  //   if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.onTurn){
+  //     await FirebaseRequest.refreshRoom(model!);
+  //     uploadData();
+  //     await Future.delayed(Duration(milliseconds: 50));
+  //   }
+  // }
+  //
+  // Future<void> _updatePhaseStand() async{
+  //   if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.stand){
+  //     await FirebaseRequest.refreshRoom(model!);
+  //     importData(true);
+  //     await Future.delayed(Duration(milliseconds: 50));
+  //   }
+  // }
+  //
+  // Future<void> _updatePhaseEndGame() async{
+  //   if (_status == RoomStatus.end){
+  //     await FirebaseRequest.refreshRoom(model!);
+  //     if (_thisPlayer!.isDealer()){
+  //       uploadData();
+  //     } else {
+  //       importData(true);
+  //     }
+  //     await Future.delayed(Duration(milliseconds: 50));
+  //   }
+  // }
 
-  Future<void> _updatePhaseDistributing() async{
-    if (_status == RoomStatus.distributing){
-      if (_thisPlayer!.isDealer()){
-        // This case being handled by startOnlineGame()
-      } else {
-        await FirebaseRequest.refreshRoom(model!);
-        importData(true);
-        await Future.delayed(Duration(milliseconds: 50));
+  //================================================================
+  // REQUEST HANDLER
+
+  List<RequestModel> _requestCache = [];
+
+  bool _validateRequest(){
+    if (requestList.isEmpty){
+      _requestCache.clear();
+      return true;
+    }
+
+    List<RequestModel> duplicatedReqList = [];
+
+    for (RequestModel model in _requestCache){
+      for (RequestModel element in requestList){
+        if (element.isEqual(model)){
+          duplicatedReqList.add(model);
+          FirebaseRequest.deleteRequest(model, this.model!.roomID!);
+          break;
+        }
       }
     }
+
+    _requestCache.clear();
+    _requestCache = duplicatedReqList;
+
+    return duplicatedReqList.isEmpty;
   }
 
-  Future<void> _updatePhaseWaitToTurn() async{
-    if (_status == RoomStatus.start){
-      await FirebaseRequest.refreshRoom(model!);
-      importData(true);
-      await Future.delayed(Duration(milliseconds: 50));
+  Future<void> _requestHandler() async {
+    // Handle one request per times.
+
+    RequestModel req = requestList.first;
+    _requestCache.add(req);
+
+    switch(req.command){
+      // ----------------------------------------------------------
+      case RequestModel.reqJoinRoom:
+        {
+          int availableSeat = getAvailableSeat();
+          if (_status == RoomStatus.ready && availableSeat != -1) {
+            PlayerModel newPlayerModel = PlayerModel(
+                playerID: req.playerID!,
+                roomID: model!.roomID!,
+                seat: availableSeat,
+                state: "none",
+                result: "uncheck",
+                cards: []
+            );
+            GameFactory.createPlayerOnline(newPlayerModel, false);
+            await uploadData();
+          } else {
+            print("Reject join room request");
+          }
+          break;
+        }
+
+      // ----------------------------------------------------------
+      case RequestModel.reqReady:
+        {
+          if (_status != RoomStatus.ready){
+            print("Ready request invalid. This room is not in \"Ready\" state.");
+            break;
+          }
+          for (GamePlayerOnline player in _players){
+            if (player.userId == req.playerID && player.state == PlayerState.none){
+              player.state == PlayerState.ready;
+              break;
+            }
+          }
+          break;
+        }
+
+    // ----------------------------------------------------------
+      case RequestModel.reqCancelReady:
+        {
+          if (_status != RoomStatus.ready){
+            print("Ready request invalid. This room is not in \"Ready\" state.");
+            break;
+          }
+          for (GamePlayerOnline player in _players){
+            if (player.userId == req.playerID && player.state == PlayerState.ready){
+              player.state == PlayerState.none;
+              break;
+            }
+          }
+          break;
+        }
+
+      // ----------------------------------------------------------
+      case RequestModel.reqDrawCard:
+        {
+          if (_status != RoomStatus.start){
+            print("Draw request invalid. This room hasn't started yet.");
+            break;
+          }
+          if (_currentPlayer!.userId == req.playerID){
+            await playerDrawCard();
+          } else {
+            print('This is not player#${req.playerID}\'s turn.');
+          }
+          break;
+        }
+
+
+      // ----------------------------------------------------------
+      case RequestModel.reqStand:
+        {
+          if (_status != RoomStatus.start){
+            print("Draw request invalid. This room hasn't started yet.");
+            break;
+          }
+          if (_currentPlayer!.userId == req.playerID){
+            await playerEndTurn();
+          } else {
+            print('This is not player#${req.playerID}\'s turn.');
+          }
+          break;
+        }
     }
+
+    await FirebaseRequest.deleteRequest(req, model!.roomID!);
   }
 
-  Future<void> _updatePhaseOnTurn() async{
-    if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.onTurn){
-      await FirebaseRequest.refreshRoom(model!);
-      uploadData();
-      await Future.delayed(Duration(milliseconds: 50));
-    }
-  }
+  //================================================================
 
-  Future<void> _updatePhaseStand() async{
-    if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.stand){
-      await FirebaseRequest.refreshRoom(model!);
-      importData(true);
-      await Future.delayed(Duration(milliseconds: 50));
-    }
-  }
-
-  Future<void> _updatePhaseEndGame() async{
-    if (_status == RoomStatus.end){
-      await FirebaseRequest.refreshRoom(model!);
-      if (_thisPlayer!.isDealer()){
-        uploadData();
-      } else {
-        importData(true);
-      }
-      await Future.delayed(Duration(milliseconds: 50));
-    }
-  }
 
   // ================================================
+  // EXECUTE FUNCTIONS
 
   Future<bool> tryEndOnlineGame() async {
     if (_revealedCount == _players.length){
@@ -536,28 +715,31 @@ final class GameOnlineManager{
     return null;
   }
 
+  // ===========================================================
+  // GET
 
-  // PLAYER BEHAVIOR
-  void playerDrawCard(){
-    if (_thisPlayer != _currentPlayer){
-      return;
+  int getAvailableSeat(){
+    List<PlayerModel> playersInRoom = model!.players;
+
+    if (playersInRoom.length >= 6){
+      return -1;
     }
-    GameCard card = _deck.removeAt(0);
-    _thisPlayer?.hit(card);
-    if (_thisPlayer == _dealer){
-      if (_thisPlayer!.isBurn() || _thisPlayer!.isDragon()){
-        dealerExecuteAll();
+
+    // Get available seat
+    int availableSeat = 0;
+
+    for (int i = 0; i < playersInRoom.length - 1; i++){
+      if (playersInRoom[i+1].seat - playersInRoom[i].seat > 1){
+        availableSeat = playersInRoom[i].seat + 1;
+        break;
       }
-      tryEndOnlineGame();
     }
-  }
 
-  void playerEndTurn(){
-    if (currentPlayer?.isDealer() == false){
-      _currentPlayer?.stand();
-      _currentPlayer = _getNextPlayer(_currentPlayer!);
-      _currentPlayer?.startTurn();
+    if (availableSeat == 0){
+      availableSeat = playersInRoom.length + 1;
     }
+
+    return availableSeat;
   }
 
   GamePlayerOnline _getNextPlayer(GamePlayerOnline player){
@@ -574,14 +756,25 @@ final class GameOnlineManager{
     return result;
   }
 
+  // ===========================================================
+  // BOOLEAN
+
+  bool thisUserIsHost(){
+    return _thisPlayer == _dealer;
+  }
+
+  bool thisUserIsInRoom(){
+    return _thisPlayer != null;
+  }
+
   bool playerCanEndTurn(){
     if (_status != RoomStatus.start || _currentPlayer == _dealer){
       return false;
     }
     return
       _thisPlayer != null
-      && _thisPlayer == _currentPlayer
-      && _thisPlayer!.getTotalValues() > 15;
+          && _thisPlayer == _currentPlayer
+          && _thisPlayer!.getTotalValues() > 15;
   }
 
   bool playerCanDraw(){
@@ -590,27 +783,9 @@ final class GameOnlineManager{
     }
     return
       _thisPlayer != null
-      && _thisPlayer! == _currentPlayer
-      && _thisPlayer!.isBurn() == false
-      && _thisPlayer!.getTotalValues() != 21;
-  }
-
-  void dealerExecutePlayer(int seatNumber){
-    if (_thisPlayer != _dealer || _thisPlayer != _currentPlayer){
-      return;
-    }
-    _players[seatNumber].reveal(_dealer!);
-    _revealedCount ++;
-    tryEndOnlineGame();
-  }
-
-  void dealerExecuteAll(){
-    for (GamePlayerOnline player in _players){
-      if (player.state == PlayerState.revealed || player.isDealer()){
-        continue;
-      }
-      player.reveal(_dealer!);
-    }
+          && _thisPlayer! == _currentPlayer
+          && _thisPlayer!.isBurn() == false
+          && _thisPlayer!.getTotalValues() != 21;
   }
 
   bool dealerCanExecutePlayer(){
@@ -619,12 +794,10 @@ final class GameOnlineManager{
     }
     return
       _thisPlayer != null
-      && _thisPlayer == _dealer
-      && _thisPlayer?.state == PlayerState.onTurn
-      && _thisPlayer!.getTotalValues() > 16;
+          && _thisPlayer == _dealer
+          && _thisPlayer?.state == PlayerState.onTurn
+          && _thisPlayer!.getTotalValues() > 16;
   }
-
-  // ROOM CONTROL
 
   bool canStartGame(){
     return _thisPlayer != null && _thisPlayer! == _dealer && canStartOnlineGame();
@@ -634,58 +807,136 @@ final class GameOnlineManager{
     return _status == RoomStatus.end;
   }
 
-  Future<void> cleanTable() async{
-    for (GamePlayerOnline player in _players){
-      player.cards.clear();
-      player.state = PlayerState.none;
-    }
-    _deck.clear();
-    _status = RoomStatus.ready;
-
-    uploadData();
-    await Future.delayed(Duration(milliseconds: 50));
-  }
-
   bool playerCanReady() {
     return
       _status == RoomStatus.ready
-      && _thisPlayer != null
-      && _thisPlayer != _dealer
-      && _thisPlayer!.state == PlayerState.none;
+          && _thisPlayer != null
+          && _thisPlayer != _dealer
+          && _thisPlayer!.state == PlayerState.none;
   }
 
   bool playerCanCancelReady() {
     return
       _status == RoomStatus.ready
-      && _thisPlayer != null
-      && _thisPlayer != _dealer
-      && _thisPlayer!.state == PlayerState.ready;
+          && _thisPlayer != null
+          && _thisPlayer != _dealer
+          && _thisPlayer!.state == PlayerState.ready;
   }
 
-  Future<void> playerReady() async {
-    importData(true);
-    await Future.delayed(Duration(milliseconds: 50));
-    if (_thisPlayer == null){
-      return;
-    }
-    if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
-      if (_thisPlayer!.state == PlayerState.none){
-        _thisPlayer!.state == PlayerState.ready;
+
+  // ===========================================================
+  // PLAYER BEHAVIOR
+
+  Future<void> playerDrawCard() async {
+    // if (_thisPlayer != _currentPlayer){
+    //   return;
+    // }
+    GameCard card = _deck.removeAt(0);
+    _currentPlayer?.hit(card);
+    if (_currentPlayer == _dealer){
+      if (_currentPlayer!.isBurn() || _currentPlayer!.isDragon()){
+        dealerExecuteAll();
       }
+      tryEndOnlineGame();
     }
+    await uploadData();
   }
 
-  Future<void> playerCancelReady() async {
-    importData(true);
-    await Future.delayed(Duration(milliseconds: 50));
-    if (_thisPlayer == null){
+  Future<void> playerEndTurn() async {
+    if (currentPlayer?.isDealer() == false){
+      _currentPlayer?.stand();
+      _currentPlayer = _getNextPlayer(_currentPlayer!);
+      _currentPlayer?.startTurn();
+    }
+
+    await uploadData();
+  }
+
+  Future<void> dealerExecutePlayer(int seatNumber) async {
+    if (_thisPlayer != _dealer || _thisPlayer != _currentPlayer){
       return;
     }
-    if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
-      if (_thisPlayer!.state == PlayerState.ready) {
-        _thisPlayer!.state == PlayerState.none;
+    _players[seatNumber].reveal(_dealer!);
+    _revealedCount ++;
+    tryEndOnlineGame();
+
+    await uploadData();
+  }
+
+  Future<void> dealerExecuteAll() async {
+    for (GamePlayerOnline player in _players){
+      if (player.state == PlayerState.revealed || player.isDealer()){
+        continue;
       }
+      player.reveal(_dealer!);
     }
+
+    await uploadData();
+  }
+
+  //================================================================
+  // ROOM CONTROL
+
+  Future<void> cleanTable() async{
+    for (GamePlayerOnline player in _players){
+      player.cards.clear();
+      player.state = PlayerState.none;
+    }
+
+    _deck.clear();
+    _status = RoomStatus.ready;
+
+    await uploadData();
+  }
+
+  // ===================================================================
+  // SEND REQUEST
+
+  Future<void> reqDrawCard() async {
+    RequestModel req = GameFactory.createRequestDrawCard(_thisUserID);
+    await FirebaseRequest.sendRequest(req, model!.roomID!);
+  }
+
+  Future<void> reqStand() async {
+    RequestModel req = GameFactory.createRequestStand(_thisUserID);
+    await FirebaseRequest.sendRequest(req, model!.roomID!);
+  }
+
+  Future<void> reqJoinRoom() async {
+    RequestModel req = GameFactory.createRequestJoinRoom(_thisUserID);
+    await FirebaseRequest.sendRequest(req, model!.roomID!);
+  }
+
+  Future<void> reqReady() async {
+    RequestModel req = GameFactory.createRequestReady(_thisUserID);
+    await FirebaseRequest.sendRequest(req, model!.roomID!);
+
+    // importData(true);
+    // await Future.delayed(Duration(milliseconds: 50));
+    // if (_thisPlayer == null){
+    //   return;
+    // }
+    // if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
+    //   if (_thisPlayer!.state == PlayerState.none){
+    //     _thisPlayer!.state = PlayerState.ready;
+    //   }
+    // }
+  }
+
+  Future<void> reqCancelReady() async {
+    RequestModel req = GameFactory.createRequestCancelReady(_thisUserID);
+    await FirebaseRequest.sendRequest(req, model!.roomID!);
+
+    // importData(true);
+    // await Future.delayed(Duration(milliseconds: 50));
+    // if (_thisPlayer == null){
+    //   return;
+    // }
+    // if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
+    //   if (_thisPlayer!.state == PlayerState.ready) {
+    //     _thisPlayer!.state = PlayerState.none;
+    //   }
+    // }
   }
 }
 

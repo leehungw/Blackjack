@@ -19,8 +19,8 @@ class DemoScreenOnline extends StatefulWidget {
 class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
   // ====================================
-  int roomID = -1;
-  int userID = 1;
+  int roomID = 10;
+  int userID = 21521336;
   // ====================================
   
   GameOnlineManager gameManager = GameOnlineManager.instance;
@@ -33,10 +33,10 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
     setState(() {});
   }
 
-  Future<void> _update() async {
-    await gameManager.onlineGameUpdate();
-    setState(() {});
-  }
+  // Future<void> _update() async {
+  //   await gameManager.onlineGameUpdate();
+  //   setState(() {});
+  // }
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
     Future.delayed(Duration(milliseconds: 100), () {
       _startGame();
-      timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => _update());
+      // timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) => _update());
     });
   }
 
@@ -108,9 +108,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                               fontFamily: "Montserrat"),
                         ),
                       )),
-                  onTap: () {
+                  onTap: () async {
                     if (gameManager.dealerCanExecutePlayer()){
-                      gameManager.dealerExecutePlayer(i);
+                      await gameManager.dealerExecutePlayer(i);
                       setState(() {});
                     }
                   }),
@@ -201,9 +201,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                         fontFamily: "Montserrat"),
                                   ),
                                 )),
-                            onTap: () {
+                            onTap: () async {
                               if (gameManager.canStartGame()){
-                                gameManager.startOnlineGame();
+                                await gameManager.startOnlineGame();
                                 setState(() {});
                               }
                             }),
@@ -236,12 +236,12 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                         fontFamily: "Montserrat"),
                                   ),
                                 )),
-                            onTap: () {
+                            onTap: () async {
                               if (gameManager.playerCanReady()){
-                                gameManager.playerReady();
+                                await gameManager.reqReady();
                                 setState(() {});
                               } else if (gameManager.playerCanCancelReady()){
-                                gameManager.playerCancelReady();
+                                await gameManager.reqCancelReady();
                                 setState(() {});
                               }
                             }),
@@ -272,9 +272,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                         fontFamily: "Montserrat"),
                                   ),
                                 )),
-                            onTap: () {
+                            onTap: () async {
                               if (gameManager.canCleanTable()){
-                                gameManager.cleanTable();
+                                await gameManager.cleanTable();
                                 setState(() {});
                               }
                             }),
@@ -312,10 +312,10 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                         fontFamily: "Montserrat"),
                                   ),
                                 )),
-                            onTap: () {
+                            onTap: () async {
                               bool test = gameManager.playerCanDraw();
                               if (gameManager.playerCanDraw()){
-                                gameManager.playerDrawCard();
+                                await gameManager.reqDrawCard();
                                 setState(() {});
                               }
                             }),
@@ -347,9 +347,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                         fontFamily: "Montserrat"),
                                   ),
                                 )),
-                            onTap: () {
+                            onTap: () async {
                               if (gameManager.playerCanEndTurn()){
-                                gameManager.playerEndTurn();
+                                await gameManager.reqStand();
                                 setState(() {});
                               }
                             }),

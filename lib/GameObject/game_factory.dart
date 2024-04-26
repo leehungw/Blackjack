@@ -1,5 +1,6 @@
 import 'package:card/GameObject/game_player_online.dart';
 import 'package:card/models/PlayerModel.dart';
+import 'package:card/models/RequestModel.dart';
 
 import 'game_card.dart';
 
@@ -32,8 +33,57 @@ abstract final class GameFactory {
   // Create Online Objects
 
   static GamePlayerOnline createPlayerOnline(PlayerModel model, bool isUser){
-    GamePlayerOnline p = GamePlayerOnline("", 0, 0, 0);
+    GamePlayerOnline p = GamePlayerOnline(0, 0, 0);
     p.parseData(model, isUser);
     return p;
   }
+
+  // Create Request
+
+  /// Create a request for asking the host to add this player to room
+  static RequestModel createRequestJoinRoom(int thisPlayerID){
+    return RequestModel(
+        key: RequestModel.formatRequestsKey(thisPlayerID),
+        playerID: thisPlayerID,
+        command: RequestModel.reqJoinRoom,
+        params: []
+    );
+  }
+
+  static RequestModel createRequestReady(int thisPlayerID){
+    return RequestModel(
+        key: RequestModel.formatRequestsKey(thisPlayerID),
+        playerID: thisPlayerID,
+        command: RequestModel.reqReady,
+        params: []
+    );
+  }
+
+  static RequestModel createRequestCancelReady(int thisPlayerID){
+    return RequestModel(
+        key: RequestModel.formatRequestsKey(thisPlayerID),
+        playerID: thisPlayerID,
+        command: RequestModel.reqCancelReady,
+        params: []
+    );
+  }
+
+  static RequestModel createRequestDrawCard(int thisPlayerID){
+    return RequestModel(
+        key: RequestModel.formatRequestsKey(thisPlayerID),
+        playerID: thisPlayerID,
+        command: RequestModel.reqDrawCard,
+        params: []
+    );
+  }
+
+  static RequestModel createRequestStand(int thisPlayerID){
+    return RequestModel(
+        key: RequestModel.formatRequestsKey(thisPlayerID),
+        playerID: thisPlayerID,
+        command: RequestModel.reqStand,
+        params: []
+    );
+  }
+
 }
