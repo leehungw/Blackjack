@@ -19,7 +19,7 @@ class DemoScreenOnline extends StatefulWidget {
 class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
   // ====================================
-  int roomID = 10;
+  int roomID = -1;
   int userID = 21521336;
   // ====================================
   
