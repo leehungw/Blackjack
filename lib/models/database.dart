@@ -244,7 +244,7 @@ class Database {
 
     if (manager.model == null) {
       _log.fine('Updating local data with Firestore data ($roomModel)');
-      manager.importRoomData(roomModel!, false);
+      manager.importRoomData(roomModel!, true);
     }
     else if (roomModel!.isEqual(manager.model!)) {
       _log.fine('No change');
