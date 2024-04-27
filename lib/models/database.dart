@@ -121,37 +121,37 @@ class Database {
     return room.toJson();
   }
 
-  /// Takes the raw JSON snapshot coming from Firestore and attempts to
-  /// convert it into a list of [PlayingCard]s.
-  static List<RequestModel> _requestsFromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> snapshot,
-      SnapshotOptions? options,
-      ) {
-    final data = snapshot.data()?['cards'] as List?;
-
-    if (data == null) {
-      _log.info('No data found on Firestore, returning empty list');
-      return [];
-    }
-
-    final list = List.castFrom<Object?, Map<String, Object?>>(data);
-
-    try {
-      return list.map((raw) => RequestModel.fromJson(raw)).toList();
-    } catch (e) {
-      throw FirebaseControllerException(
-          'Failed to parse data from Firestore: $e');
-    }
-  }
-
-  /// Takes a list of [RequestModel]s and converts it into a JSON object
-  /// that can be saved into Firestore.
-  static Map<String, Object?> _requestsToFirestore(
-      List<RequestModel> requests,
-      SetOptions? options,
-      ) {
-    return {'Requests': requests.map((c) => c.toJson()).toList()};
-  }
+  // /// Takes the raw JSON snapshot coming from Firestore and attempts to
+  // /// convert it into a list of [PlayingCard]s.
+  // static List<RequestModel> _requestsFromFirestore(
+  //     DocumentSnapshot<Map<String, dynamic>> snapshot,
+  //     SnapshotOptions? options,
+  //     ) {
+  //   final data = snapshot.data()?['cards'] as List?;
+  //
+  //   if (data == null) {
+  //     _log.info('No data found on Firestore, returning empty list');
+  //     return [];
+  //   }
+  //
+  //   final list = List.castFrom<Object?, Map<String, Object?>>(data);
+  //
+  //   try {
+  //     return list.map((raw) => RequestModel.fromJson(raw)).toList();
+  //   } catch (e) {
+  //     throw FirebaseControllerException(
+  //         'Failed to parse data from Firestore: $e');
+  //   }
+  // }
+  //
+  // /// Takes a list of [RequestModel]s and converts it into a JSON object
+  // /// that can be saved into Firestore.
+  // static Map<String, Object?> _requestsToFirestore(
+  //     List<RequestModel> requests,
+  //     SetOptions? options,
+  //     ) {
+  //   return {'Requests': requests.map((c) => c.toJson()).toList()};
+  // }
 
   /// Updates the local state of [Room] with the data from Firestore.
   static void _updateLocalRoomFromFirestore(
@@ -177,7 +177,7 @@ class Database {
       GameOnlineManager manager, QuerySnapshot<Map<String, dynamic>> snapshot) {
     _log.fine('Received new data from Firestore (${snapshot.docs})');
 
-    final requestList = snapshot.docs.map((doc) => RequestModel.fromJson(doc.data())).toList();
+    final requestList = snapshot.docs.map((doc) => RequestModel.fromJson(doc.id, doc.data())).toList();
 
     if (Validator.validateRequestList(requestList, manager.requestList)) {
       _log.fine('No change');

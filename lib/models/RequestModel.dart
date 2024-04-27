@@ -22,12 +22,12 @@ class RequestModel{
     'params': params,
   };
 
-  static RequestModel fromJson(Map<String, Object?> json) {
+  static RequestModel fromJson(String key, Map<String, Object?> json) {
     final dataParams = json['params'] as List?;
     // final listParams = List.castFrom<Object?, <String, Object?>>(dataParams!);
 
     return RequestModel(
-        key: json['key'] as String,
+        key: key,
         playerID: json['playerID'] as int,
         command:  json['command'] as String,
         params: List.castFrom(dataParams!)
