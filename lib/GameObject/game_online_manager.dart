@@ -247,6 +247,7 @@ final class GameOnlineManager{
     );
 
     RoomModel roomModel = RoomModel(
+        key: RoomModel.formatRoomKey(roomID),
         roomID: roomID,
         players: [thisUserModel],
         dealer: _thisUserID,
