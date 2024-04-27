@@ -22,7 +22,7 @@ class Database {
 
   static StreamSubscription? _requestsFirestoreSubscription;
 
-  static late DocumentReference<List<RequestModel>> _requestsDoc;
+  static late CollectionReference<Map<String, dynamic>> _requestsDoc;
 
   static late DocumentReference<RoomModel> _roomDoc;
 
@@ -38,9 +38,8 @@ class Database {
     });
 
     _requestsDoc = instance.collection(RequestModel.collectionName)
-      .doc(RequestModel.formatRequestCollectionKey(roomID))
-      .withConverter<List<RequestModel>>(
-        fromFirestore: _requestsFromFirestore, toFirestore: _requestsToFirestore);
+      .doc("${RequestModel.formatRequestCollectionKey(roomID)}")
+      .collection("Requests");
 
     _requestsFirestoreSubscription = _requestsDoc.snapshots().listen((snapshot) {
       _updateLocalRequestsFromFirestore(GameOnlineManager.instance, snapshot);
@@ -58,59 +57,6 @@ class Database {
 
     _log.fine('Disposed');
   }
-
-  // static Future<void> refreshDB() async {
-  //   int timeout = 300;
-  //   bool readRoom = false;
-  //   bool readPlayer = false;
-  //
-  //   rooms.clear();
-  //   players.clear();
-  //
-  //   FirebaseRequest.readRooms().listen(
-  //       (event) {
-  //         rooms = event;
-  //         print("get Room success");
-  //         readRoom = true;
-  //       },
-  //       onError: (err) {
-  //         print(err);
-  //         return;
-  //       },
-  //       // onDone: () {
-  //       //   print("get Room success");
-  //       //
-  //       // }
-  //   );
-  //
-  //   FirebaseRequest.readPlayers().listen(
-  //       (event) {
-  //         players = event;
-  //         print("get Player success");
-  //         readPlayer = true;
-  //       },
-  //       onError: (err) {
-  //         print(err);
-  //         return;
-  //       },
-  //       // onDone: () {
-  //       //   print("get Room success");
-  //       //   readPlayer = true;
-  //       // }
-  //   );
-  //
-  //   while (timeout > 0 && (readRoom == false || readPlayer == false)){
-  //       timeout--;
-  //       await Future.delayed(Duration(milliseconds: 50));
-  //   }
-  //
-  //   if (timeout <= 0){
-  //     print("Get data false");
-  //     return;
-  //   }
-  //
-  //   rooms.sort((a, b) => a.roomID! - b.roomID!);
-  // }
 
   static Future<int> getAvailableRoomID() async {
 
@@ -152,34 +98,6 @@ class Database {
 
     return rooms.last.roomID! + 1;
   }
-
-  // static Future<RoomModel?> getRoomByID(int id) async {
-  //   await refreshDB();
-  //
-  //   try {
-  //     RoomModel room =
-  //         rooms.where((roomCheck) => roomCheck.roomID! == id)
-  //             .first;
-  //     return room;
-  //   } catch (e) {
-  //     return null;
-  //   }
-  // }
-  //
-  // static Future<List<PlayerModel>> getPlayersInRoom(int roomID) async {
-  //   await refreshDB();
-  //   try {
-  //     List<PlayerModel> result = [];
-  //     for (PlayerModel player in players){
-  //       if (player.roomID == roomID){
-  //         result.add(player);
-  //       }
-  //     }
-  //     return result;
-  //   } catch (e) {
-  //     return [];
-  //   }
-  // }
 
   // ===================================================================
 
@@ -256,10 +174,10 @@ class Database {
 
   /// Updates the local state of [Room] with the data from Firestore.
   static void _updateLocalRequestsFromFirestore(
-      GameOnlineManager manager, DocumentSnapshot<List<RequestModel>> snapshot) {
-    _log.fine('Received new data from Firestore (${snapshot.data()})');
+      GameOnlineManager manager, QuerySnapshot<Map<String, dynamic>> snapshot) {
+    _log.fine('Received new data from Firestore (${snapshot.docs})');
 
-    final requestList = snapshot.data() ?? [];
+    final requestList = snapshot.docs.map((doc) => RequestModel.fromJson(doc.data())).toList();
 
     if (Validator.validateRequestList(requestList, manager.requestList)) {
       _log.fine('No change');
