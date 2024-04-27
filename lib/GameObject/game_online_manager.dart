@@ -552,8 +552,10 @@ final class GameOnlineManager{
   }
 
   Future<void> _requestHandler() async {
-    // Handle one request per times.
-
+    if (requestList.isEmpty){
+      return;
+    }
+    // Handle one request per times
     RequestModel req = requestList.first;
     _requestCache.add(req);
 
@@ -578,7 +580,7 @@ final class GameOnlineManager{
                 result: "uncheck",
                 cards: []
             );
-            GameFactory.createPlayerOnline(newPlayerModel, false);
+            _players.add(GameFactory.createPlayerOnline(newPlayerModel, false));
             await uploadData();
           } else {
             print("Reject join room request");
@@ -803,7 +805,7 @@ final class GameOnlineManager{
   // BOOLEAN
 
   bool thisUserIsHost(){
-    return _thisPlayer == _dealer;
+    return _thisPlayer != null && _thisPlayer == _dealer;
   }
 
   bool thisUserIsInRoom(){
