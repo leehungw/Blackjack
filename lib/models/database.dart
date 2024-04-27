@@ -242,7 +242,11 @@ class Database {
 
     final roomModel = snapshot.data();
 
-    if (roomModel!.isEqual(manager.model!)) {
+    if (manager.model == null) {
+      _log.fine('Updating local data with Firestore data ($roomModel)');
+      manager.importRoomData(roomModel!, false);
+    }
+    else if (roomModel!.isEqual(manager.model!)) {
       _log.fine('No change');
     } else {
       _log.fine('Updating local data with Firestore data ($roomModel)');
