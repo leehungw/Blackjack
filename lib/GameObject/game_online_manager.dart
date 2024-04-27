@@ -174,7 +174,7 @@ final class GameOnlineManager{
         break;
     }
 
-    model!.currentPlayer = _currentPlayer!.userId;
+    model!.currentPlayer = _currentPlayer == null ? -1 : _currentPlayer!.userId;
     model!.dealer = _dealer!.userId;
     model!.players.clear();
 
@@ -187,6 +187,7 @@ final class GameOnlineManager{
   }
 
   void importRequests(List<RequestModel> requestList){
+
     this.requestList = requestList;
 
     if (thisUserIsHost() == false){
