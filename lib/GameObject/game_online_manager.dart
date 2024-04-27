@@ -267,7 +267,7 @@ final class GameOnlineManager{
         return false;
       }
     }
-
+    model = roomModel;
     Database.initializeDatabase(roomID);
 
     return true;
