@@ -43,10 +43,10 @@ abstract final class GameFactory {
   /// Create a request for asking the host to add this player to room
   static RequestModel createRequestJoinRoom(int thisPlayerID){
     return RequestModel(
-        key: RequestModel.formatRequestsKey(thisPlayerID),
-        playerID: thisPlayerID,
-        command: RequestModel.reqJoinRoom,
-        params: []
+      key: RequestModel.formatRequestsKey(thisPlayerID),
+      playerID: thisPlayerID,
+      command: RequestModel.reqJoinRoom,
+      params: []
     );
   }
 

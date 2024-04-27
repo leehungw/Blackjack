@@ -10,27 +10,27 @@ class RequestModel{
   List<String> params = [];
 
   RequestModel({
-    required key,
-    required playerID,
-    required command,
-    required params
+    required this.key,
+    required this.playerID,
+    required this.command,
+    required this.params
   });
 
   Map<String, dynamic> toJson() => {
     'playerID': playerID,
     'command': command,
-    'deck': params,
+    'params': params,
   };
 
   static RequestModel fromJson(Map<String, Object?> json) {
     final dataParams = json['params'] as List?;
-    final listParams = List.castFrom<Object?, Map<String, Object?>>(dataParams!);
+    // final listParams = List.castFrom<Object?, <String, Object?>>(dataParams!);
 
     return RequestModel(
         key: json['key'] as String,
         playerID: json['playerID'] as int,
         command:  json['command'] as String,
-        params: listParams
+        params: List.castFrom(dataParams!)
     );
   }
 
@@ -39,7 +39,7 @@ class RequestModel{
   }
 
   static String formatRequestsKey(int playerID){
-    return "request_${DateTime.now()}_p$playerID";
+    return ("request_${DateTime.now()}_p$playerID").replaceAll(" ", "");
   }
 
   bool isEqual(RequestModel obj){
