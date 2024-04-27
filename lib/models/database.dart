@@ -246,7 +246,7 @@ class Database {
       _log.fine('No change');
     } else {
       _log.fine('Updating local data with Firestore data ($roomModel)');
-      manager.importRoomData(roomModel);
+      manager.importRoomData(roomModel, false);
     }
   }
 

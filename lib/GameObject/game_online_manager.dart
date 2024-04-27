@@ -96,9 +96,9 @@ final class GameOnlineManager{
   //================================================================
   // DATABASE INTERACTION
 
-  Future<void> importRoomData(RoomModel newModel) async {
+  Future<void> importRoomData(RoomModel newModel, bool ignoreHost) async {
 
-    if (thisUserIsHost()){
+    if (thisUserIsHost() && !ignoreHost){
       _remoteChanges.add(null);
       // This User is host. No need to update data from remote
       return;
@@ -223,6 +223,7 @@ final class GameOnlineManager{
 
     if (success){
       await FirebaseRequest.setRoom(model!);
+      importRoomData(model!, true);
       _playerChanges.add(null);
     }
 
