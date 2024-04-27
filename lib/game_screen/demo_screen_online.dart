@@ -26,10 +26,13 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
   GameOnlineManager gameManager = GameOnlineManager.instance;
   List<Card> playerSeats = [];
 
-  Timer? timer;
+  StreamSubscription? _gameLocalSubscription;
 
   Future<void> _startGame() async {
     await gameManager.initialize(userID, roomID);
+    _gameLocalSubscription = gameManager.allChanges.listen((event) {
+      setState(() {});
+    });
     setState(() {});
   }
 
@@ -50,7 +53,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
   @override
   void dispose() {
-    timer?.cancel();
+    gameManager.dispose();
     super.dispose();
   }
 

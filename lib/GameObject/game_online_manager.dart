@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:async/async.dart';
 import 'package:card/GameObject/game_factory.dart';
 import 'package:card/models/FirebaseRequest.dart';
 import 'package:card/models/PlayerModel.dart';
@@ -21,6 +24,22 @@ enum RoomStatus {
 final class GameOnlineManager{
   static final GameOnlineManager _instance = GameOnlineManager();
   static GameOnlineManager get instance => _instance;
+
+  final StreamController<void> _playerChanges = StreamController<void>.broadcast();
+
+  final StreamController<void> _remoteChanges = StreamController<void>.broadcast();
+
+  /// A [Stream] that fires an event every time a change is made _locally_,
+  /// by the player.
+  Stream<void> get playerChanges => _playerChanges.stream;
+
+  /// A [Stream] that fires an event every time a change is made _remotely_,
+  /// by another player.
+  Stream<void> get remoteChanges => _remoteChanges.stream;
+
+  /// A [Stream] that fires an event every time any change to this area is made.
+  Stream<void> get allChanges =>
+      StreamGroup.mergeBroadcast([remoteChanges, playerChanges]);
 
   RoomModel? model;
   List<RequestModel> requestList = [];
@@ -66,6 +85,12 @@ final class GameOnlineManager{
     _dealer = null;
     _revealedCount = 0;
     _status = RoomStatus.end;
+  }
+
+  void dispose() {
+    _remoteChanges.close();
+    _playerChanges.close();
+    Database.dispose();
   }
 
   //================================================================
@@ -121,6 +146,8 @@ final class GameOnlineManager{
         _status = RoomStatus.ready;
         break;
     }
+
+    _remoteChanges.add(null);
   }
 
   Future<void> uploadData() async {
@@ -155,6 +182,7 @@ final class GameOnlineManager{
     }
 
     await Database.updateFirestoreFromLocal(model!);
+    _playerChanges.add(null);
   }
 
   void importRequests(List<RequestModel> requestList){
