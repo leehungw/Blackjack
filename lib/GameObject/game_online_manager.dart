@@ -286,6 +286,7 @@ final class GameOnlineManager{
 
     int timeout = 300;
 
+
     // Check if Room data has been received.
     while (model == null){
       await Future.delayed(Duration(milliseconds: 50));
@@ -300,11 +301,13 @@ final class GameOnlineManager{
     await reqJoinRoom();
 
     // Check if player already joined
-    timeout = 300;
+    timeout = 400;
     while (thisUserIsInRoom() == false){
-      await reqJoinRoom();
       await Future.delayed(Duration(milliseconds: 50));
       timeout --;
+      if (timeout % 100 == 0 && timeout > 0){
+        await reqJoinRoom();
+      }
       if (timeout <= 0){
         Database.dispose();
         print("Join room failed");
