@@ -216,11 +216,8 @@ class GamePlayer {
     return false;
   }
 
-  bool getDistributedCard(GameCard card){
-    if (state != PlayerState.ready){
-      return false;
-    }
-    if (cards.length < 2){
+  bool getDistributedCard(GameCard card) {
+    if (cards.length < 2) {
       cards.add(card);
       return true;
     }
