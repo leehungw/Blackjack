@@ -21,6 +21,9 @@ enum RoomStatus {
   ready,
 }
 
+// TODO: Duplicated user when join room
+// TODO: Can't update client side
+
 final class GameOnlineManager{
   static final GameOnlineManager _instance = GameOnlineManager();
   static GameOnlineManager get instance => _instance;
@@ -88,8 +91,8 @@ final class GameOnlineManager{
   }
 
   void dispose() {
-    _remoteChanges.close();
-    _playerChanges.close();
+    // _remoteChanges.close();
+    // _playerChanges.close();
     Database.dispose();
   }
 
@@ -147,6 +150,12 @@ final class GameOnlineManager{
         _status = RoomStatus.ready;
         break;
     }
+
+    // TODO: Temporary use, will be removed later
+    for (GameCard card in _thisPlayer!.cards){
+      card.flip();
+    }
+    //
 
     _remoteChanges.add(null);
   }
