@@ -598,6 +598,7 @@ final class GameOnlineManager{
           for (GamePlayerOnline player in _players){
             if (player.userId == req.playerID && player.state == PlayerState.none){
               player.state == PlayerState.ready;
+              await uploadData();
               break;
             }
           }
@@ -614,6 +615,7 @@ final class GameOnlineManager{
           for (GamePlayerOnline player in _players){
             if (player.userId == req.playerID && player.state == PlayerState.ready){
               player.state == PlayerState.none;
+              await uploadData();
               break;
             }
           }
