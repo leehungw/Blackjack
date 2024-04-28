@@ -110,13 +110,11 @@ class GamePlayer {
   }
 
   void startTurn(){
-    if (state == PlayerState.wait) {
-      state = PlayerState.onTurn;
-    }
+    state = PlayerState.onTurn;
   }
 
   void stand(){
-      state = PlayerState.stand;
+    state = PlayerState.stand;
   }
 
   void becomeDealer(){

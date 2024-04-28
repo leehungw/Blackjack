@@ -192,6 +192,7 @@ final class GameOnlineManager{
 
     if (thisUserIsHost() == false){
       // This user isn't host. No need to handle requests.
+      _remoteChanges.add(null);
       return;
     }
 
@@ -421,9 +422,7 @@ final class GameOnlineManager{
 
     await uploadData();
 
-    await checkBlackjack();
-
-    if (_status == RoomStatus.start){
+    if (await checkBlackjack() == false){
       _status = RoomStatus.start;
       for (int i = 0; i < _players.length; i++){
         if (_players[i].isDealer()){
@@ -435,7 +434,6 @@ final class GameOnlineManager{
         }
       }
       _currentPlayer?.startTurn();
-
       await uploadData();
     }
   }
