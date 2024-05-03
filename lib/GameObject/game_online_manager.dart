@@ -707,7 +707,12 @@ final class GameOnlineManager{
   }
 
   bool thisUserIsInRoom(){
-    return _thisPlayer != null;
+    for (GamePlayerOnline player in _players){
+      if (player.userId == _thisUserID){
+        return true;
+      }
+    }
+    return false;
   }
 
   bool playerCanEndTurn(){
