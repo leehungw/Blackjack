@@ -83,6 +83,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
   @override
   void dispose() {
+    _gameLocalSubscription?.cancel();
     gameManager.dispose();
     super.dispose();
   }
