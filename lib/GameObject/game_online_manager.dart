@@ -262,7 +262,7 @@ final class GameOnlineManager{
   Future<bool> initializeNewHostRoom() async {
     _status = RoomStatus.init;
     int roomID = await Database.getAvailableRoomID();
-    if (roomID == -1){
+    if (roomID != initializeRoomID){
       print("Create room failed");
       return false;
     }
