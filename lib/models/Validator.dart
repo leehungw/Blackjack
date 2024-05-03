@@ -11,7 +11,7 @@ class Validator{
           return false;
         }
       } catch (e){
-        print(e);
+        print("ValidateRoom(Validator):$e");
         return false;
       }
       return true;
@@ -21,7 +21,7 @@ class Validator{
       try {
 
       } catch (e){
-        print(e);
+        print("validate Player (validator): $e");
         return false;
       }
       return true;

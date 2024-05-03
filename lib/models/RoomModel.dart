@@ -62,8 +62,8 @@ class RoomModel {
     //   newPlayers.add(int.parse(element));
     // }
 
-    final dataDeck = json['deck'] as List?;
-    final deck = List.castFrom<Object?, Map<String, Object?>>(dataDeck!);
+    // final dataDeck = json['deck'] as List?;
+    // final deck = List.castFrom<Object?, Map<String, Object?>>(dataDeck!);
 
     return RoomModel(
         key: key,

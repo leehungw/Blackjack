@@ -70,7 +70,7 @@ class Database {
           readRoom = true;
         },
         onError: (err) {
-          print(err);
+          print("Database-getAvailableRoomID: $err");
           return;
         },
         // onDone: () {
