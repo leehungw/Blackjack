@@ -22,9 +22,13 @@ enum RoomStatus {
 }
 
 // TODO: Duplicated user when join room
-// TODO: Can't update client side
+// TODO: Can't update client side showed cards (Done)
+// TODO: Quắt rồi vẫn ko dọn đc bàn (?)
+// TODO: Không cập nhật lại Result của Player (Done)
 
 final class GameOnlineManager{
+  static const int initializeRoomID = 0;
+
   static final GameOnlineManager _instance = GameOnlineManager();
   static GameOnlineManager get instance => _instance;
 
@@ -151,11 +155,25 @@ final class GameOnlineManager{
         break;
     }
 
-    // TODO: Temporary use, will be removed later
-    for (GameCard card in _thisPlayer!.cards){
-      card.flip();
+
+    // Show player cards when they have already been executed.
+    int showedCount = 0;
+    for (GamePlayerOnline player in _players){
+      if (player == _dealer){
+        showedCount ++;
+        continue;
+      } else {
+        if (player.result != PlayerResult.uncheck){
+          showedCount++;
+          player.flipCards();
+        } else if (player == _thisPlayer){
+          player.flipCards();
+        }
+      }
     }
-    //
+    if (showedCount == _players.length){
+      _dealer!.flipCards();
+    }
 
     _remoteChanges.add(null);
   }
@@ -226,7 +244,7 @@ final class GameOnlineManager{
     _clear();
     _thisUserID = thisUserID;
     bool success;
-    if (roomID < 0){
+    if (roomID == initializeRoomID){
       success = await initializeNewHostRoom();
     } else {
       success = await initializeClientRoom(roomID);
@@ -263,7 +281,7 @@ final class GameOnlineManager{
         roomID: roomID,
         players: [thisUserModel],
         dealer: _thisUserID,
-        deck: [],
+        // deck: [],
         status: "ready",
         currentPlayer: -1
     );
@@ -309,6 +327,14 @@ final class GameOnlineManager{
       }
     }
 
+    // Player already joined this room before
+    if (thisUserIsInRoom()){
+
+      return true;
+    }
+
+    // Send join room request
+
     await reqJoinRoom();
 
     // Check if player already joined
@@ -327,66 +353,6 @@ final class GameOnlineManager{
     }
 
     return true;
-
-    // if (playerExist){
-    //
-    //   model = room;
-    //   return true;
-    //
-    // } else {
-    //
-    //   // Full
-    //   if (room.players.length == 6){
-    //     print("Room full");
-    //     return false;
-    //   }
-    //
-    //   List<PlayerModel> playersInRoom = await Database.getPlayersInRoom(room.roomID!);
-    //   playersInRoom.sort((a, b) => a.seat - b.seat);
-    //   // Get available seat
-    //   int avaiableSeat = -1;
-    //
-    //   for (int i = 0; i < playersInRoom.length - 1; i++){
-    //     if (playersInRoom[i+1].seat - playersInRoom[i].seat > 1){
-    //       avaiableSeat = playersInRoom[i].seat + 1;
-    //       break;
-    //     }
-    //   }
-    //
-    //   if (avaiableSeat == -1){
-    //     avaiableSeat = playersInRoom.length + 1;
-    //   }
-    //
-    //   PlayerModel thisUserModel = PlayerModel(
-    //       playerID: _thisUserID,
-    //       roomID: room.roomID!,
-    //       seat: avaiableSeat,
-    //       state: "none",
-    //       result: "uncheck",
-    //       cards: []
-    //   );
-    //
-    //   room.players.add(_thisUserID);
-    //
-    //   FirebaseRequest.addPlayer(thisUserModel);
-    //   FirebaseRequest.updateRoom(room);
-    //
-    //   await Future.delayed(Duration(milliseconds: 50));
-    //   model = await Database.getRoomByID(room.roomID!);
-    //   await Future.delayed(Duration(milliseconds: 50));
-    //   // Check if player already joined room or not
-    //   timeout = 300;
-    //   while (model == null || model?.players.length != room.players.length){
-    //     model = await Database.getRoomByID(room.roomID!);
-    //     await Future.delayed(Duration(milliseconds: 50));
-    //     timeout--;
-    //     if (timeout <= 0){
-    //       break;
-    //     }
-    //   }
-    //
-    //   return timeout > 0;
-    // }
   }
 
   //================================================================
@@ -451,83 +417,6 @@ final class GameOnlineManager{
     _status = RoomStatus.end;
     await uploadData();
   }
-
-  // UPDATE METHODS
-
-  // Future<void> onlineGameUpdate() async {
-  //   if (_status == RoomStatus.init){
-  //     return;
-  //   }
-  //   if (model == null){
-  //     return;
-  //   } else if (_thisPlayer == null || _thisPlayer?.key == ""){
-  //     importData(true);
-  //     return;
-  //   }
-  //   _updatePhaseWaitToStart();
-  //   _updatePhaseDistributing();
-  //   _updatePhaseWaitToTurn();
-  //   _updatePhaseOnTurn();
-  //   _updatePhaseStand();
-  //   _updatePhaseEndGame();
-  // }
-
-  // Future<void> _updatePhaseWaitToStart() async{
-  //   if (_status == RoomStatus.ready){
-  //     await FirebaseRequest.refreshRoom(model!);
-  //     importData(false);
-  //     uploadThisUser();
-  //     await Future.delayed(Duration(milliseconds: 50));
-  //   }
-  // }
-  //
-  // Future<void> _updatePhaseDistributing() async{
-  //   if (_status == RoomStatus.distributing){
-  //     if (_thisPlayer!.isDealer()){
-  //       // This case being handled by startOnlineGame()
-  //     } else {
-  //       await FirebaseRequest.refreshRoom(model!);
-  //       importData(true);
-  //       await Future.delayed(Duration(milliseconds: 50));
-  //     }
-  //   }
-  // }
-  //
-  // Future<void> _updatePhaseWaitToTurn() async{
-  //   if (_status == RoomStatus.start){
-  //     await FirebaseRequest.refreshRoom(model!);
-  //     importData(true);
-  //     await Future.delayed(Duration(milliseconds: 50));
-  //   }
-  // }
-  //
-  // Future<void> _updatePhaseOnTurn() async{
-  //   if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.onTurn){
-  //     await FirebaseRequest.refreshRoom(model!);
-  //     uploadData();
-  //     await Future.delayed(Duration(milliseconds: 50));
-  //   }
-  // }
-  //
-  // Future<void> _updatePhaseStand() async{
-  //   if (_status == RoomStatus.start && _thisPlayer!.state == PlayerState.stand){
-  //     await FirebaseRequest.refreshRoom(model!);
-  //     importData(true);
-  //     await Future.delayed(Duration(milliseconds: 50));
-  //   }
-  // }
-  //
-  // Future<void> _updatePhaseEndGame() async{
-  //   if (_status == RoomStatus.end){
-  //     await FirebaseRequest.refreshRoom(model!);
-  //     if (_thisPlayer!.isDealer()){
-  //       uploadData();
-  //     } else {
-  //       importData(true);
-  //     }
-  //     await Future.delayed(Duration(milliseconds: 50));
-  //   }
-  // }
 
   //================================================================
   // REQUEST HANDLER
@@ -935,6 +824,9 @@ final class GameOnlineManager{
     for (GamePlayerOnline player in _players){
       player.cards.clear();
       player.state = PlayerState.none;
+      if (player.isDealer() == false){
+        player.result = PlayerResult.uncheck;
+      }
     }
 
     _deck.clear();

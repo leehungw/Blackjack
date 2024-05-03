@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:card/GameObject/game_offline_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -19,8 +18,8 @@ class DemoScreenOnline extends StatefulWidget {
 class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
   // ====================================
-  int roomID = 32;
-  int userID = 21521336;
+  int roomID = 0;
+  int userID = 1;
   // ====================================
   
   GameOnlineManager gameManager = GameOnlineManager.instance;
@@ -29,6 +28,40 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
   StreamSubscription? _gameLocalSubscription;
 
   Future<void> _startGame() async {
+
+    // Join room dialog
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Join room"),
+          content: Column(
+            children: [
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(hintText: "User ID"),
+                onSubmitted: (string) => {
+                  userID = int.parse(string)
+                },
+              ),
+
+              TextField(
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(hintText: "Room ID"),
+                onSubmitted: (string) => {
+                  roomID = int.parse(string)
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("Find room")
+            )
+          ],
+        )
+    );
+
     await gameManager.initialize(userID, roomID);
     _gameLocalSubscription = gameManager.allChanges.listen((event) {
       setState(() {});
@@ -133,7 +166,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                 //     fit: BoxFit.fill),
               ),
               child: Text(
-                "Người chơi " + player.seat.toString(),
+                "Người chơi ${player.seat}",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
@@ -316,7 +349,6 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                   ),
                                 )),
                             onTap: () async {
-                              bool test = gameManager.playerCanDraw();
                               if (gameManager.playerCanDraw()){
                                 await gameManager.reqDrawCard();
                                 setState(() {});

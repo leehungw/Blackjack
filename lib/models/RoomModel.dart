@@ -10,7 +10,7 @@ class RoomModel {
   int? roomID;
   List<PlayerModel> players = [];
   int? dealer;
-  List<String> deck = [];
+  // List<String> deck = [];
   String? status;
   int? currentPlayer;
 
@@ -22,7 +22,7 @@ class RoomModel {
         required this.roomID,
         required this.players,
         required this.dealer,
-        required this.deck,
+        // required this.deck,
         required this.status,
         this.currentPlayer
       }
@@ -32,7 +32,7 @@ class RoomModel {
     'roomID': roomID,
     'players': players.map((player) => player.toJson()).toList(),
     'dealer': dealer,
-    'deck': deck,
+    // 'deck': deck,
     'status': status,
     'currentPlayer': currentPlayer
   };
@@ -43,7 +43,7 @@ class RoomModel {
         roomID: roomID,
         players: players,
         dealer: dealer,
-        deck: deck,
+        // deck: deck,
         status: status,
         currentPlayer: currentPlayer
     );
@@ -70,7 +70,7 @@ class RoomModel {
         roomID: json['roomID'] as int,
         players:  listPlayer.map((raw) => PlayerModel.fromJson(raw)).toList(),
         dealer: json['dealer'] as int,
-        deck: List.from(deck),
+        // deck: List.from(deck),
         status: json['status'] as String,
         currentPlayer: json['currentPlayer'] as int
     );
@@ -82,7 +82,7 @@ class RoomModel {
       && roomID == obj.roomID
       && Validator.validatePlayerList(players, obj.players)
       && dealer == obj.dealer
-      && listEquals(deck, obj.deck)
+      // && listEquals(deck, obj.deck)
       && status == obj.status
       && currentPlayer == obj.currentPlayer
     ;
