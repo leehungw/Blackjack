@@ -32,9 +32,9 @@ final class GameOnlineManager{
   static final GameOnlineManager _instance = GameOnlineManager();
   static GameOnlineManager get instance => _instance;
 
-  final StreamController<void> _playerChanges = StreamController<void>.broadcast();
+  late StreamController<void> _playerChanges = StreamController<void>.broadcast();
 
-  final StreamController<void> _remoteChanges = StreamController<void>.broadcast();
+  late StreamController<void> _remoteChanges = StreamController<void>.broadcast();
 
   /// A [Stream] that fires an event every time a change is made _locally_,
   /// by the player.
@@ -95,8 +95,8 @@ final class GameOnlineManager{
   }
 
   void dispose() {
-    // _remoteChanges.close();
-    // _playerChanges.close();
+    _remoteChanges.close();
+    _playerChanges.close();
     Database.dispose();
   }
 
@@ -242,6 +242,8 @@ final class GameOnlineManager{
 
   Future<bool> initialize(int thisUserID, int roomID) async {
     _clear();
+    _playerChanges = StreamController<void>.broadcast();
+    _remoteChanges = StreamController<void>.broadcast();
     _thisUserID = thisUserID;
     bool success;
     if (roomID == initializeRoomID){
