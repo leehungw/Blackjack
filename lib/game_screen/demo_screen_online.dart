@@ -16,51 +16,48 @@ class DemoScreenOnline extends StatefulWidget {
 }
 
 class _DemoScreenOnlineState extends State<DemoScreenOnline> {
-
   // ====================================
   int roomID = 0;
-  int userID = 1;
+  int userID = 21520889;
   // ====================================
-  
+
   GameOnlineManager gameManager = GameOnlineManager.instance;
   List<Card> playerSeats = [];
+  final _userIDController = TextEditingController();
+  final _roomIDController = TextEditingController();
 
   StreamSubscription? _gameLocalSubscription;
 
   Future<void> _startGame() async {
-
     // Join room dialog
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Join room"),
-          content: Column(
-            children: [
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "User ID"),
-                onSubmitted: (string) => {
-                  userID = int.parse(string)
-                },
+              title: const Text("Join room"),
+              content: Column(
+                children: [
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(hintText: "User ID"),
+                    controller: _userIDController,
+                  ),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(hintText: "Room ID"),
+                    controller: _roomIDController,
+                  ),
+                ],
               ),
-
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Room ID"),
-                onSubmitted: (string) => {
-                  roomID = int.parse(string)
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Find room")
-            )
-          ],
-        )
-    );
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      userID = int.parse(_userIDController.text);
+                      roomID = int.parse(_roomIDController.text);
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Find room"))
+              ],
+            ));
 
     await gameManager.initialize(userID, roomID);
     _gameLocalSubscription = gameManager.allChanges.listen((event) {
@@ -94,11 +91,11 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
   Widget build(BuildContext context) {
     playerSeats.clear();
 
-    for (int i = 0; i < gameManager.players.length; i++){
+    for (int i = 0; i < gameManager.players.length; i++) {
       GamePlayer player = gameManager.players[i];
       // Get player Cards
       List<Container> playerCards = [];
-      for (GameCard card in player.cards){
+      for (GameCard card in player.cards) {
         playerCards.add(Container(
           width: 40,
           height: 50,
@@ -108,14 +105,15 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
       // Create seat
       Card playerSeat = Card(
-        color: player.result == PlayerResult.dealer ? Colors.blueAccent :
-                (player.result == PlayerResult.win ? Colors.greenAccent :
-                  (player.result == PlayerResult.lose ? Colors.black26 :
-                    (player.result == PlayerResult.tie ? Colors.yellow :
-                      Colors.deepPurpleAccent.shade200
-                    )
-                  )
-                ),
+        color: player.result == PlayerResult.dealer
+            ? Colors.blueAccent
+            : (player.result == PlayerResult.win
+                ? Colors.greenAccent
+                : (player.result == PlayerResult.lose
+                    ? Colors.black26
+                    : (player.result == PlayerResult.tie
+                        ? Colors.yellow
+                        : Colors.deepPurpleAccent.shade200))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,7 +126,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(13),
-                        color: gameManager.dealerCanExecutePlayer() ? Colors.deepOrange : Colors.black45,
+                        color: gameManager.dealerCanExecutePlayer()
+                            ? Colors.deepOrange
+                            : Colors.black45,
                         // image: DecorationImage(
                         //     image: AssetImage(
                         //         "assets/images/button_background_inactive.png"),
@@ -145,7 +145,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                         ),
                       )),
                   onTap: () async {
-                    if (gameManager.dealerCanExecutePlayer()){
+                    if (gameManager.dealerCanExecutePlayer()) {
                       await gameManager.dealerExecutePlayer(i);
                       setState(() {});
                     }
@@ -157,23 +157,23 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
               height: 60,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(13),
-                color: gameManager.players[i].state == PlayerState.onTurn ? Colors.green :
-                        (gameManager.players[i].state == PlayerState.wait ? Colors.red : Colors.black)
-                      ,
+                color: gameManager.players[i].state == PlayerState.onTurn
+                    ? Colors.green
+                    : (gameManager.players[i].state == PlayerState.wait
+                        ? Colors.red
+                        : Colors.black),
                 // image: DecorationImage(
                 //     image: AssetImage(
                 //         "assets/images/button_background_inactive.png"),
                 //     fit: BoxFit.fill),
               ),
-              child: Text(
-                "Người chơi ${player.seat}",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontFamily: "Montserrat"),
-                textAlign: TextAlign.center
-              ),
+              child: Text("Người chơi ${player.seat}",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontFamily: "Montserrat"),
+                  textAlign: TextAlign.center),
             ),
             Gap(10),
             Row(
@@ -187,7 +187,6 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
 
       playerSeats.add(playerSeat);
     }
-
 
     return SafeArea(
       child: Builder(builder: (context) {
@@ -207,7 +206,6 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
               ),
               child: Center(
                 child: Column(children: [
-
                   // ROOM
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -221,7 +219,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                 height: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
-                                  color: gameManager.canStartGame() ? Colors.indigo : Colors.black45,
+                                  color: gameManager.canStartGame()
+                                      ? Colors.indigo
+                                      : Colors.black45,
                                   // image: DecorationImage(
                                   //     image: AssetImage(
                                   //         "assets/images/button_background_inactive.png"),
@@ -238,7 +238,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                   ),
                                 )),
                             onTap: () async {
-                              if (gameManager.canStartGame()){
+                              if (gameManager.canStartGame()) {
                                 await gameManager.startOnlineGame();
                                 setState(() {});
                               }
@@ -255,8 +255,11 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                 height: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
-                                  color: gameManager.playerCanReady() ? Colors.teal :
-                                  (gameManager.playerCanCancelReady() ? Colors.redAccent : Colors.black45),
+                                  color: gameManager.playerCanReady()
+                                      ? Colors.teal
+                                      : (gameManager.playerCanCancelReady()
+                                          ? Colors.redAccent
+                                          : Colors.black45),
                                   // image: DecorationImage(
                                   //     image: AssetImage(
                                   //         "assets/images/button_background_inactive.png"),
@@ -273,10 +276,10 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                   ),
                                 )),
                             onTap: () async {
-                              if (gameManager.playerCanReady()){
+                              if (gameManager.playerCanReady()) {
                                 await gameManager.reqReady();
                                 setState(() {});
-                              } else if (gameManager.playerCanCancelReady()){
+                              } else if (gameManager.playerCanCancelReady()) {
                                 await gameManager.reqCancelReady();
                                 setState(() {});
                               }
@@ -292,7 +295,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                 height: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
-                                  color: gameManager.canCleanTable() ? Colors.deepPurple : Colors.black45,
+                                  color: gameManager.canCleanTable()
+                                      ? Colors.deepPurple
+                                      : Colors.black45,
                                   // image: DecorationImage(
                                   //     image: AssetImage(
                                   //         "assets/images/button_background_inactive.png"),
@@ -309,7 +314,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                   ),
                                 )),
                             onTap: () async {
-                              if (gameManager.canCleanTable()){
+                              if (gameManager.canCleanTable()) {
                                 await gameManager.cleanTable();
                                 setState(() {});
                               }
@@ -332,7 +337,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                 height: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
-                                  color: gameManager.playerCanDraw() ? Colors.indigo : Colors.black45,
+                                  color: gameManager.playerCanDraw()
+                                      ? Colors.indigo
+                                      : Colors.black45,
                                   // image: DecorationImage(
                                   //     image: AssetImage(
                                   //         "assets/images/button_background_inactive.png"),
@@ -349,7 +356,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                   ),
                                 )),
                             onTap: () async {
-                              if (gameManager.playerCanDraw()){
+                              if (gameManager.playerCanDraw()) {
                                 await gameManager.reqDrawCard();
                                 setState(() {});
                               }
@@ -366,7 +373,9 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                 height: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
-                                  color: gameManager.playerCanEndTurn() ? Colors.teal : Colors.black45,
+                                  color: gameManager.playerCanEndTurn()
+                                      ? Colors.teal
+                                      : Colors.black45,
                                   // image: DecorationImage(
                                   //     image: AssetImage(
                                   //         "assets/images/button_background_inactive.png"),
@@ -383,7 +392,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                                   ),
                                 )),
                             onTap: () async {
-                              if (gameManager.playerCanEndTurn()){
+                              if (gameManager.playerCanEndTurn()) {
                                 await gameManager.reqStand();
                                 setState(() {});
                               }
