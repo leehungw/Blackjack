@@ -91,7 +91,7 @@ class Database {
     }
 
     if (rooms.isEmpty){
-      return 0;
+      return 1000;
     }
 
       rooms.sort((a, b) => a.roomID! - b.roomID!);
