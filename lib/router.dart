@@ -4,6 +4,7 @@
 import 'package:card/home_features/home_screen.dart';
 import 'package:card/main_menu/login_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
+import 'package:card/setting_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -53,6 +54,12 @@ final router = GoRouter(
     GoRoute(
       path: '/home',
       builder: (context, state) => const HomeScreen(key: Key('home')),
+      routes: [
+        GoRoute(
+          path: 'setting',
+          builder: (context, state) => const SettingScreen(key: Key('setting')),
+        ),
+      ],
     ),
   ],
 );

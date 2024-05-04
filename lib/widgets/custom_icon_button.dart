@@ -1,6 +1,7 @@
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class CustomIconButton extends StatelessWidget {
@@ -35,6 +36,7 @@ class CustomIconButton extends StatelessWidget {
             // gradient: gradient,
             color: color,
           ),
+          Gap(5),
           Text(
             text,
             style: TextStyles.defaultStyle.copyWith(

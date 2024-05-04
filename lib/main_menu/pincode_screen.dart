@@ -7,6 +7,8 @@ import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -14,33 +16,6 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
-
-Future<UserCredential?> registerWithEmailAndPassword(
-  String email,
-  String password,
-  String displayName,
-  String avatar,
-  void Function(String) showErrorMessage,
-) async {
-  try {
-    UserCredential userCredential =
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    await userCredential.user!.updateDisplayName(displayName);
-    await userCredential.user!.updatePhotoURL(avatar);
-
-    return userCredential;
-  } on FirebaseAuthException catch (e) {
-    if (e.code == 'email-already-in-use') {
-      showErrorMessage('Email đã được sử dụng.');
-    }
-
-    return null;
-  }
-}
 
 class PincodeScreen extends StatefulWidget {
   final String name;
@@ -346,15 +321,29 @@ class _PincodeScreenState extends State<PincodeScreen> {
                             UserCredential userCredential = await FirebaseAuth
                                 .instance
                                 .createUserWithEmailAndPassword(
-                              email: widget.email,
-                              password: widget.pass,
+                              email: widget.email.trim(),
+                              password: widget.pass.trim(),
                             );
 
-                            // await userCredential.user!
-                            //     .updateDisplayName(widget.uname);
+                            if (widget.imagefile.isNotEmpty) {
+                              Reference ref = FirebaseStorage.instance
+                                  .ref()
+                                  .child('avatars')
+                                  .child('${userCredential.user!.uid}.jpg');
+                              Uint8List imageData =
+                                  await File(widget.imagefile).readAsBytes();
+                              await ref.putData(imageData,
+                                  SettableMetadata(contentType: 'image/jpeg'));
 
-                            // await userCredential.user!
-                            //     .updatePhotoURL(widget.imagefile);
+                              String url = await ref.getDownloadURL();
+                              await userCredential.user!.updatePhotoURL(url);
+                            } else {
+                              await userCredential.user!.updatePhotoURL(
+                                  'https://firebasestorage.googleapis.com/v0/b/lucky-card-42fae.appspot.com/o/avatar.jpg?alt=media&token=e0736d41-b937-44a6-b05e-a08e9096440f');
+                            }
+
+                            await userCredential.user!
+                                .updateDisplayName(widget.uname);
 
                             await FirebaseFirestore.instance
                                 .collection("Users")
@@ -364,9 +353,8 @@ class _PincodeScreenState extends State<PincodeScreen> {
                               'yourName': widget.name,
                               'userName': widget.uname,
                               'email': widget.email,
-                              'avatar': widget.imagefile,
                               'level': 0,
-                              'money': 10000,
+                              'money': 100000,
                               'startDate': Timestamp.now(),
                               'duration': 0,
                             });
