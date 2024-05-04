@@ -18,6 +18,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isLogInButtonActive = false;
+
   String pass = "";
   final emailController = TextEditingController();
   FocusNode emailFocus = FocusNode();
@@ -174,6 +176,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30),
                         child: TextField(
+                          onTapOutside: (event) {
+                            emailFocus.unfocus();
+                            passwordFocus.unfocus();
+                            _checkLogInButtonState();
+                          },
                           controller: emailController,
                           focusNode: emailFocus,
                           keyboardType: TextInputType.emailAddress,
@@ -203,6 +210,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30),
                         child: TextField(
+                          onTapOutside: (event) {
+                            emailFocus.unfocus();
+                            passwordFocus.unfocus();
+                            _checkLogInButtonState();
+                          },
                           controller: passwordController,
                           focusNode: passwordFocus,
                           onTap: () => {firstEnterPasswordTF = true},
@@ -259,10 +271,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
                                   color: Colors.transparent,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          "assets/images/button_background_inactive.png"),
-                                      fit: BoxFit.fill),
+                                  image: isLogInButtonActive
+                                      ? DecorationImage(
+                                          image: AssetImage(
+                                              "assets/images/button_background_active.png"),
+                                          fit: BoxFit.fill)
+                                      : DecorationImage(
+                                          image: AssetImage(
+                                              "assets/images/button_background_inactive.png"),
+                                          fit: BoxFit.fill),
                                 ),
                                 child: Center(
                                   child: Text(
@@ -317,5 +334,12 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
     );
+  }
+
+  void _checkLogInButtonState() {
+    setState(() {
+      isLogInButtonActive =
+          emailController.text.isNotEmpty && passwordController.text.isNotEmpty;
+    });
   }
 }

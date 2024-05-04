@@ -23,29 +23,28 @@ class CustomIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        IconButton(
-          iconSize: size,
-          icon: Icon(
+    return GestureDetector(
+      onTap: () {
+        onPressed;
+      },
+      child: Column(
+        children: [
+          Icon(
             icon,
             size: size,
             // gradient: gradient,
             color: color,
           ),
-          onPressed: onPressed,
-        ),
-        GradientText(
-          text,
-          gradientDirection: GradientDirection.ttb,
-          style: TextStyles.defaultStyle
-              .copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-          colors: const [
-            Palette.titleTextGradientTop,
-            Palette.titleTextGradientBottom,
-          ],
-        ),
-      ],
+          Text(
+            text,
+            style: TextStyles.defaultStyle.copyWith(
+              fontWeight: FontWeight.normal,
+              fontSize: 15,
+              color: Palette.labelFunctionText,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

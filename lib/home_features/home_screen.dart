@@ -192,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               alignment: Alignment.centerLeft,
                               child: CustomIconButton(
                                 color: Palette.black,
-                                icon: Icons.settings,
+                                icon: Icons.settings_outlined,
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
