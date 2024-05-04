@@ -1,13 +1,17 @@
+import 'dart:ffi';
+
 import 'package:card/main.dart';
 import 'package:card/widgets/forgot_password_dialog.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -53,7 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.of(context, rootNavigator: true).pop();
 
     if (result) {
-      // ignore: use_build_context_synchronously
       GoRouter.of(context).go('/home');
     } else {
       setState(() {
@@ -65,20 +68,34 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<bool> signIn(BuildContext context) async {
     try {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.value.text,
-          password: passwordController.value.text);
-    } on Exception {
-      // ignore: use_build_context_synchronously
-      return false;
+          email: emailController.text.trim(),
+          password: passwordController.text.trim());
+      DocumentSnapshot<Map<String, dynamic>> userData = await FirebaseFirestore
+          .instance
+          .collection('Users')
+          .doc(credential.user!.uid)
+          .get();
+      if (userData.exists) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('userID', credential.user!.uid);
+        prefs.setString('email', userData.data()!['email'] as String);
+        prefs.setString('yourName', userData.data()!['yourName'] as String);
+        prefs.setString('userName', userData.data()!['userName'] as String);
+        prefs.setInt('level', userData.data()!['level'] as int);
+        prefs.setString('startDate',
+            (userData.data()!['startDate'] as Timestamp).toDate().toString());
+        prefs.setInt('money', userData.data()!['money'] as int);
+        String? avatar = credential.user!.photoURL;
+        prefs.setString('avatar', avatar ?? '');
+      } else {
+        return false; // Trả về false nếu không tìm thấy dữ liệu người dùng
+      }
+    } catch (e) {
+      print("Error signing in: $e");
+      return false; // Trả về false nếu có lỗi xảy ra
     }
-    // ignore: use_build_context_synchronously
-    return true;
+    return true; // Trả về true nếu đăng nhập thành công và lưu dữ liệu vào SharedPreferences
   }
-
-  // void forgetPasswordTextTapped(BuildContext context) {
-  //   Navigator.of(context, rootNavigator: true)
-  //       .push(MaterialPageRoute(builder: (context) => const ForgotPassPage()));
-  // }
 
   void signUpTextTapped(BuildContext context) {
     Navigator.of(context, rootNavigator: true)
