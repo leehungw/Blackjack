@@ -12,7 +12,12 @@
           "package_name": "com.example.blackjack"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "139396063931-bodommt9l3k24k77hk2jf08pj69k5fou.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCAF7Z4CAssYVUBiDk41rLAsFfRqrBrdkc"
@@ -20,11 +25,58 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "139396063931-bodommt9l3k24k77hk2jf08pj69k5fou.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "139396063931-cjc4t3phl0siso4u9pujoaqebg1llo0v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.card.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:139396063931:android:59db765e9f0293a59fff9e",
+        "android_client_info": {
+          "package_name": "com.example.luckyCard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "139396063931-bodommt9l3k24k77hk2jf08pj69k5fou.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAF7Z4CAssYVUBiDk41rLAsFfRqrBrdkc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "139396063931-bodommt9l3k24k77hk2jf08pj69k5fou.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "139396063931-cjc4t3phl0siso4u9pujoaqebg1llo0v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.card.RunnerTests"
+              }
+            }
+          ]
         }
       }
     }
   ],
   "configuration_version": "1"
 }
-
