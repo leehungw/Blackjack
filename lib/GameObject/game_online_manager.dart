@@ -394,8 +394,11 @@ final class GameOnlineManager{
       for (GamePlayerOnline player in _players){
         GameCard card = _deck.removeAt(0);
         player.getDistributedCard(card);
+        if (player == _thisPlayer){
+          card.flip();
+        }
         await uploadData();
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(Duration(milliseconds: 500));
       }
     }
     for (GamePlayerOnline player in _players){
@@ -791,6 +794,9 @@ final class GameOnlineManager{
     //   return;
     // }
     GameCard card = _deck.removeAt(0);
+    if (_currentPlayer == _thisPlayer){
+      card.flip();
+    }
     _currentPlayer?.hit(card);
     if (_currentPlayer == _dealer){
       if (_currentPlayer!.isBurn() || _currentPlayer!.isDragon()){
