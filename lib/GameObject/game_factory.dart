@@ -12,13 +12,13 @@ abstract final class GameFactory {
       for (int j = 0; j < 4; j++){
         switch (j){
           case 0:
-            newDeck.add(GameCard(i, CardType.clubs, false, true));
+            newDeck.add(GameCard(i, CardType.clubs, true, false));
           case 1:
-            newDeck.add(GameCard(i, CardType.diamonds, false, true));
+            newDeck.add(GameCard(i, CardType.diamonds, true, false));
           case 2:
-            newDeck.add(GameCard(i, CardType.hearts, false, true));
+            newDeck.add(GameCard(i, CardType.hearts, true, false));
           case 3:
-            newDeck.add(GameCard(i, CardType.spades, false, true));
+            newDeck.add(GameCard(i, CardType.spades, true, false));
         }
       }
     }

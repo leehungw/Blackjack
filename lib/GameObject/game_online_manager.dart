@@ -21,10 +21,15 @@ enum RoomStatus {
   ready,
 }
 
-// TODO: Duplicated user when join room
+// TODO: Duplicated user when join room (solved?)
 // TODO: Can't update client side showed cards (Done)
 // TODO: Quắt rồi vẫn ko dọn đc bàn (?)
 // TODO: Không cập nhật lại Result của Player (Done)
+
+// TODO: xì lát rồi mà host vẫn phải bọt bài?
+// TODO: bị lộ bài (bên màn hình nhà cái)
+// TODO: chưa đủ tẩy mà vẫn hiện dọn bàn (19) ko hiện xét mà hiện dọn bàn
+// TODO: xét xong ko kết thúc game đc
 
 final class GameOnlineManager{
   static const int initializeRoomID = 0;
@@ -643,6 +648,10 @@ final class GameOnlineManager{
       _revealedCount++;
     }
 
+    if (await tryEndOnlineGame()){
+      return true;
+    }
+
     // All is normal
     uploadData();
     await Future.delayed(Duration(milliseconds: 50));
@@ -836,6 +845,7 @@ final class GameOnlineManager{
       }
     }
 
+    _revealedCount = 0;
     _deck.clear();
     _status = RoomStatus.ready;
 
