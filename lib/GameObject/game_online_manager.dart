@@ -800,9 +800,9 @@ final class GameOnlineManager{
     _currentPlayer?.hit(card);
     if (_currentPlayer == _dealer){
       if (_currentPlayer!.isBurn() || _currentPlayer!.isDragon()){
-        dealerExecuteAll();
+        await dealerExecuteAll();
       }
-      tryEndOnlineGame();
+      await tryEndOnlineGame();
     }
     await uploadData();
   }
