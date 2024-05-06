@@ -21,16 +21,6 @@ enum RoomStatus {
   ready,
 }
 
-// TODO: Duplicated user when join room (solved?)
-// TODO: Can't update client side showed cards (Done)
-// TODO: Quắt rồi vẫn ko dọn đc bàn (?)
-// TODO: Không cập nhật lại Result của Player (Done)
-
-// TODO: xì lát rồi mà host vẫn phải bọt bài?
-// TODO: bị lộ bài (bên màn hình nhà cái)
-// TODO: chưa đủ tẩy mà vẫn hiện dọn bàn (19) ko hiện xét mà hiện dọn bàn
-// TODO: xét xong ko kết thúc game đc
-
 final class GameOnlineManager{
   static const int initializeRoomID = 0;
 
@@ -570,7 +560,7 @@ final class GameOnlineManager{
   // EXECUTE FUNCTIONS
 
   Future<bool> tryEndOnlineGame() async {
-    if (_revealedCount == _players.length){
+    if (_revealedCount == _players.length - 1){
       await endOnlineGame();
       return true;
     }
@@ -758,7 +748,7 @@ final class GameOnlineManager{
       _thisPlayer != null
           && _thisPlayer == _dealer
           && _thisPlayer?.state == PlayerState.onTurn
-          && _thisPlayer!.getTotalValues() > 16;
+          && _thisPlayer!.getTotalValues() >= 16;
   }
 
   bool canStartGame(){
@@ -766,7 +756,10 @@ final class GameOnlineManager{
   }
 
   bool canCleanTable(){
-    return _status == RoomStatus.end;
+    return
+      _status == RoomStatus.end
+      && _thisPlayer != null
+      && _thisPlayer == _dealer;
   }
 
   bool playerCanReady() {
@@ -823,7 +816,7 @@ final class GameOnlineManager{
     }
     _players[seatNumber].reveal(_dealer!);
     _revealedCount ++;
-    tryEndOnlineGame();
+    await tryEndOnlineGame();
 
     await uploadData();
   }
@@ -834,6 +827,7 @@ final class GameOnlineManager{
         continue;
       }
       player.reveal(_dealer!);
+      _revealedCount++;
     }
 
     await uploadData();
