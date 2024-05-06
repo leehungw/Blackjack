@@ -1,54 +1,63 @@
 // Copyright 2023, the Flutter project authors. Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
-
+import 'package:card/home_features/home_screen.dart';
 import 'package:card/main_menu/login_screen.dart';
-import 'package:card/main_menu/pincode_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
-import 'package:flutter/foundation.dart';
+import 'package:card/setting_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import 'game_screen/demo_screen.dart';
-import 'game_screen/demo_screen_online.dart';
-import 'settings/settings_screen.dart';
 import 'style/my_transition.dart';
 import 'style/palette.dart';
 
-/// The router describes the game's navigational hierarchy, from the main
-/// screen through settings screens all the way to each individual level.
 final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const LoginScreen(key: Key('login screen')),
+      redirect: (BuildContext context, GoRouterState state) {
+        if (FirebaseAuth.instance.currentUser != null) {
+          return '/home';
+        } else {
+          return '/login';
+        }
+      },
+    ),
+    GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(key: Key('login')),
+        routes: [
+          GoRoute(
+            path: 'signup',
+            pageBuilder: (context, state) => buildMyTransition<void>(
+              key: ValueKey('signup'),
+              color: Palette.accountBackgroundGradientBottom,
+              child: const SignupScreen(
+                key: Key('signup'),
+              ),
+            ),
+            // routes: [
+            //   GoRoute(
+            //     path: 'verification',
+            //     pageBuilder: (context, state) => buildMyTransition<void>(
+            //       key: ValueKey('verification'),
+            //       color: context.watch<Palette>().backgroundPlaySession,
+            //       child: const PincodeScreen(
+            //         key: Key('verification'),
+            //       ),
+            //     ),
+            //   )
+            // ],
+          ),
+        ]),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const HomeScreen(key: Key('home')),
       routes: [
         GoRoute(
-          path: 'signup',
-          pageBuilder: (context, state) => buildMyTransition<void>(
-            key: ValueKey('signup'),
-            color: context.watch<Palette>().backgroundPlaySession,
-            child: const DemoScreenOnline(
-              key: Key('signup'),
-            ),
-          ),
-          routes: [
-            GoRoute(
-              path: 'verification',
-              pageBuilder: (context, state) => buildMyTransition<void>(
-                key: ValueKey('verification'),
-                color: context.watch<Palette>().backgroundPlaySession,
-                child: const PincodeScreen(
-                  key: Key('verification'),
-                ),
-              ),
-            )
-          ],
-        ),
-        GoRoute(
-          path: 'settings',
-          builder: (context, state) =>
-              const SettingsScreen(key: Key('settings')),
+          path: 'setting',
+          builder: (context, state) => const SettingScreen(key: Key('setting')),
         ),
       ],
     ),

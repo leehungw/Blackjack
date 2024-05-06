@@ -20,14 +20,22 @@ dependencies:
   logging: ^1.2.0
   provider: ^6.0.5
   shared_preferences: ^2.2.2
-  firebase_core: ^2.27.0
+  firebase_core: ^2.30.1
   firebase_auth: ^4.17.8
   firebase_ui_auth: ^1.13.1
   cloud_firestore: ^4.15.8
   gap: ^3.0.1
   simple_gradient_text: ^1.3.0
   pin_code_fields: ^8.0.1
-
+  image_picker: ^1.1.0
+  mailer: ^6.1.0
+  google_fonts: ^6.2.1
+  firebase_storage: ^11.7.2
+  email_validator: any
+  percent_indicator: ^4.2.3
+  font_awesome_flutter: ^10.7.0
+  gradient_icon: ^2.0.9
+  url_launcher: ^6.2.6
 dev_dependencies:
   flutter_lints: ^3.0.0
   flutter_test:
@@ -43,17 +51,19 @@ flutter:
     - assets/music/
     - assets/sfx/
     - assets/images/cards/
+    - assets/fonts/
+    - assets/fonts/Montserrat/
 
   fonts:
+    - family: Montserrat
+      fonts:
+       - asset: assets/fonts/Montserrat/Montserrat-Regular.ttf
     - family: Permanent Marker
       fonts:
         - asset: assets/fonts/Permanent_Marker/PermanentMarker-Regular.ttf
     - family: Montagu Slab
       fonts: 
         - asset: assets/fonts/Montagu_Slab/MontaguSlab.ttf
-    - family: Montserrat
-      fonts:
-        - asset: assets/fonts/Montserrat/Montserrat.ttf
 flutter_launcher_icons:
   android: true
   ios: true

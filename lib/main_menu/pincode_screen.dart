@@ -1,14 +1,31 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
 
+import 'package:card/main_menu/signup_screen.dart';
+import 'package:card/style/palette.dart';
+import 'package:card/style/text_styles.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
 class PincodeScreen extends StatefulWidget {
-  const PincodeScreen({super.key});
+  final String name;
+  final String uname;
+  final String email;
+  final String pass;
+  final String imagefile;
+  const PincodeScreen(
+      this.name, this.uname, this.email, this.pass, this.imagefile,
+      {super.key});
 
   @override
   State<PincodeScreen> createState() => _PincodeScreenState();
@@ -22,6 +39,78 @@ class _PincodeScreenState extends State<PincodeScreen> {
   StreamController<ErrorAnimationType> errorController =
       StreamController<ErrorAnimationType>();
   TextEditingController textEditingController = TextEditingController();
+  bool _verifySuccess = false;
+
+  String generateRandomCode() {
+    Random random = Random();
+    String code = '';
+    for (int i = 0; i < 6; i++) {
+      code += random.nextInt(10).toString();
+    }
+    return code;
+  }
+
+  void sendConfirmationCode(String code) async {
+    String username = "personalschedulemanager@gmail.com";
+    String password = "myocgxvnvsdybuhr";
+
+    final smtpServer = gmail(username, password);
+
+    final message = Message()
+      ..from = Address(username)
+      ..recipients.add(widget.email)
+      ..subject = 'Confirmation Code'
+      ..text = 'Your confirmation code is: $code';
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: $sendReport');
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  void resendConfirmationCode() {
+    pinCode = generateRandomCode();
+    sendConfirmationCode(pinCode);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _verifySuccess = false;
+    pinCode = generateRandomCode();
+    sendConfirmationCode(pinCode);
+  }
+
+  final bool _canPop = false;
+  void _backButton(BuildContext context) async {
+    if (!_verifySuccess) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Cảnh báo'),
+          content: Text(
+              'Hành động này sẽ chuyển bạn về trang đăng ký ! \n Bạn có chắc chắn không ?'),
+          actions: [
+            FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Hủy')),
+            FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: Text('Đồng ý'))
+          ],
+        ),
+      );
+    } else {
+      Navigator.of(context, rootNavigator: true).push(_createRoute());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +127,10 @@ class _PincodeScreenState extends State<PincodeScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: const [Color(0xFFDD4444), Color(0xFF5F1313)],
+                  colors: const [
+                    Palette.accountBackgroundGradientBottom,
+                    Palette.accountBackgroundGradientTop
+                  ],
                 ),
               ),
               child: Center(
@@ -49,11 +141,13 @@ class _PincodeScreenState extends State<PincodeScreen> {
                     child: Row(
                       children: [
                         IconButton(
-                          onPressed: () => {Navigator.pop(context)},
+                          onPressed: () {
+                            _backButton(context);
+                          },
                           icon: Icon(
                             Icons.arrow_back,
                             size: 30,
-                            color: Colors.white,
+                            color: Palette.primaryText,
                           ),
                         ),
                         Padding(
@@ -63,23 +157,12 @@ class _PincodeScreenState extends State<PincodeScreen> {
                                   54)),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               Text(
                                 "VERIFY YOUR",
-                                style: TextStyle(
-                                    fontFamily: "Montserrat",
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 32,
-                                    color: Colors.white),
+                                style: TextStyles.screenTitle,
                               ),
-                              Text(
-                                "ACCOUNT",
-                                style: TextStyle(
-                                    fontFamily: "Montserrat",
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 32,
-                                    color: Colors.white),
-                              ),
+                              Text("ACCOUNT", style: TextStyles.screenTitle),
                             ],
                           ),
                         )
@@ -92,45 +175,40 @@ class _PincodeScreenState extends State<PincodeScreen> {
                     height: 160.0,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: AssetImage(
-                            "assets/images/default_profile_picture.png"),
-                        fit: BoxFit.cover,
-                      ),
+                      image: widget.imagefile.isNotEmpty
+                          ? DecorationImage(
+                              image: FileImage(File(widget.imagefile)),
+                              fit: BoxFit.cover,
+                            )
+                          : DecorationImage(
+                              image: AssetImage(
+                                  "assets/images/default_profile_picture.png"),
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                   Gap(26),
                   Text(
                     "Welcome",
-                    style: TextStyle(
-                        fontFamily: "Montserrat",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Colors.white),
+                    style: TextStyles.defaultStyle
+                        .copyWith(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   Gap(10),
                   GradientText(
-                    'Your Name',
-                    style: TextStyle(
-                        fontSize: 26.0,
-                        fontFamily: 'Montagu Slab',
-                        fontWeight: FontWeight.bold),
+                    widget.name,
+                    style: TextStyles.appTitle,
                     colors: const [
-                      Color(0xFFFEE60F),
-                      Color(0xFFF4FD8B),
+                      Palette.titleTextGradientTop,
+                      Palette.titleTextGradientBottom,
                     ],
                   ),
                   Gap(40),
                   Row(
-                    children: const [
+                    children: [
                       Gap(33),
                       Text(
                         "Enter Your Code",
-                        style: TextStyle(
-                            fontFamily: "Montserrat",
-                            fontWeight: FontWeight.normal,
-                            fontSize: 20,
-                            color: Colors.white),
+                        style: TextStyles.defaultStyle.copyWith(fontSize: 20),
                       ),
                     ],
                   ),
@@ -142,10 +220,10 @@ class _PincodeScreenState extends State<PincodeScreen> {
                             vertical: 8.0, horizontal: 30),
                         child: PinCodeTextField(
                           appContext: context,
-                          pastedTextStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          pastedTextStyle: TextStyles.defaultStyle.copyWith(
+                              color: Palette.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20),
                           length: 6,
                           obscureText: false,
                           animationType: AnimationType.fade,
@@ -161,8 +239,9 @@ class _PincodeScreenState extends State<PincodeScreen> {
                             borderRadius: BorderRadius.circular(5),
                             fieldHeight: 50,
                             fieldWidth: 50,
-                            activeFillColor:
-                                hasError ? Colors.green : Colors.white,
+                            activeFillColor: hasError
+                                ? Palette.textFieldBorderFocus
+                                : Palette.primaryText,
                             selectedColor: Theme.of(context)
                                 .colorScheme
                                 .onTertiaryContainer,
@@ -183,7 +262,7 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           boxShadows: const [
                             BoxShadow(
                               offset: Offset(0, 1),
-                              color: Colors.black12,
+                              color: Palette.black,
                               blurRadius: 10,
                             )
                           ],
@@ -201,6 +280,15 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           },
                         )),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                    child: Text(
+                      hasError ? "*Please fill up all the cells properly" : "",
+                      style: TextStyles.defaultStyle.copyWith(
+                          fontSize: 12,
+                          color: Palette.accountBackgroundGradientBottom),
+                    ),
+                  ),
                   Gap(40),
                   GestureDetector(
                       child: Container(
@@ -216,16 +304,91 @@ class _PincodeScreenState extends State<PincodeScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              "Sign Up",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                  fontFamily: "Montserrat"),
+                              "Confirm Code",
+                              style: TextStyles.bigButtonText,
                             ),
                           )),
-                      onTap: () {
-                        //TODO: handle verification logic
+                      onTap: () async {
+                        if (currentText == pinCode) {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              });
+                          try {
+                            UserCredential userCredential = await FirebaseAuth
+                                .instance
+                                .createUserWithEmailAndPassword(
+                              email: widget.email.trim(),
+                              password: widget.pass.trim(),
+                            );
+
+                            if (widget.imagefile.isNotEmpty) {
+                              Reference ref = FirebaseStorage.instance
+                                  .ref()
+                                  .child('avatars')
+                                  .child('${userCredential.user!.uid}.jpg');
+                              Uint8List imageData =
+                                  await File(widget.imagefile).readAsBytes();
+                              await ref.putData(imageData,
+                                  SettableMetadata(contentType: 'image/jpeg'));
+
+                              String url = await ref.getDownloadURL();
+                              await userCredential.user!.updatePhotoURL(url);
+                            } else {
+                              await userCredential.user!.updatePhotoURL(
+                                  'https://firebasestorage.googleapis.com/v0/b/lucky-card-42fae.appspot.com/o/avatar.jpg?alt=media&token=e0736d41-b937-44a6-b05e-a08e9096440f');
+                            }
+
+                            await userCredential.user!
+                                .updateDisplayName(widget.uname);
+
+                            await FirebaseFirestore.instance
+                                .collection("Users")
+                                .doc(userCredential.user!.uid)
+                                .set({
+                              'playerID': userCredential.user!.uid,
+                              'yourName': widget.name,
+                              'userName': widget.uname,
+                              'email': widget.email,
+                              'level': 0,
+                              'money': 100000,
+                              'startDate': Timestamp.now(),
+                              'duration': 0,
+                            });
+                          } on FirebaseAuthException catch (e) {
+                            if (e.code == 'email-already-in-use') {
+                              showErrorMessage('Email đã được sử dụng.');
+                            }
+                            print('Error: $e');
+                          }
+                          _verifySuccess = true;
+                          Navigator.of(context, rootNavigator: true).pop();
+                          setState(() {});
+                          GoRouter.of(context).go('/login');
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Thông báo'),
+                                content: Text(
+                                  'MÃ XÁC NHẬN KHÔNG CHÍNH XÁC!!!',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('Đóng'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
                       }),
                 ]),
               ),
@@ -233,6 +396,49 @@ class _PincodeScreenState extends State<PincodeScreen> {
           ),
         );
       }),
+    );
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const SignupScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        final tween = Tween(begin: begin, end: end);
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: curve,
+        );
+
+        return SlideTransition(
+          position: tween.animate(curvedAnimation),
+          child: child,
+        );
+      },
+    );
+  }
+
+  void showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Lỗi'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Đóng'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
