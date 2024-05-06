@@ -51,4 +51,39 @@ class TextStyles {
       color: Palette.black,
       fontWeight: FontWeight.normal,
       fontFamily: GoogleFonts.montserrat().fontFamily);
+
+  //Setting Screen
+  static TextStyle settingScreenTitle = TextStyle(
+    fontSize: 40,
+    color: Colors.black,
+    fontWeight: FontWeight.w800,
+    fontFamily: 'Montserrat',
+    letterSpacing: 0.01,
+  );
+  static TextStyle settingScreenSubTitle = TextStyle(
+    fontSize: 28,
+    color: Colors.white,
+    fontWeight: FontWeight.bold,
+    fontFamily: GoogleFonts.inter().fontFamily,
+    letterSpacing: 0.01,
+  );
+  static TextStyle textInField = TextStyle(
+    fontSize: 20,
+    color: Colors.black.withOpacity(0.85),
+    fontWeight: FontWeight.w600,
+    fontFamily: GoogleFonts.inter().fontFamily,
+    letterSpacing: 0.01,
+  );
+  static TextStyle settingScreenButton = TextStyle(
+    fontSize: 28,
+    color: Palette.settingDialogButtonText,
+    fontWeight: FontWeight.bold,
+    fontFamily: GoogleFonts.inter().fontFamily,
+    letterSpacing: 0.01,
+  );
+  static TextStyle settingTextButton = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w300,
+    fontFamily: GoogleFonts.inter().fontFamily,
+  );
 }

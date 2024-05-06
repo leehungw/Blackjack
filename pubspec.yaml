@@ -50,17 +50,19 @@ flutter:
     - assets/images/
     - assets/music/
     - assets/sfx/
+    - assets/fonts/
+    - assets/fonts/Montserrat/
 
   fonts:
+    - family: Montserrat
+      fonts:
+       - asset: assets/fonts/Montserrat/Montserrat-Regular.ttf
     - family: Permanent Marker
       fonts:
         - asset: assets/fonts/Permanent_Marker/PermanentMarker-Regular.ttf
     - family: Montagu Slab
       fonts: 
         - asset: assets/fonts/Montagu_Slab/MontaguSlab.ttf
-    - family: Montserrat
-      fonts:
-        - asset: assets/fonts/Montserrat/Montserrat.ttf
 flutter_launcher_icons:
   android: true
   ios: true

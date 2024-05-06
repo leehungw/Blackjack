@@ -62,4 +62,10 @@ class Palette {
 
   //Home Screen
   static const Color labelFunctionText = Color(0xFFF8FFA1);
+
+  //Setting Screen
+  static const Color textFieldBackgroundGradientTop = Color(0xFFD9D9D9);
+  static const Color textFieldBackgroundGradientBottom = Color(0xFF737373);
+  static const Color settingTextButtonGradientLeft = Color(0xFF3EF520);
+  static const Color settingTextButtonGradientRight = Color(0xFF1ABB00);
 }
