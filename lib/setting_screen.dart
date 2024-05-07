@@ -1,14 +1,19 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:card/widgets/custom_elevated_button_small.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -19,9 +24,13 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   bool _obscureOldPass = true;
+  TextEditingController _oldPassController = TextEditingController();
   bool _obscureNewPass = true;
+  TextEditingController _newPassController = TextEditingController();
   bool _obscureConfirmPass = true;
+  TextEditingController _confirmPassController = TextEditingController();
   String imagefile = '';
+  String emailPref = '';
   @override
   void initState() {
     super.initState();
@@ -32,7 +41,623 @@ class _SettingScreenState extends State<SettingScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       imagefile = prefs.getString('avatar') ?? '';
+      emailPref = prefs.getString('email') ?? '';
     });
+  }
+
+  void _changePassword() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        });
+
+    // Lấy mật khẩu hiện tại từ trường TextField
+    String oldPassword = _oldPassController.text.trim();
+
+    // Lấy mật khẩu mới từ trường TextField
+    String newPassword = _newPassController.text.trim();
+
+    // Lấy xác nhận mật khẩu từ trường TextField
+    String confirmPassword = _confirmPassController.text.trim();
+
+    // Kiểm tra mật khẩu hiện tại có chính xác hay không
+    // Sử dụng currentUser để xác định người dùng hiện tại đang đăng nhập
+    User? user = FirebaseAuth.instance.currentUser;
+
+    AuthCredential credential =
+        EmailAuthProvider.credential(email: emailPref, password: oldPassword);
+    try {
+      await user!.reauthenticateWithCredential(credential);
+    } catch (error) {
+      // Nếu xảy ra lỗi, hiển thị dialog thông báo lỗi
+      Navigator.of(context, rootNavigator: true).pop();
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            content: Container(
+              padding: EdgeInsets.all(15),
+              height: 150,
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Palette.dialogConfirmGradientTop,
+                    Palette.dialogConfirmGradientBottom,
+                  ],
+                ),
+              ),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Mật khẩu hiện tại không chính xác',
+                      style: TextStyles.dialogText.copyWith(
+                        fontSize: 18,
+                      ),
+                    ),
+                    Container(
+                      width: 140,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Palette.textFieldBackgroundGradientTop,
+                            Palette.textFieldBackgroundGradientBottom,
+                          ],
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Đóng',
+                          style: TextStyles.settingScreenButton.copyWith(
+                            color: Colors.red,
+                            fontSize: 26,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    // Kiểm tra mật khẩu mới
+    if (newPassword.length < 6 || newPassword.contains(' ')) {
+      Navigator.of(context, rootNavigator: true).pop();
+      // Nếu mật khẩu mới không đạt yêu cầu, hiển thị dialog thông báo lỗi
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            content: Container(
+              padding: EdgeInsets.all(15),
+              height: 150,
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Palette.dialogConfirmGradientTop,
+                    Palette.dialogConfirmGradientBottom,
+                  ],
+                ),
+              ),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Mật khẩu mới phải có ít nhất 6 ký tự và không chứa khoảng trắng!',
+                      style: TextStyles.dialogText.copyWith(
+                        fontSize: 18,
+                      ),
+                    ),
+                    Container(
+                      width: 140,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Palette.textFieldBackgroundGradientTop,
+                            Palette.textFieldBackgroundGradientBottom,
+                          ],
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Đóng',
+                          style: TextStyles.settingScreenButton.copyWith(
+                            color: Colors.red,
+                            fontSize: 26,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    // Kiểm tra xác nhận mật khẩu
+    if (newPassword != confirmPassword) {
+      Navigator.of(context, rootNavigator: true).pop();
+      // Nếu xác nhận mật khẩu không khớp, hiển thị dialog thông báo lỗi
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            content: Container(
+              padding: EdgeInsets.all(15),
+              height: 150,
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Palette.dialogConfirmGradientTop,
+                    Palette.dialogConfirmGradientBottom,
+                  ],
+                ),
+              ),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Xác nhận mật khẩu không khớp với mật khẩu mới!',
+                      style: TextStyles.dialogText.copyWith(
+                        fontSize: 18,
+                      ),
+                    ),
+                    Container(
+                      width: 140,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Palette.textFieldBackgroundGradientTop,
+                            Palette.textFieldBackgroundGradientBottom,
+                          ],
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Đóng',
+                          style: TextStyles.settingScreenButton.copyWith(
+                            color: Colors.red,
+                            fontSize: 26,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    // Thay đổi mật khẩu
+    try {
+      await user.updatePassword(newPassword);
+      Navigator.of(context, rootNavigator: true).pop();
+      // Nếu thay đổi thành công, hiển thị dialog thông báo thành công
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            content: Container(
+              padding: EdgeInsets.all(15),
+              height: 150,
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Palette.dialogConfirmGradientTop,
+                    Palette.dialogConfirmGradientBottom,
+                  ],
+                ),
+              ),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Mật khẩu đã được thay đổi thành công!',
+                      style: TextStyles.dialogText.copyWith(
+                        fontSize: 18,
+                      ),
+                    ),
+                    Container(
+                      width: 140,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Palette.textFieldBackgroundGradientTop,
+                            Palette.textFieldBackgroundGradientBottom,
+                          ],
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _oldPassController.clear();
+                          _newPassController.clear();
+                          _confirmPassController.clear();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Đóng',
+                          style: TextStyles.settingScreenButton.copyWith(
+                            color: Colors.red,
+                            fontSize: 26,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+            ),
+          );
+        },
+      );
+    } catch (error) {
+      Navigator.of(context, rootNavigator: true).pop();
+      // Nếu xảy ra lỗi trong quá trình thay đổi mật khẩu, hiển thị dialog thông báo lỗi
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.all(0),
+            content: Container(
+              padding: EdgeInsets.all(15),
+              height: 150,
+              width: MediaQuery.of(context).size.width * 0.8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Palette.dialogConfirmGradientTop,
+                    Palette.dialogConfirmGradientBottom,
+                  ],
+                ),
+              ),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Đã xảy ra lỗi khi thay đổi mật khẩu!\nVui lòng thử lại sau!',
+                      style: TextStyles.dialogText.copyWith(
+                        fontSize: 18,
+                      ),
+                    ),
+                    Container(
+                      width: 140,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Palette.textFieldBackgroundGradientTop,
+                            Palette.textFieldBackgroundGradientBottom,
+                          ],
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          padding: EdgeInsets.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Đóng',
+                          style: TextStyles.settingScreenButton.copyWith(
+                            color: Colors.red,
+                            fontSize: 26,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> launchEmailApp() async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'personalschedulemanager@gmail.com',
+      queryParameters: {
+        'subject': 'Góp_Ý_Của_Người_Dùng',
+      },
+    );
+
+    try {
+      await launchUrl(emailLaunchUri);
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              contentPadding: EdgeInsets.all(0),
+              content: Container(
+                padding: EdgeInsets.all(15),
+                height: 150,
+                width: MediaQuery.of(context).size.width * 0.8,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Palette.dialogConfirmGradientTop,
+                      Palette.dialogConfirmGradientBottom,
+                    ],
+                  ),
+                ),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Thiết bị của bạn không có ứng dụng email nào!',
+                        style: TextStyles.dialogText.copyWith(
+                          fontSize: 18,
+                        ),
+                      ),
+                      Container(
+                        width: 140,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Palette.textFieldBackgroundGradientTop,
+                              Palette.textFieldBackgroundGradientBottom,
+                            ],
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            padding: EdgeInsets.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Đóng',
+                            style: TextStyles.settingScreenButton.copyWith(
+                              color: Colors.red,
+                              fontSize: 26,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+              ),
+            );
+          });
+    }
+  }
+
+  void _showLogoutConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.all(0),
+          content: Container(
+            padding: EdgeInsets.all(15),
+            height: 150,
+            width: MediaQuery.of(context).size.width * 0.8,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Palette.dialogConfirmGradientTop,
+                  Palette.dialogConfirmGradientBottom,
+                ],
+              ),
+            ),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Bạn muốn đăng xuất?',
+                    style: TextStyles.dialogText,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 140,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Palette.textFieldBackgroundGradientTop,
+                              Palette.textFieldBackgroundGradientBottom,
+                            ],
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            padding: EdgeInsets.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Hủy',
+                            style: TextStyles.settingScreenButton.copyWith(
+                              color: Colors.red,
+                              fontSize: 26,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 140,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Palette
+                                  .settingDialogButtonBackgroundGradientBottom,
+                              Palette.settingDialogButtonBackgroundGradientTop,
+                            ],
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _logout,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            padding: EdgeInsets.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Xác nhận',
+                            style: TextStyles.settingScreenButton,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ]),
+          ),
+        );
+      },
+    );
+  }
+
+  void _logout() {
+    FirebaseAuth.instance.signOut();
+    GoRouter.of(context).go('/login');
   }
 
   @override
@@ -81,9 +706,9 @@ class _SettingScreenState extends State<SettingScreen> {
             padding: const EdgeInsets.all(24),
             child: SingleChildScrollView(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Gap(30),
                   Container(
                     alignment: Alignment.center,
                     child: Text(
@@ -91,12 +716,12 @@ class _SettingScreenState extends State<SettingScreen> {
                       style: TextStyles.settingScreenTitle,
                     ),
                   ),
-                  const Gap(30),
+                  const Gap(20),
                   Container(
                     alignment: Alignment.center,
                     child: Container(
-                      width: 150,
-                      height: 150,
+                      width: 120,
+                      height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         image: imagefile.isNotEmpty
@@ -137,6 +762,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       alignment: Alignment.centerRight,
                       children: [
                         TextField(
+                          controller: _oldPassController,
                           obscureText: _obscureOldPass,
                           onTapOutside: (event) {
                             FocusScope.of(context).unfocus();
@@ -189,6 +815,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       alignment: Alignment.centerRight,
                       children: [
                         TextField(
+                          controller: _newPassController,
                           obscureText: _obscureNewPass,
                           onTapOutside: (event) {
                             FocusScope.of(context).unfocus();
@@ -198,7 +825,7 @@ class _SettingScreenState extends State<SettingScreen> {
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                             ),
-                            hintText: 'Mật khẩu hiện tại',
+                            hintText: 'Mật khẩu mới',
                             hintStyle: TextStyles.textInField.copyWith(
                               color: Colors.black.withOpacity(0.3),
                             ),
@@ -241,6 +868,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       alignment: Alignment.centerRight,
                       children: [
                         TextField(
+                          controller: _confirmPassController,
                           obscureText: _obscureConfirmPass,
                           onTapOutside: (event) {
                             FocusScope.of(context).unfocus();
@@ -250,7 +878,7 @@ class _SettingScreenState extends State<SettingScreen> {
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                             ),
-                            hintText: 'Mật khẩu hiện tại',
+                            hintText: 'Xác nhận mật khẩu mới',
                             hintStyle: TextStyles.textInField.copyWith(
                               color: Colors.black.withOpacity(0.3),
                             ),
@@ -273,7 +901,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ],
                     ),
                   ),
-                  const Gap(15),
+                  const Gap(10),
                   Container(
                     alignment: Alignment.center,
                     child: Container(
@@ -291,7 +919,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: _changePassword,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -337,7 +965,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                   const Gap(20),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: launchEmailApp,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -409,9 +1037,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                       ),
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: _showLogoutConfirmationDialog,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -431,6 +1057,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                   ),
+                  const Gap(20),
                 ],
               ),
             ),

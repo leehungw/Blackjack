@@ -68,4 +68,6 @@ class Palette {
   static const Color textFieldBackgroundGradientBottom = Color(0xFF737373);
   static const Color settingTextButtonGradientLeft = Color(0xFF3EF520);
   static const Color settingTextButtonGradientRight = Color(0xFF1ABB00);
+  static const Color dialogConfirmGradientTop = Color(0xFFB7DEEF);
+  static const Color dialogConfirmGradientBottom = Color(0xFF3D99C1);
 }
