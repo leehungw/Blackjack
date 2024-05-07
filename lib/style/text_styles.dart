@@ -86,4 +86,10 @@ class TextStyles {
     fontWeight: FontWeight.w300,
     fontFamily: GoogleFonts.inter().fontFamily,
   );
+  static TextStyle dialogText = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.w800,
+    fontFamily: GoogleFonts.inter().fontFamily,
+    color: Colors.black,
+  );
 }

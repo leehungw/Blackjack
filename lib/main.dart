@@ -6,6 +6,7 @@ import 'dart:developer' as dev;
 
 import 'package:card/config/firebase_options.dart';
 import 'package:card/router.dart';
+import 'package:card/widgets/background_music_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,14 @@ class MyApp extends StatelessWidget {
         routeInformationProvider: router.routeInformationProvider,
         routeInformationParser: router.routeInformationParser,
         routerDelegate: router.routerDelegate,
+        builder: (context, child) {
+          return Stack(
+            children: [
+              child!,
+              BackgroundMusicWidget(),
+            ],
+          );
+        },
       );
     });
   }
