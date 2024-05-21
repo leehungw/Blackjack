@@ -53,6 +53,7 @@ flutter:
     - assets/images/
     - assets/music/
     - assets/sfx/
+    - assets/images/cards/
     - assets/fonts/
     - assets/fonts/Montserrat/
 
