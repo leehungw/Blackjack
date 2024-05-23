@@ -75,9 +75,17 @@ final class GameOnlineManager{
     return _players;
   }
 
-  bool get isStart {
-    return _status == RoomStatus.init || _status == RoomStatus.start;
+  GamePlayerOnline? get thisPlayer {
+    return _thisPlayer;
   }
+
+  RoomStatus get status {
+    return _status;
+  }
+
+  // bool get isStart {
+  //   return _status == RoomStatus.init || _status == RoomStatus.start;
+  // }
 
   void _clear(){
     _thisUserID = -1;
@@ -585,7 +593,7 @@ final class GameOnlineManager{
     List<GamePlayerOnline> normal_players = [];
     PlayerCardState dealerResult = PlayerCardState.normal;
     for (GamePlayerOnline player in _players){
-      PlayerCardState result = player.CheckBlackjack();
+      PlayerCardState result = player.checkBlackjack();
       if (player.isDealer()){
         dealerResult = result;
         continue;
@@ -689,6 +697,20 @@ final class GameOnlineManager{
     return availableSeat;
   }
 
+  GamePlayerOnline? GetPlayerBySeatOffset(int seatOffset){
+    if (_thisPlayer == null) {
+      return null;
+    }
+    int seat = _thisPlayer!.seat + seatOffset;
+    seat = seat > 6 ? seat - 6 : seat;
+    for (GamePlayerOnline player in players){
+      if (player.seat == seat){
+        return player;
+      }
+    }
+    return null;
+  }
+
   GamePlayerOnline _getNextPlayer(GamePlayerOnline player){
     GamePlayerOnline result = _players.first;
     for (int i = 0; i < _players.length; i++){
@@ -740,13 +762,27 @@ final class GameOnlineManager{
           && _thisPlayer!.getTotalValues() != 21;
   }
 
-  bool dealerCanExecutePlayer(){
+  // check all
+  bool dealerCanExecuteAllPlayer(){
     if (_status != RoomStatus.start){
       return false;
     }
     return
       _thisPlayer != null
           && _thisPlayer == _dealer
+          && _thisPlayer?.state == PlayerState.onTurn
+          && _thisPlayer!.getTotalValues() >= 16;
+  }
+
+  bool dealerCanExecutePlayer(GamePlayerOnline player){
+    if (_status != RoomStatus.start){
+      return false;
+    }
+    return
+      _thisPlayer != null
+          && _thisPlayer == _dealer
+          && players.contains(player)
+          && player.result == PlayerResult.uncheck
           && _thisPlayer?.state == PlayerState.onTurn
           && _thisPlayer!.getTotalValues() >= 16;
   }

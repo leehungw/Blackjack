@@ -1,6 +1,7 @@
 // Copyright 2023, the Flutter project authors. Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
+import 'package:card/game_screen/game_screen.dart';
 import 'package:card/home_features/home_screen.dart';
 import 'package:card/main_menu/login_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
@@ -33,9 +34,12 @@ final router = GoRouter(
             pageBuilder: (context, state) => buildMyTransition<void>(
               key: ValueKey('signup'),
               color: Palette.accountBackgroundGradientBottom,
-              child: const SignupScreen(
-                key: Key('signup'),
-              ),
+              // child: const SignupScreen(
+              //   key: Key('signup'),
+              // ),
+              child: const GameScreenOnline(
+                key: Key('gamescreen')
+              )
             ),
             // routes: [
             //   GoRoute(

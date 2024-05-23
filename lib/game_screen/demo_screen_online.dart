@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:card/GameObject/game_player_online.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -93,7 +94,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
     playerSeats.clear();
 
     for (int i = 0; i < gameManager.players.length; i++) {
-      GamePlayer player = gameManager.players[i];
+      GamePlayerOnline player = gameManager.players[i];
       // Get player Cards
       List<Container> playerCards = [];
       for (GameCard card in player.cards) {
@@ -127,7 +128,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(13),
-                        color: gameManager.dealerCanExecutePlayer()
+                        color: gameManager.dealerCanExecutePlayer(player)
                             ? Colors.deepOrange
                             : Colors.black45,
                         // image: DecorationImage(
@@ -146,7 +147,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
                         ),
                       )),
                   onTap: () async {
-                    if (gameManager.dealerCanExecutePlayer()) {
+                    if (gameManager.dealerCanExecutePlayer(player)) {
                       await gameManager.dealerExecutePlayer(i);
                       setState(() {});
                     }

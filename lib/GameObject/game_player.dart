@@ -46,7 +46,7 @@ class GamePlayer {
     return cards.length;
   }
 
-  PlayerCardState CheckBlackjack(){
+  PlayerCardState checkBlackjack(){
     if (cards.length < 2){
       return PlayerCardState.error;
     }

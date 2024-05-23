@@ -113,7 +113,7 @@ final class GameOfflineManager{
     GamePlayer? dealer;
     PlayerCardState dealerResult = PlayerCardState.normal;
     for (GamePlayer player in _players){
-      PlayerCardState result = player.CheckBlackjack();
+      PlayerCardState result = player.checkBlackjack();
       if (player.isDealer()){
         dealer = player;
         dealerResult = result;
