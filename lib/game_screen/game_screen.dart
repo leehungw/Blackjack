@@ -589,6 +589,26 @@ class _PlayerCardState extends State<PlayerCard> {
       return null;
     }
 
+    if (player.state == PlayerState.ready){
+      return Align(
+        alignment: Alignment.center,
+        child: Center(
+          child: GradientText(
+            "Sẵn sàng",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: "Montserrat"
+            ),
+            colors: const [
+              Color(0xFF95ff80),
+              Color(0xFF40ff1a),
+            ],
+          ),
+        ),
+      );
+    }
+
     String specialResult = "";
     switch (player.checkBlackjack()){
       case PlayerCardState.ban_ban:
