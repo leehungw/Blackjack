@@ -157,8 +157,8 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     return Align(
       alignment: Alignment.center,
       child: Container(
-        width: 140,
-        height: 140,
+        width: 120,
+        height: 120,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: gameManager.playerCanDraw() ?
@@ -184,48 +184,48 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     if (gameManager.thisUserIsHost()){
       return Align(
         alignment: Alignment.center,
-        child: Container(
-          width: 140,
-          height: 140,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: gameManager.dealerCanExecuteAllPlayer()
-                  ? AssetImage("assets/images/game_button_execute_all.png")
-                  : AssetImage("assets/images/game_button_execute_all_fade.png"),
-              fit: BoxFit.fill,
-            ),
-          ),
-          child: GestureDetector(
-            onTap: () async => {
-              if (gameManager.dealerCanExecuteAllPlayer()){
-                await gameManager.dealerExecuteAll()
-              }
-            },
-            child: SizedBox(width: 60, height: 60),
+        child: GestureDetector(
+          onTap: () async => {
+            if (gameManager.dealerCanExecuteAllPlayer()){
+              await gameManager.dealerExecuteAll()
+            }
+          },
+          child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: gameManager.dealerCanExecuteAllPlayer()
+                      ? AssetImage("assets/images/game_button_execute_all.png")
+                      : AssetImage("assets/images/game_button_execute_all_fade.png"),
+                  fit: BoxFit.fill,
+                ),
+              ),
+              child: null
           )
         )
       );
     } else {
       return Align(
         alignment: Alignment.center,
-        child: Container(
-          width: 140,
-          height: 140,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: gameManager.playerCanEndTurn()
-                  ? AssetImage("assets/images/game_button_stop.png")
-                  : AssetImage("assets/images/game_button_stop_fade.png"),
-              fit: BoxFit.fill,
+        child: GestureDetector(
+          onTap: () async => {
+            if (gameManager.playerCanEndTurn()){
+              await gameManager.reqStand()
+            }
+          },
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: gameManager.playerCanEndTurn()
+                    ? AssetImage("assets/images/game_button_stop.png")
+                    : AssetImage("assets/images/game_button_stop_fade.png"),
+                fit: BoxFit.fill,
+              ),
             ),
-          ),
-          child: GestureDetector(
-            onTap: () async => {
-              if (gameManager.playerCanEndTurn()){
-                await gameManager.reqStand()
-              }
-            },
-            child: SizedBox(width: 60, height: 60),
+            child: null
           )
         )
       );
@@ -241,15 +241,16 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
 
     List<Container> playerCards = [];
     for (GameCard card in player.cards) {
-      playerCards.add(Container(
-        width: 20,
-        height: 75,
-        alignment: Alignment.center,
-        child: OverflowBox(
-          maxWidth: 20,
-          maxHeight: 75,
-          child: card.getImage(60, 75),
-        ),
+      playerCards.add(
+        Container(
+          width: 20,
+          height: 75,
+          alignment: Alignment.center,
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            maxHeight: double.infinity,
+            child: card.getImage(60, 75)
+          ),
       ));
     }
     return playerCards;
@@ -387,7 +388,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                         Container(
                           margin: const EdgeInsets.only(top: 20.0, left: 10.0),
                           child:
-                            Text("Phòng $roomID",
+                            Text("Phòng ${gameManager.model == null ? "???" : gameManager.model?.roomID}",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
@@ -428,9 +429,9 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(width: 10, height: 10),
-                              PlayerCard(player: gameManager.GetPlayerBySeatOffset(2), isHost: gameManager.thisUserIsHost()),
-                              PlayerCard(player: gameManager.GetPlayerBySeatOffset(1), isHost: gameManager.thisUserIsHost()),
+                              const SizedBox(width: 10, height: 60),
+                              PlayerCard(seat: 2),
+                              PlayerCard(seat: 1),
                               SizedBox(
                                   width: 60,
                                   height: 60,
@@ -448,7 +449,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              PlayerCard(player: gameManager.GetPlayerBySeatOffset(3), isHost: gameManager.thisUserIsHost()),
+                              PlayerCard(seat: 3),
                               const SizedBox(width: 10, height: 10),
                               Container(
                                 margin: const EdgeInsets.only(bottom: 40.0),
@@ -494,9 +495,9 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const SizedBox(width: 10, height: 10),
-                              PlayerCard(player: gameManager.GetPlayerBySeatOffset(4), isHost: gameManager.thisUserIsHost()),
-                              PlayerCard(player: gameManager.GetPlayerBySeatOffset(5), isHost: gameManager.thisUserIsHost()),
+                              const SizedBox(width: 10, height: 60),
+                              PlayerCard(seat: 4),
+                              PlayerCard(seat: 5),
                               Container(
                                   width: 60,
                                   height: 60,
@@ -540,39 +541,38 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
 }
 
 class PlayerCard extends StatefulWidget {
-  final GamePlayerOnline? player;
-  final bool isHost;
-  const PlayerCard({super.key, required this.player, required this.isHost});
+  final int seat;
+  const PlayerCard({super.key, required this.seat});
 
   @override
   State<PlayerCard> createState() => _PlayerCardState();
 }
 
 class _PlayerCardState extends State<PlayerCard> {
-  GamePlayerOnline? player;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    player = widget.player;
   }
 
   // CREATE PLAYER CARDS ON HAND
   List<Container> createPlayerCards(){
+    GameOnlineManager gameManager = GameOnlineManager.instance;
+    GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(widget.seat);
     if (player == null){
       return [];
     }
 
     List<Container> playerCards = [];
-    for (GameCard card in player!.cards) {
+    for (GameCard card in player.cards) {
       playerCards.add(Container(
         width: 20,
         height: 50,
         alignment: Alignment.center,
         child: OverflowBox(
-          maxWidth: 20,
-          maxHeight: 50,
+          maxWidth: double.infinity,
+          maxHeight: double.infinity,
           child: card.getImage(40, 50),
         ),
       ));
@@ -582,14 +582,15 @@ class _PlayerCardState extends State<PlayerCard> {
 
   // CREATE THE EXECUTE BUTTON / RESULT
   Align? getBottomWidget() {
-    if (widget.player == null){
+    GameOnlineManager gameManager = GameOnlineManager.instance;
+    GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(widget.seat);
+
+    if (player == null){
       return null;
     }
 
-    GameOnlineManager gameManager = GameOnlineManager.instance;
-
     String specialResult = "";
-    switch (widget.player!.checkBlackjack()){
+    switch (player.checkBlackjack()){
       case PlayerCardState.ban_ban:
         specialResult = "Xì bàn";
         break;
@@ -603,18 +604,18 @@ class _PlayerCardState extends State<PlayerCard> {
         break;
     }
 
-    if (widget.player!.result == PlayerResult.win){
+    if (player.result == PlayerResult.win){
       return Align(
         alignment: Alignment.center,
         child: Center(
           child: GradientText(
             specialResult != "" ?
               specialResult
-              : "${widget.player!.getTotalValues()} điểm",
+              : "${player.getTotalValues()} điểm",
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 28,
-                fontFamily: "Inter"
+                fontFamily: "Montserrat"
             ),
             colors: const [
               Color(0xFFFFA800),
@@ -625,18 +626,18 @@ class _PlayerCardState extends State<PlayerCard> {
       );
     }
 
-    if (widget.player!.result == PlayerResult.tie){
+    if (player.result == PlayerResult.tie){
       return Align(
         alignment: Alignment.center,
         child: Center(
           child: GradientText(
             specialResult != "" ?
             specialResult
-                : "${widget.player!.getTotalValues()} điểm",
+                : "${player.getTotalValues()} điểm",
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 28,
-                fontFamily: "Inter"
+                fontFamily: "Montserrat"
             ),
             colors: const [
               Color(0xFFB9E0F8),
@@ -647,20 +648,20 @@ class _PlayerCardState extends State<PlayerCard> {
       );
     }
 
-    if (widget.player!.result == PlayerResult.lose){
+    if (player.result == PlayerResult.lose){
       return Align(
         alignment: Alignment.center,
         child: Center(
           child: GradientText(
-            widget.player!.isBurn() ?
+            player.isBurn() ?
               "Quắc"
               : ( specialResult != "" ?
                   specialResult
-                : "${widget.player!.getTotalValues()} điểm"),
+                : "${player.getTotalValues()} điểm"),
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 28,
-                fontFamily: "Inter"
+                fontFamily: "Montserrat"
             ),
             colors: const [
               Color(0xFFF1F1F1),
@@ -672,7 +673,7 @@ class _PlayerCardState extends State<PlayerCard> {
     }
 
     // Execute button
-    if (gameManager.dealerCanExecutePlayer(widget.player!)){
+    if (gameManager.dealerCanExecutePlayer(player)){
         return Align(
             alignment: Alignment.center,
             child: Container(
@@ -686,8 +687,8 @@ class _PlayerCardState extends State<PlayerCard> {
                 ),
                 child: GestureDetector(
                   onTap: () async => {
-                    if (gameManager.dealerCanExecutePlayer(widget.player!)){
-                      await gameManager.dealerExecutePlayer(widget.player!.seat)
+                    if (gameManager.dealerCanExecutePlayer(player)){
+                      await gameManager.dealerExecutePlayer(player.seat)
                     }
                   },
                   child: SizedBox(width: 86, height: 28),
@@ -703,12 +704,12 @@ class _PlayerCardState extends State<PlayerCard> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 120,
-      height: 120,
+      height: 160,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            margin: const EdgeInsets.only(bottom: 20.0),
+            margin: const EdgeInsets.only(bottom: 5.0),
             width: 120,
             height: 50,
             decoration: BoxDecoration(

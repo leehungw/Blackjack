@@ -697,7 +697,7 @@ final class GameOnlineManager{
     return availableSeat;
   }
 
-  GamePlayerOnline? GetPlayerBySeatOffset(int seatOffset){
+  GamePlayerOnline? getPlayerBySeatOffset(int seatOffset){
     if (_thisPlayer == null) {
       return null;
     }
