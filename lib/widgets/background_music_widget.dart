@@ -23,7 +23,7 @@ class _BackgroundMusicWidgetState extends State<BackgroundMusicWidget> {
   void playBackgroundMusic() async {
     await audioPlayer.play(
       AssetSource(
-        'music/Mr_Smith-Azul.mp3',
+        'music/backgroundmusic.mp3',
         mimeType: 'audio/mpeg',
       ),
     );
