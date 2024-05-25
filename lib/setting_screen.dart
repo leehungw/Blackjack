@@ -937,33 +937,6 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                   ),
                   const Gap(20),
-                  Text(
-                    'Nhạc nền',
-                    style: TextStyles.settingScreenSubTitle,
-                  ),
-                  const Gap(10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Mặc định',
-                        style: TextStyles.textInField
-                            .copyWith(color: Colors.black),
-                      ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: GradientText(
-                          'Chọn nhạc',
-                          style: TextStyles.settingTextButton,
-                          colors: const [
-                            Palette.settingTextButtonGradientRight,
-                            Palette.settingTextButtonGradientLeft,
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  const Gap(20),
                   GestureDetector(
                     onTap: launchEmailApp,
                     child: Row(
@@ -1014,7 +987,8 @@ class _SettingScreenState extends State<SettingScreen> {
                         ),
                         child: Text(
                           'Thoát',
-                          style: TextStyles.settingScreenButton,
+                          style: TextStyles.settingScreenButton
+                              .copyWith(color: Colors.blue),
                         ),
                       ),
                     ),
