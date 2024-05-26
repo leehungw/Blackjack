@@ -13,6 +13,9 @@ import 'game_card.dart';
 import 'game_player.dart';
 import 'game_player_online.dart';
 
+// TODO: sửa lỗi duplicated player khi tham gia lại phòng
+// TODO: host vô lại phòng không nhìn thấy được bài của mình
+
 enum RoomStatus {
   start,
   end,
@@ -158,12 +161,14 @@ final class GameOnlineManager{
         break;
     }
 
-
     // Show player cards when they have already been executed.
     int showedCount = 0;
     for (GamePlayerOnline player in _players){
       if (player == _dealer){
         showedCount ++;
+        if (player == _thisPlayer){
+          player.flipCards();
+        }
         continue;
       } else {
         if (player.result != PlayerResult.uncheck){
@@ -422,6 +427,9 @@ final class GameOnlineManager{
   }
 
   Future<void> endOnlineGame() async {
+    if (_status == RoomStatus.end){
+      return;
+    }
     _status = RoomStatus.end;
     await uploadData();
   }
@@ -568,7 +576,7 @@ final class GameOnlineManager{
   // EXECUTE FUNCTIONS
 
   Future<bool> tryEndOnlineGame() async {
-    if (_revealedCount == _players.length - 1){
+    if (_revealedCount >= _players.length - 1){
       await endOnlineGame();
       return true;
     }
@@ -879,7 +887,7 @@ final class GameOnlineManager{
       player.reveal(_dealer!);
       _revealedCount++;
     }
-
+    await tryEndOnlineGame();
     await uploadData();
   }
 

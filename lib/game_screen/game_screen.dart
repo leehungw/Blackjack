@@ -123,6 +123,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     }
 
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: () async => {
         if (gameManager.thisUserIsHost()){
           if (gameManager.canStartGame()){
@@ -157,6 +158,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     return Align(
       alignment: Alignment.center,
       child:  GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () async => {
             if (gameManager.playerCanDraw()){
               await gameManager.reqDrawCard()
@@ -185,6 +187,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       return Align(
         alignment: Alignment.center,
         child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () async => {
             if (gameManager.dealerCanExecuteAllPlayer()){
               await gameManager.dealerExecuteAll()
@@ -209,6 +212,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       return Align(
         alignment: Alignment.center,
         child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () async => {
             if (gameManager.playerCanEndTurn()){
               await gameManager.reqStand()
@@ -697,6 +701,7 @@ class _PlayerCardState extends State<PlayerCard> {
         return Align(
             alignment: Alignment.center,
             child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
               onTap: () async => {
                 if (gameManager.dealerCanExecutePlayer(player)){
                   await gameManager.dealerExecutePlayer(player.seat)
