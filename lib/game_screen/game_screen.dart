@@ -156,26 +156,26 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
   Align getLeftButton() {
     return Align(
       alignment: Alignment.center,
-      child: Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: gameManager.playerCanDraw() ?
-              AssetImage("assets/images/game_button_draw.png")
-                : AssetImage("assets/images/game_button_draw_fade.png"),
-            fit: BoxFit.fill,
-          ),
-        ),
-        child: GestureDetector(
+      child:  GestureDetector(
           onTap: () async => {
             if (gameManager.playerCanDraw()){
               await gameManager.reqDrawCard()
             }
           },
-          child: SizedBox(width: 60, height: 60),
-        )
+          child: Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: gameManager.playerCanDraw() ?
+              AssetImage("assets/images/game_button_draw.png")
+                  : AssetImage("assets/images/game_button_draw_fade.png"),
+              fit: BoxFit.fill,
+            ),
+          ),
+          child: null
       )
+        )
     );
   }
 
