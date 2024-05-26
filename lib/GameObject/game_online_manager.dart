@@ -697,6 +697,15 @@ final class GameOnlineManager{
     return availableSeat;
   }
 
+  GamePlayerOnline? getPlayerBySeat(int seat){
+    for (GamePlayerOnline player in players){
+      if (player.seat == seat){
+        return player;
+      }
+    }
+    return null;
+  }
+
   GamePlayerOnline? getPlayerBySeatOffset(int seatOffset){
     if (_thisPlayer == null) {
       return null;
@@ -850,7 +859,12 @@ final class GameOnlineManager{
     if (_thisPlayer != _dealer || _thisPlayer != _currentPlayer){
       return;
     }
-    _players[seatNumber].reveal(_dealer!);
+    GamePlayerOnline? player = getPlayerBySeat(seatNumber);
+    if (player == null){
+      print("Player at seat $seatNumber doesn't exist!");
+      return;
+    }
+    player.reveal(_dealer!);
     _revealedCount ++;
     await tryEndOnlineGame();
 

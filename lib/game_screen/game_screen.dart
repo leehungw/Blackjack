@@ -696,7 +696,13 @@ class _PlayerCardState extends State<PlayerCard> {
     if (gameManager.dealerCanExecutePlayer(player)){
         return Align(
             alignment: Alignment.center,
-            child: Container(
+            child: GestureDetector(
+              onTap: () async => {
+                if (gameManager.dealerCanExecutePlayer(player)){
+                  await gameManager.dealerExecutePlayer(player.seat)
+                }
+              },
+              child: Container(
                 width: 86,
                 height: 28,
                 decoration: BoxDecoration(
@@ -705,14 +711,8 @@ class _PlayerCardState extends State<PlayerCard> {
                     fit: BoxFit.fill,
                   ),
                 ),
-                child: GestureDetector(
-                  onTap: () async => {
-                    if (gameManager.dealerCanExecutePlayer(player)){
-                      await gameManager.dealerExecutePlayer(player.seat)
-                    }
-                  },
-                  child: SizedBox(width: 86, height: 28),
-                )
+                child: null
+              )
             )
         );
     }
