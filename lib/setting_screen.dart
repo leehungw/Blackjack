@@ -704,6 +704,8 @@ class _SettingScreenState extends State<SettingScreen> {
           ),
           Container(
             padding: const EdgeInsets.all(24),
+            height: size.height,
+            alignment: Alignment.center,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1031,7 +1033,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ),
                   ),
-                  const Gap(20),
+                  const Gap(50),
                 ],
               ),
             ),

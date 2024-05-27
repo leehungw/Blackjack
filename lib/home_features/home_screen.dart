@@ -3,6 +3,7 @@ import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:card/widgets/custom_icon_button.dart';
+import 'package:card/widgets/login_gift_dialog.dart';
 import 'package:card/widgets/start_game_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -266,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               alignment: Alignment.centerLeft,
                               child: CustomIconButton(
                                 color: Palette.rollCallIcon,
-                                icon: FontAwesomeIcons.calendar,
+                                icon: FontAwesomeIcons.solidCalendarDays,
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
@@ -277,7 +278,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 size: 40,
                                 onPressed: () {
-                                  //TODO: rollcall onpressed handle
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return LoginGift();
+                                    },
+                                  );
                                 },
                                 text: "Điểm danh",
                               ),
@@ -335,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               alignment: Alignment.centerLeft,
                               child: CustomIconButton(
                                 color: Palette.coinGrind,
-                                icon: Icons.money,
+                                icon: FontAwesomeIcons.coins,
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
