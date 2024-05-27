@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:card/main.dart';
+import 'package:card/models/user.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:card/widgets/custom_elevated_button_big.dart';
@@ -21,6 +24,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  PlayerRepo _playerRepo = PlayerRepo();
+
+  static const double constXExp = 0.05;
+
   Future<void> signout() async {
     FirebaseAuth.instance.signOut();
     GoRouter.of(context).go('/login');
@@ -54,125 +61,182 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Center(
                     child: Column(children: [
-                      Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: Palette.titleTextGradientBottom,
-                                    width: 2)),
-                            child: Row(
-                              children: [
-                                Container(
+                      FutureBuilder(
+                          future: _playerRepo.getPlayerById(
+                              FirebaseAuth.instance.currentUser!.uid),
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.hasData) {
+                              Player player = snapshot.data as Player;
+
+                              int level =
+                                  (constXExp * sqrt(player.level)).floor();
+
+                              int currentLevelExp =
+                                  pow((level / constXExp), 2).floor();
+                              int nextLevelExp =
+                                  pow(((level + 1) / constXExp), 2).floor();
+                              int diffExp = nextLevelExp - currentLevelExp;
+                              int earnedExp = player.level - currentLevelExp;
+                              double expPercentage = earnedExp / diffExp;
+
+                              return Row(
+                                children: [
+                                  Container(
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(10),
                                         border: Border.all(
                                             color:
                                                 Palette.titleTextGradientBottom,
                                             width: 2)),
-                                    child: Column(
+                                    child: Row(
                                       children: [
-                                        CircleAvatar(
-                                          radius: 50,
-                                          backgroundImage: AssetImage(
-                                              'assets/images/default_profile_picture.png'),
-                                        ),
-                                        Gap(10),
-                                        Text(
-                                          "Tuong Pham",
-                                          style: TextStyles.defaultStyle
-                                              .copyWith(
-                                                  fontWeight: FontWeight.bold),
+                                        Container(
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                border: Border.all(
+                                                    color: Palette
+                                                        .titleTextGradientBottom,
+                                                    width: 2)),
+                                            child: Column(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 50,
+                                                  backgroundImage:
+                                                      Image.network(FirebaseAuth
+                                                                  .instance
+                                                                  .currentUser!
+                                                                  .photoURL ??
+                                                              'https://firebasestorage.googleapis.com/v0/b/lucky-card-42fae.appspot.com/o/avatar.jpg?alt=media&token=e0736d41-b937-44a6-b05e-a08e9096440f')
+                                                          .image,
+                                                ),
+                                                Gap(10),
+                                                Text(
+                                                  player.userName,
+                                                  style: TextStyles.defaultStyle
+                                                      .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                )
+                                              ],
+                                            )),
+                                        Gap(7),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  TextSpan(
+                                                    text: "Coins: ",
+                                                    style: TextStyles
+                                                        .textFieldStyle
+                                                        .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Palette
+                                                                .primaryText),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        player.money.toString(),
+                                                    style: TextStyles
+                                                        .textFieldStyle
+                                                        .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Palette
+                                                                .numberText),
+                                                  ),
+                                                  TextSpan(
+                                                      text: " VND",
+                                                      style: TextStyles
+                                                          .textFieldStyle
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: Palette
+                                                                  .black)),
+                                                ],
+                                              ),
+                                            ),
+                                            Gap(10),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  "Level: ",
+                                                  style: TextStyles
+                                                      .textFieldStyle
+                                                      .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Palette
+                                                              .primaryText),
+                                                ),
+                                                LinearPercentIndicator(
+                                                  width: 120.0,
+                                                  lineHeight: 14.0,
+                                                  percent: expPercentage,
+                                                  barRadius:
+                                                      Radius.circular(10),
+                                                  backgroundColor: Palette
+                                                      .buttonStartBackgroundGradientTop,
+                                                  progressColor: Palette
+                                                      .buttonStartBackgroundGradientBottom,
+                                                ),
+                                                Text(" LV.$level",
+                                                    style: TextStyles
+                                                        .textFieldStyle
+                                                        .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color:
+                                                                Palette.black))
+                                              ],
+                                            ),
+                                            Gap(10),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  "ID:  ",
+                                                  style: TextStyles
+                                                      .textFieldStyle
+                                                      .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Palette
+                                                              .primaryText),
+                                                ),
+                                                SizedBox(
+                                                  width: 160,
+                                                  child: Text(
+                                                    player.playerID,
+                                                    style: TextStyles
+                                                        .textFieldStyle
+                                                        .copyWith(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Palette
+                                                                .numberText),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ],
                                         )
                                       ],
-                                    )),
-                                Gap(7),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: "Coins: ",
-                                            style: TextStyles.textFieldStyle
-                                                .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Palette.primaryText),
-                                          ),
-                                          TextSpan(
-                                            text: "1,000,000,000",
-                                            style: TextStyles.textFieldStyle
-                                                .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Palette.numberText),
-                                          ),
-                                          TextSpan(
-                                              text: " VND",
-                                              style: TextStyles.textFieldStyle
-                                                  .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Palette.black)),
-                                        ],
-                                      ),
                                     ),
-                                    Gap(10),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Level: ",
-                                          style: TextStyles.textFieldStyle
-                                              .copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Palette.primaryText),
-                                        ),
-                                        LinearPercentIndicator(
-                                          width: 120.0,
-                                          lineHeight: 14.0,
-                                          percent: 0.5,
-                                          barRadius: Radius.circular(10),
-                                          backgroundColor: Palette
-                                              .buttonStartBackgroundGradientTop,
-                                          progressColor: Palette
-                                              .buttonStartBackgroundGradientBottom,
-                                        ),
-                                        Text(" LV.2",
-                                            style: TextStyles.textFieldStyle
-                                                .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Palette.black))
-                                      ],
-                                    ),
-                                    Gap(10),
-                                    RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: "ID: ",
-                                            style: TextStyles.textFieldStyle
-                                                .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Palette.primaryText),
-                                          ),
-                                          TextSpan(
-                                            text: "123456789",
-                                            style: TextStyles.textFieldStyle
-                                                .copyWith(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Palette.numberText),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
+                                  )
+                                ],
+                              );
+                            } else {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          }),
                       Gap(30),
                       SizedBox(
                         height: 145,
@@ -294,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Palette.buttonPracticeBackgroundGradientBottom
                                 ],
                               ),
-                              onPressed: () {
+                              onPressed: () async {
                                 //TODO: Practice onpressed handle
                               },
                               text: "Luyện Tập",
