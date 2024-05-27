@@ -49,6 +49,10 @@ class Player {
       duration: data['duration'] as int,
     );
   }
+  @override
+  int get hashCode => playerID.hashCode;
+  @override
+  bool operator ==(other) => playerID == (other as Player).playerID;
 }
 
 // Để lưu trữ thông tin người dùng lên Firestore
@@ -128,5 +132,15 @@ class PlayerRepo {
         .doc(id)
         .update({"money": player.money - amount}).then((_) => isSuccess = true);
     return isSuccess;
+  }
+
+  Future<List<Player>> getAllPlayers() async {
+    final CollectionReference<Map<String, dynamic>> collectionRef =
+        FirebaseFirestore.instance.collection("Users");
+    QuerySnapshot querySnapshot = await collectionRef.get();
+
+    final players =
+        querySnapshot.docs.map((doc) => Player.fromFirestore(doc)).toList();
+    return players;
   }
 }

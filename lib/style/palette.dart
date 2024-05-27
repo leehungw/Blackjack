@@ -59,6 +59,7 @@ class Palette {
   static const Color settingDialogButtonText = Color(0xFF049D00);
   static const Color rollCallIcon = Color(0xFF1102BE);
   static const Color coinGrind = Color(0xFFF4B325);
+  static const Color ranking2nd = Color(0xFFC6C6C6);
 
   //Home Screen
   static const Color labelFunctionText = Color(0xFFF8FFA1);
