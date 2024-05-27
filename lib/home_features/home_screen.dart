@@ -313,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 size: 40,
                                 onPressed: () {
-                                  //TODO: Setting onpressed handle
+                                  GoRouter.of(context).go("/home/rank");
                                 },
                                 text: "Xếp hạng",
                               ),
