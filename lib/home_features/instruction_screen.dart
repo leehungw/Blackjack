@@ -6,6 +6,7 @@ import 'package:card/widgets/custom_elevated_button_small.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class InstructionScreen extends StatefulWidget {
@@ -106,7 +107,7 @@ class _InstructionScreenState extends State<InstructionScreen> {
                           ],
                         ),
                         onPressed: () {
-                          //TODO: Context.pop()
+                          context.pop();
                         },
                         text: "Đã Hiểu",
                       ),
