@@ -9,8 +9,6 @@ import 'package:card/widgets/custom_icon_button.dart';
 import 'package:card/widgets/login_gift_dialog.dart';
 import 'package:card/widgets/start_game_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
@@ -365,9 +363,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               onPressed: () async {
-                                //TODO: Practice onpressed handle
+                                GoRouter.of(context).go("/home/room_list");
                               },
-                              text: "Luyện Tập",
+                              text: "Phòng",
                             ),
                           ),
                           Padding(
@@ -387,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 size: 40,
                                 onPressed: () {
-                                  //TODO: Instructions onpressed handle
+                                  GoRouter.of(context).go("/home/instruction");
                                 },
                                 text: "Hướng dẫn",
                               ),
