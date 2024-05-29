@@ -1,9 +1,7 @@
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,8 +15,7 @@ class LoginGift extends StatefulWidget {
 class _LoginGiftState extends State<LoginGift> {
   int _duration = 0;
   DateTime? _startDay;
-  List<bool> _giftReceived = List.filled(7, false);
-  DateTime _currentDate = DateTime.now();
+  final DateTime _currentDate = DateTime.now();
   int distinct = 0;
   late String userID;
 
@@ -31,37 +28,31 @@ class _LoginGiftState extends State<LoginGift> {
   _loadFromSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     userID = prefs.getString('userID') ?? '';
-    print('User ID: $userID');
     int duration = prefs.getInt('duration') ?? 0;
     String? startDayString = prefs.getString('startDate');
     DateTime? startDay =
         startDayString != null ? DateTime.parse(startDayString) : null;
-    //kiem tra
-    print('Start Day: $startDay');
-    int daysPassed = _currentDate.difference(startDay!).inDays;
-    if (startDay != null) {
-      if (daysPassed != duration && daysPassed != (duration - 1)) {
-        print('Loi 1 day ne anh Tuong a');
-        print('Duration loi 1: $duration');
-        print('Days Passed loi 1: $daysPassed');
-        duration = 0;
-        startDay = _currentDate;
-      }
-      if (duration == 7 && startDay != _currentDate) {
-        print('Loi 2 day ne anh Tuong a');
-        duration = 0;
-        startDay = _currentDate;
-      }
-    }
 
-    setState(() {
-      _duration = duration;
-      _startDay = startDay ?? _startDay;
-      distinct = daysPassed;
-    });
-    print('Duration: $_duration');
-    print('Start Day: $_startDay');
-    print('Distinct: $distinct');
+    int daysPassed = _currentDate.difference(startDay!).inDays;
+
+    if (((daysPassed != duration && daysPassed != (duration - 1)) ||
+            duration >= 7) &&
+        daysPassed != 0) {
+      duration = 0;
+      startDay = _currentDate;
+      setState(() {
+        _duration = duration;
+        _startDay = startDay ?? _startDay;
+        distinct = 0;
+      });
+      _updateDatabase();
+    } else {
+      setState(() {
+        _duration = duration;
+        _startDay = startDay ?? _startDay;
+        distinct = daysPassed;
+      });
+    }
   }
 
   _updateDatabase() async {
@@ -74,18 +65,16 @@ class _LoginGiftState extends State<LoginGift> {
 
   _updateSharedPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    print('tesst ne');
-    print('Duration: $_duration');
+
     await prefs.setInt('duration', _duration);
-    print('Start Day: $_startDay');
-    print('Start Day String: ${_startDay!.toString()}');
+
     await prefs.setString('startDate', _startDay!.toString());
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
+      child: SizedBox(
         height: 340,
         width: 300,
         child: Stack(
@@ -99,12 +88,12 @@ class _LoginGiftState extends State<LoginGift> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: const [
                     Palette.homeDialogBackgroundGradientBottom,
                     Palette.homeDialogBackgroundGradientTop,
                   ],
                 ),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.white,
                     offset: Offset(0, 0),
@@ -166,7 +155,7 @@ class _LoginGiftState extends State<LoginGift> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
-                                        colors: [
+                                        colors: const [
                                           Palette.loginGiftButtonGradientTop,
                                           Palette.loginGiftButtonGradientBottom,
                                         ],
@@ -220,12 +209,12 @@ class _LoginGiftState extends State<LoginGift> {
                                         ),
                                         Center(
                                           child: Visibility(
+                                            visible: 1 <= _duration,
                                             child: Icon(
                                               FontAwesomeIcons.check,
                                               color: Palette.loginGiftCheck,
                                               size: 38,
                                             ),
-                                            visible: 1 <= _duration,
                                           ),
                                         ),
                                       ],
@@ -304,7 +293,7 @@ class _LoginGiftState extends State<LoginGift> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
-                                        colors: [
+                                        colors: const [
                                           Palette.loginGiftButtonGradientTop,
                                           Palette.loginGiftButtonGradientBottom,
                                         ],
@@ -358,12 +347,12 @@ class _LoginGiftState extends State<LoginGift> {
                                         ),
                                         Center(
                                           child: Visibility(
+                                            visible: 2 <= _duration,
                                             child: Icon(
                                               FontAwesomeIcons.check,
                                               color: Palette.loginGiftCheck,
                                               size: 38,
                                             ),
-                                            visible: 2 <= _duration,
                                           ),
                                         ),
                                       ],
@@ -442,7 +431,7 @@ class _LoginGiftState extends State<LoginGift> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
-                                        colors: [
+                                        colors: const [
                                           Palette.loginGiftButtonGradientTop,
                                           Palette.loginGiftButtonGradientBottom,
                                         ],
@@ -496,12 +485,12 @@ class _LoginGiftState extends State<LoginGift> {
                                         ),
                                         Center(
                                           child: Visibility(
+                                            visible: 3 <= _duration,
                                             child: Icon(
                                               FontAwesomeIcons.check,
                                               color: Palette.loginGiftCheck,
                                               size: 38,
                                             ),
-                                            visible: 3 <= _duration,
                                           ),
                                         ),
                                       ],
@@ -580,7 +569,7 @@ class _LoginGiftState extends State<LoginGift> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
-                                        colors: [
+                                        colors: const [
                                           Palette.loginGiftButtonGradientTop,
                                           Palette.loginGiftButtonGradientBottom,
                                         ],
@@ -634,12 +623,12 @@ class _LoginGiftState extends State<LoginGift> {
                                         ),
                                         Center(
                                           child: Visibility(
+                                            visible: 4 <= _duration,
                                             child: Icon(
                                               FontAwesomeIcons.check,
                                               color: Palette.loginGiftCheck,
                                               size: 38,
                                             ),
-                                            visible: 4 <= _duration,
                                           ),
                                         ),
                                       ],
@@ -722,7 +711,7 @@ class _LoginGiftState extends State<LoginGift> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
-                                        colors: [
+                                        colors: const [
                                           Palette.loginGiftButtonGradientTop,
                                           Palette.loginGiftButtonGradientBottom,
                                         ],
@@ -776,12 +765,12 @@ class _LoginGiftState extends State<LoginGift> {
                                         ),
                                         Center(
                                           child: Visibility(
+                                            visible: 5 <= _duration,
                                             child: Icon(
                                               FontAwesomeIcons.check,
                                               color: Palette.loginGiftCheck,
                                               size: 38,
                                             ),
-                                            visible: 5 <= _duration,
                                           ),
                                         ),
                                       ],
@@ -860,7 +849,7 @@ class _LoginGiftState extends State<LoginGift> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
-                                        colors: [
+                                        colors: const [
                                           Palette.loginGiftButtonGradientTop,
                                           Palette.loginGiftButtonGradientBottom,
                                         ],
@@ -914,12 +903,12 @@ class _LoginGiftState extends State<LoginGift> {
                                         ),
                                         Center(
                                           child: Visibility(
+                                            visible: 6 <= _duration,
                                             child: Icon(
                                               FontAwesomeIcons.check,
                                               color: Palette.loginGiftCheck,
                                               size: 38,
                                             ),
-                                            visible: 6 <= _duration,
                                           ),
                                         ),
                                       ],
@@ -999,7 +988,7 @@ class _LoginGiftState extends State<LoginGift> {
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
-                                        colors: [
+                                        colors: const [
                                           Palette.loginGiftButtonGradientTop,
                                           Palette.loginGiftButtonGradientBottom,
                                         ],
@@ -1052,12 +1041,12 @@ class _LoginGiftState extends State<LoginGift> {
                                         ),
                                         Center(
                                           child: Visibility(
+                                            visible: 7 <= _duration,
                                             child: Icon(
                                               FontAwesomeIcons.check,
                                               color: Palette.loginGiftCheck,
                                               size: 38,
                                             ),
-                                            visible: 7 <= _duration,
                                           ),
                                         ),
                                       ],
