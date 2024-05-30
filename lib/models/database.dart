@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:card/GameObject/game_online_manager.dart';
-import 'package:card/models/PlayerModel.dart';
 import 'package:card/models/RequestModel.dart';
 import 'package:card/models/Validator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,8 +40,8 @@ class Database {
       .doc(RequestModel.formatRequestCollectionKey(roomID))
       .collection("Requests");
 
-    _requestsFirestoreSubscription = _requestsDoc.snapshots().listen((snapshot) {
-      _updateLocalRequestsFromFirestore(GameOnlineManager.instance, snapshot);
+    _requestsFirestoreSubscription = _requestsDoc.snapshots().listen((snapshot) async {
+      await _updateLocalRequestsFromFirestore(GameOnlineManager.instance, snapshot);
     });
 
     // _playersFirestoreSubscription = _playersDoc.snapshots().listen((snapshot) {
@@ -173,8 +172,8 @@ class Database {
   }
 
   /// Updates the local state of [Room] with the data from Firestore.
-  static void _updateLocalRequestsFromFirestore(
-      GameOnlineManager manager, QuerySnapshot<Map<String, dynamic>> snapshot) {
+  static Future<void> _updateLocalRequestsFromFirestore(
+      GameOnlineManager manager, QuerySnapshot<Map<String, dynamic>> snapshot) async {
     _log.fine('Received new data from Firestore (${snapshot.docs})');
 
     final requestList = snapshot.docs.map((doc) => RequestModel.fromJson(doc.id, doc.data())).toList();
@@ -183,7 +182,7 @@ class Database {
       _log.fine('No change');
     } else {
       _log.fine('Updating local data with Firestore data ($requestList)');
-      manager.importRequests(requestList);
+      await manager.importRequests(requestList);
     }
   }
 

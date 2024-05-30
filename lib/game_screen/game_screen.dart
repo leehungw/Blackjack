@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:card/widgets/deal_picker_dialog.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -10,6 +11,7 @@ import '../GameObject/game_card.dart';
 import '../GameObject/game_online_manager.dart';
 import '../GameObject/game_player.dart';
 import '../GameObject/game_player_online.dart';
+import '../models/user.dart';
 
 class GameScreenOnline extends StatefulWidget {
   const GameScreenOnline({super.key});
@@ -24,45 +26,16 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
   String userID = "21520889";
   // ====================================
 
+  bool isManagerDisposed = false;
+
   GameOnlineManager gameManager = GameOnlineManager.instance;
   List<Card> playerSeats = [];
-  final _userIDController = TextEditingController();
-  final _roomIDController = TextEditingController();
+  // final _userIDController = TextEditingController();
+  // final _roomIDController = TextEditingController();
 
   StreamSubscription? _gameLocalSubscription;
 
   Future<void> _startGame() async {
-    // Join room dialog
-    await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Join room"),
-          content: Column(
-            children: [
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "User ID"),
-                controller: _userIDController,
-              ),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Room ID"),
-                controller: _roomIDController,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  userID = _userIDController.text.trim();
-                  roomID = int.parse(_roomIDController.text);
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Find room"))
-          ],
-        ));
-
-    await gameManager.initialize(userID, roomID);
     _gameLocalSubscription = gameManager.allChanges.listen((event) async {
       await _update();
     });
@@ -72,7 +45,11 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
   Future<void> _update() async {
     // Room is being deleting, post notice
     if (gameManager.status == RoomStatus.deleting){
-      await _hostLeaveDialog(context);
+      if (!gameManager.thisUserIsHost()){
+        await gameManager.dispose();
+        isManagerDisposed = true;
+        await _hostLeaveDialog(context);
+      }
     }
     setState(() {});
   }
@@ -88,9 +65,11 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     _gameLocalSubscription?.cancel();
-    gameManager.dispose();
+    if (!isManagerDisposed){
+      gameManager.dispose();
+    }
     super.dispose();
   }
 
@@ -136,7 +115,10 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
           }
         } else {
           if (gameManager.playerCanReady()){
-            gameManager.reqReady()
+            await showDialog(
+                context: context,
+                builder: (context) => DealPickerDialog(thisPlayer: gameManager.thisPlayer!.userModel!)
+            )
           } else if (gameManager.playerCanCancelReady()){
             gameManager.reqCancelReady()
           }
@@ -280,7 +262,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
               onPressed: () async {
                 // exit
                   context.pop();
-                  context.pop();
+                  GoRouter.of(context).go("/home");
                 }
               ,
               child: Text('Rời phòng')
@@ -312,8 +294,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                 // exit
                 context.pop();
                 if (await gameManager.reqLeaveRoom()){
-                  if (!context.mounted) return;
-                  context.pop();
+                  GoRouter.of(context).go("/home");
                 }
               },
               child: Text('Đồng ý'))
@@ -327,107 +308,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
 
   @override
   Widget build(BuildContext context) {
-    playerSeats.clear();
 
-    for (int i = 0; i < gameManager.players.length; i++) {
-      GamePlayerOnline player = gameManager.players[i];
-      // Get player Cards
-      List<SizedBox> playerCards = [];
-      for (GameCard card in player.cards) {
-        playerCards.add(SizedBox(
-          width: 40,
-          height: 50,
-          child: card.getImage(40, 50),
-        ));
-      }
-
-      // Create seat
-      Card playerSeat = Card(
-        color: player.result == PlayerResult.dealer
-            ? Colors.blueAccent
-            : (player.result == PlayerResult.win
-            ? Colors.greenAccent
-            : (player.result == PlayerResult.lose
-            ? Colors.black26
-            : (player.result == PlayerResult.tie
-            ? Colors.yellow
-            : Colors.deepPurpleAccent.shade200))),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 0),
-              child: GestureDetector(
-                  child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(13),
-                        color: gameManager.dealerCanExecuteAllPlayer()
-                            ? Colors.deepOrange
-                            : Colors.black45,
-                        // image: DecorationImage(
-                        //     image: AssetImage(
-                        //         "assets/images/button_background_inactive.png"),
-                        //     fit: BoxFit.fill),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Xét",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Colors.white,
-                              fontFamily: "Montserrat"),
-                        ),
-                      )),
-                  onTap: () async {
-                    if (gameManager.dealerCanExecutePlayer(player)) {
-                      await gameManager.dealerExecutePlayer(i);
-                      setState(() {});
-                    }
-                  }),
-            ),
-            Gap(5),
-            Container(
-              width: 100,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(13),
-                color: gameManager.players[i].state == PlayerState.onTurn
-                    ? Colors.green
-                    : (gameManager.players[i].state == PlayerState.wait
-                    ? Colors.red
-                    : Colors.black),
-                // image: DecorationImage(
-                //     image: AssetImage(
-                //         "assets/images/button_background_inactive.png"),
-                //     fit: BoxFit.fill),
-              ),
-              child: Text("Người chơi ${player.seat}",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontFamily: "Montserrat"),
-                  textAlign: TextAlign.center),
-            ),
-            Gap(10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: playerCards,
-            )
-          ],
-        ),
-      );
-
-      playerSeats.add(playerSeat);
-    }
-
-    //===============================================================================
-    // TODO: MAIN WIDGET
 
     return SafeArea(
       child: Builder(builder: (context) {
@@ -492,7 +373,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                             ],
                           ),
 
-                          // TABLE
+                          // TODO: TABLE
                           Container(
                             margin: const EdgeInsets.only(bottom: 20.0),
                             width: MediaQuery.of(context).size.width,
@@ -612,8 +493,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                             ),
                           ),
 
-
-                          // BOTTOM BAR
+                          // TODO: BOTTOM BAR
                           Container(
                             width: MediaQuery.of(context).size.width,
                             height: 60,
@@ -624,6 +504,20 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                 colors: const [Color(0xFF262C40), Color(0xFF464C60)],
                               ),
                             ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  gameManager.thisPlayer != null ? (gameManager.thisPlayer?.userModel != null ? gameManager.thisPlayer!.userModel!.money.toString() : "") : "",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      fontFamily: "Montserrat",
+                                      color: Colors.white
+                                  )
+                                )
+                              ],
+                            )
                           )
                         ],
                       ),
@@ -822,10 +716,11 @@ class _PlayerCardState extends State<PlayerCard> {
     return null;
   }
 
+  // TODO: Player Placeholder
   @override
   Widget build(BuildContext context) {
     GameOnlineManager gameManager = GameOnlineManager.instance;
-    GamePlayerOnline? player = gameManager.getPlayerBySeat(widget.seat);
+    GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(widget.seat);
 
     return SizedBox(
       width: 120,
@@ -850,29 +745,30 @@ class _PlayerCardState extends State<PlayerCard> {
                 SizedBox(
                   width: 50,
                   height: 20,
-                  child: Image.asset("assets/images/game_host_banner.png", width: 50, height: 20),
+                  child: player == gameManager.dealer ? Image.asset("assets/images/game_host_banner.png", width: 50, height: 20) : null,
                 ),
                 SizedBox(
-                  width: 80,
+                  width: 70,
                   height: 50,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        player != null ? player.userId : "",
+                        player != null ? (player.userModel != null ? player.userModel!.userName : "") : "",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 12,
                           fontFamily: "Montserrat",
                           color: Colors.white
-                        )
+                        ),
+                        textAlign: TextAlign.start,
                       ),
                       GradientText(
-                          player != null ? "Money?" : "",
+                          player != null ? (player.userModel != null ? player.userModel!.money.toString() : "") : "",
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 12,
                               fontFamily: "Montserrat",
                           ),
                           colors: const [

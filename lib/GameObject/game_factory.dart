@@ -32,9 +32,10 @@ abstract final class GameFactory {
 
   // Create Online Objects
 
-  static GamePlayerOnline createPlayerOnline(PlayerModel model, bool isUser){
+  static Future<GamePlayerOnline> createPlayerOnline(PlayerModel model, bool isUser) async {
     GamePlayerOnline p = GamePlayerOnline(0, "", 0);
     p.parseData(model, isUser);
+    await p.connectToUserModel();
     return p;
   }
 
@@ -50,12 +51,12 @@ abstract final class GameFactory {
     );
   }
 
-  static RequestModel createRequestReady(String thisPlayerID){
+  static RequestModel createRequestReady(String thisPlayerID, amount){
     return RequestModel(
         key: RequestModel.formatRequestsKey(thisPlayerID),
         playerID: thisPlayerID,
         command: RequestModel.reqReady,
-        params: []
+        params: [amount.toString()]
     );
   }
 
@@ -92,6 +93,15 @@ abstract final class GameFactory {
         playerID: thisPlayerID,
         command: RequestModel.reqLeave,
         params: []
+    );
+  }
+
+  static RequestModel createRequestKick(String thisPlayerID, String targetID, String flag){
+    return RequestModel(
+        key: RequestModel.formatRequestsKey(thisPlayerID),
+        playerID: thisPlayerID,
+        command: RequestModel.reqLeave,
+        params: [targetID, flag]
     );
   }
 }

@@ -37,12 +37,12 @@ final router = GoRouter(
             pageBuilder: (context, state) => buildMyTransition<void>(
               key: ValueKey('signup'),
               color: Palette.accountBackgroundGradientBottom,
-              // child: const SignupScreen(
-              //   key: Key('signup'),
-              // ),
-              child: const GameScreenOnline(
-                key: Key('gamescreen')
-              )
+              child: const SignupScreen(
+                key: Key('signup'),
+              ),
+              // child: const GameScreenOnline(
+              //   key: Key('gamescreen')
+              // )
             ),
             // routes: [
             //   GoRoute(
@@ -62,6 +62,10 @@ final router = GoRouter(
       path: '/home',
       builder: (context, state) => const HomeScreen(key: Key('home')),
       routes: [
+        GoRoute(
+          path: 'game_screen',
+          builder: (context, state) => const GameScreenOnline(key: Key('game_screen'))
+        ),
         GoRoute(
           path: 'setting',
           builder: (context, state) => const SettingScreen(key: Key('setting')),

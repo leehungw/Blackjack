@@ -59,4 +59,12 @@ class RequestModel{
   static const reqDrawCard = "reqDrawCard";
   static const reqStand = "reqStand";
   static const reqLeave = "reqLeave";
+  static const reqKick = "reqKick";
 }
+
+abstract final class ReqKickFlag{
+  static const hostKicked = "hostKicked";
+  static const outOfMoney = "outOfMoney";
+}
+
+
