@@ -84,7 +84,6 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                 .map((doc) => RoomModel.fromJson(
                                     doc.id, doc.data() as Map<String, dynamic>))
                                 .toList();
-                            int selectedIndex = 0;
                             return SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height - 300,
