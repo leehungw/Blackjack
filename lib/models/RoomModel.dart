@@ -9,10 +9,10 @@ class RoomModel {
   String? key;
   int? roomID;
   List<PlayerModel> players = [];
-  int? dealer;
+  String? dealer;
   // List<String> deck = [];
   String? status;
-  int? currentPlayer;
+  String? currentPlayer;
 
   static String collectionName = 'Rooms';
 
@@ -69,10 +69,10 @@ class RoomModel {
         key: key,
         roomID: json['roomID'] as int,
         players:  listPlayer.map((raw) => PlayerModel.fromJson(raw)).toList(),
-        dealer: json['dealer'] as int,
+        dealer: json['dealer'] as String,
         // deck: List.from(deck),
         status: json['status'] as String,
-        currentPlayer: json['currentPlayer'] as int
+        currentPlayer: json['currentPlayer'] as String
     );
   }
 

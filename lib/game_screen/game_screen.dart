@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:ffi';
 
-import 'package:flutter/cupertino.dart';
+import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
@@ -23,7 +21,7 @@ class GameScreenOnline extends StatefulWidget {
 class _GameScreenOnlineState extends State<GameScreenOnline> {
   // ====================================
   int roomID = 0;
-  int userID = 21520889;
+  String userID = "21520889";
   // ====================================
 
   GameOnlineManager gameManager = GameOnlineManager.instance;
@@ -56,7 +54,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
           actions: [
             TextButton(
                 onPressed: () {
-                  userID = int.parse(_userIDController.text);
+                  userID = _userIDController.text.trim();
                   roomID = int.parse(_roomIDController.text);
                   Navigator.of(context).pop();
                 },
@@ -65,16 +63,19 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
         ));
 
     await gameManager.initialize(userID, roomID);
-    _gameLocalSubscription = gameManager.allChanges.listen((event) {
-      setState(() {});
+    _gameLocalSubscription = gameManager.allChanges.listen((event) async {
+      await _update();
     });
     setState(() {});
   }
 
-  // Future<void> _update() async {
-  //   await gameManager.onlineGameUpdate();
-  //   setState(() {});
-  // }
+  Future<void> _update() async {
+    // Room is being deleting, post notice
+    if (gameManager.status == RoomStatus.deleting){
+      await _hostLeaveDialog(context);
+    }
+    setState(() {});
+  }
 
   @override
   void initState() {
@@ -93,7 +94,9 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     super.dispose();
   }
 
-  // THIS IS THE BUTTON AT THE MIDDLE OF THE SCREEN
+  // ===================================================================================
+  // TODO: THIS IS THE BUTTON AT THE MIDDLE OF THE SCREEN
+
   GestureDetector? getStartButton(){
     if (!gameManager.thisUserIsInRoom()){
       return null;
@@ -123,7 +126,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     }
 
     return GestureDetector(
-      behavior: HitTestBehavior.translucent,
+      behavior: HitTestBehavior.deferToChild,
       onTap: () async => {
         if (gameManager.thisUserIsHost()){
           if (gameManager.canStartGame()){
@@ -153,12 +156,14 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     );
   }
 
-  // THIS IS THE LEFT ACTION BUTTON (DRAW CARD)
+  // ===================================================================================
+  // TODO: THIS IS THE LEFT ACTION BUTTON (DRAW CARD)
+
   Align getLeftButton() {
     return Align(
       alignment: Alignment.center,
       child:  GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          behavior: HitTestBehavior.deferToChild,
           onTap: () async => {
             if (gameManager.playerCanDraw()){
               await gameManager.reqDrawCard()
@@ -187,7 +192,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       return Align(
         alignment: Alignment.center,
         child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          behavior: HitTestBehavior.deferToChild,
           onTap: () async => {
             if (gameManager.dealerCanExecuteAllPlayer()){
               await gameManager.dealerExecuteAll()
@@ -212,7 +217,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       return Align(
         alignment: Alignment.center,
         child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          behavior: HitTestBehavior.deferToChild,
           onTap: () async => {
             if (gameManager.playerCanEndTurn()){
               await gameManager.reqStand()
@@ -260,9 +265,66 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     return playerCards;
   }
 
+  // =================================================================
+  // TODO: HOST LEAVE DIALOG
+
+  Future<void> _hostLeaveDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Thông báo'),
+        content: Text(
+            'Nhà cái đã thoát khỏi phòng!'),
+        actions: [
+          FilledButton(
+              onPressed: () async {
+                // exit
+                  context.pop();
+                  context.pop();
+                }
+              ,
+              child: Text('Rời phòng')
+          )
+        ],
+      ),
+    );
+  }
 
   // =================================================================
-  // BUILD FUNCTION
+  // TODO: BACK BUTTON
+
+  final bool _canPop = false;
+  void _backButton(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Cảnh báo'),
+        content: Text(
+            'Bạn có chắc muốn rời khỏi phòng không?'),
+        actions: [
+          FilledButton(
+              onPressed: () {
+                context.pop();
+              },
+              child: Text('Hủy')),
+          FilledButton(
+              onPressed: () async {
+                // exit
+                context.pop();
+                if (await gameManager.reqLeaveRoom()){
+                  if (!context.mounted) return;
+                  context.pop();
+                }
+              },
+              child: Text('Đồng ý'))
+        ],
+      ),
+    );
+  }
+
+  // =================================================================
+  // TODO: BUILD FUNCTION
+
   @override
   Widget build(BuildContext context) {
     playerSeats.clear();
@@ -270,9 +332,9 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     for (int i = 0; i < gameManager.players.length; i++) {
       GamePlayerOnline player = gameManager.players[i];
       // Get player Cards
-      List<Container> playerCards = [];
+      List<SizedBox> playerCards = [];
       for (GameCard card in player.cards) {
-        playerCards.add(Container(
+        playerCards.add(SizedBox(
           width: 40,
           height: 50,
           child: card.getImage(40, 50),
@@ -364,185 +426,220 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       playerSeats.add(playerSeat);
     }
 
+    //===============================================================================
+    // TODO: MAIN WIDGET
+
     return SafeArea(
       child: Builder(builder: (context) {
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          backgroundColor: Colors.transparent,
-          body: SingleChildScrollView(
-            reverse: true,
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: const [Color(0xFFFF6D6D), Color(0xFF8A88FE)],
-                ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // TOP BAR
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(top: 20.0, left: 10.0),
-                          child:
-                            Text("Phòng ${gameManager.model == null ? "???" : gameManager.model?.roomID}",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Colors.black,
-                                    fontFamily: "Montserrat"),
-                                textAlign: TextAlign.center
-                            ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 20.0, right: 10.0),
-                          child:
-                            IconButton(
-                              icon: Image.asset('assets/images/game_button_exit_room.png'),
-                              iconSize: 50,
-                              onPressed: () {},
-                            )
-                        )
-                      ],
-                    ),
-
-                    // TABLE
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 20.0),
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height - 150,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage("assets/images/game_table.png"),
-                          fit: BoxFit.fitHeight,
-                        ),
+        return
+          PopScope(
+            canPop: _canPop,
+            onPopInvoked: (didPop) {
+              if (_canPop) return;
+              _backButton(context);
+              // WidgetsBinding.instance.addPostFrameCallback(
+              //         (_) async {
+              //       _backButton(context);
+              //     }
+              // );
+            },
+            child: Scaffold(
+                resizeToAvoidBottomInset: true,
+                backgroundColor: Colors.transparent,
+                body: SingleChildScrollView(
+                  reverse: true,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: const [Color(0xFFFF6D6D), Color(0xFF8A88FE)],
                       ),
-                      child: Row(
-                        // first columns
+                    ),
+                    child: Center(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Left column
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(width: 10, height: 60),
-                              PlayerCard(seat: 2),
-                              PlayerCard(seat: 1),
-                              SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: OverflowBox(
-                                    maxHeight: double.infinity,
-                                    maxWidth: double.infinity,
-                                    alignment: Alignment.bottomLeft,
-                                    child: getLeftButton(),
-                                  )
-                              )
-                            ],
-                          ),
-                          // Center column
-                          Column(
+                          // TOP BAR
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              PlayerCard(seat: 3),
-                              const SizedBox(width: 10, height: 10),
                               Container(
-                                margin: const EdgeInsets.only(bottom: 40.0),
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: AssetImage("assets/images/cards/card_back.png"),
-                                    fit: BoxFit.fitHeight,
-                                  ),
-                                ),
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: OverflowBox(
-                                    maxWidth: double.infinity,
-                                    maxHeight: double.infinity,
-                                    child: getStartButton()
-                                  ),
+                                margin: const EdgeInsets.only(top: 20.0, left: 10.0),
+                                child:
+                                Text("Phòng ${gameManager.model == null ? "???" : gameManager.model?.roomID}",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: Colors.black,
+                                        fontFamily: "Montserrat"),
+                                    textAlign: TextAlign.center
                                 ),
                               ),
-                              const SizedBox(width: 40, height: 40),
                               Container(
-                                margin: const EdgeInsets.only(bottom: 0.0),
-                                width: 80,
-                                height: 80,
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: OverflowBox(
-                                      maxWidth: double.infinity,
-                                      maxHeight: double.infinity,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                        children: createThisPlayerCards(),
-                                      )
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          // Right column
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              const SizedBox(width: 10, height: 60),
-                              PlayerCard(seat: 4),
-                              PlayerCard(seat: 5),
-                              Container(
-                                  width: 60,
-                                  height: 60,
-                                  child: OverflowBox(
-                                    maxHeight: double.infinity,
-                                    maxWidth: double.infinity,
-                                    alignment: Alignment.bottomRight,
-                                    child: getRightButton(),
+                                  margin: const EdgeInsets.only(top: 20.0, right: 10.0),
+                                  child:
+                                  IconButton(
+                                    icon: Image.asset('assets/images/game_button_exit_room.png'),
+                                    iconSize: 50,
+                                    onPressed: () {
+                                      _backButton(context);
+                                    },
                                   )
                               )
-
                             ],
                           ),
 
+                          // TABLE
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 20.0),
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height - 150,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage("assets/images/game_table.png"),
+                                fit: BoxFit.fitHeight,
+                              ),
+                            ),
+                            child: Row(
+                              // first columns
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Left column
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(width: 10, height: 60),
+                                    PlayerCard(seat: 2),
+                                    PlayerCard(seat: 1),
+                                    DeferredPointerHandler(
+                                        child: SizedBox(
+                                            width: 60,
+                                            height: 60,
+                                            child: OverflowBox(
+                                              maxHeight: double.infinity,
+                                              maxWidth: double.infinity,
+                                              alignment: Alignment.bottomLeft,
+                                              child: DeferPointer(
+                                                  child: getLeftButton()
+                                              ),
+                                            )
+                                        )
+                                    ),
+
+                                  ],
+                                ),
+                                // Center column
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    PlayerCard(seat: 3),
+                                    const SizedBox(width: 10, height: 10),
+                                    DeferredPointerHandler(
+                                      child: Container(
+                                          margin: const EdgeInsets.only(bottom: 40.0),
+                                          width: 80,
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: AssetImage("assets/images/cards/card_back.png"),
+                                              fit: BoxFit.fitHeight,
+                                            ),
+                                          ),
+                                          child: DeferPointer(
+                                            child: Align(
+                                              alignment: Alignment.center,
+                                              child: OverflowBox(
+                                                  maxWidth: double.infinity,
+                                                  maxHeight: double.infinity,
+                                                  child: getStartButton()
+                                              ),
+                                            ),
+                                          )
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 40, height: 40),
+                                    Container(
+                                      margin: const EdgeInsets.only(bottom: 0.0),
+                                      width: 80,
+                                      height: 80,
+                                      child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: OverflowBox(
+                                            maxWidth: double.infinity,
+                                            maxHeight: double.infinity,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: createThisPlayerCards(),
+                                            )
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // Right column
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    const SizedBox(width: 10, height: 60),
+                                    PlayerCard(seat: 4),
+                                    PlayerCard(seat: 5),
+                                    DeferredPointerHandler(
+                                        child: SizedBox(
+                                            width: 60,
+                                            height: 60,
+                                            child: OverflowBox(
+                                                maxHeight: double.infinity,
+                                                maxWidth: double.infinity,
+                                                alignment: Alignment.bottomRight,
+                                                child: DeferPointer(
+                                                  child: getRightButton(),
+                                                )
+                                            )
+                                        )
+                                    )
+                                  ],
+                                ),
+
+                              ],
+                            ),
+                          ),
+
+
+                          // BOTTOM BAR
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: const [Color(0xFF262C40), Color(0xFF464C60)],
+                              ),
+                            ),
+                          )
                         ],
                       ),
                     ),
-
-
-                    // BOTTOM BAR
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: const [Color(0xFF262C40), Color(0xFF464C60)],
-                          ),
-                        ),
-                    )
-                  ],
-                ),
-              ),
+                  ),
+                )
             ),
-          )
-        );
+          );
       }),
     );
   }
 }
+
+//===============================================================================
+// TODO: PLAYER CARD
+//===============================================================================
 
 class PlayerCard extends StatefulWidget {
   final int seat;
@@ -727,6 +824,9 @@ class _PlayerCardState extends State<PlayerCard> {
 
   @override
   Widget build(BuildContext context) {
+    GameOnlineManager gameManager = GameOnlineManager.instance;
+    GamePlayerOnline? player = gameManager.getPlayerBySeat(widget.seat);
+
     return SizedBox(
       width: 120,
       height: 160,
@@ -743,7 +843,48 @@ class _PlayerCardState extends State<PlayerCard> {
                 fit: BoxFit.fill,
               ),
             ),
-            child: null /* add child content here */,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 50,
+                  height: 20,
+                  child: Image.asset("assets/images/game_host_banner.png", width: 50, height: 20),
+                ),
+                SizedBox(
+                  width: 80,
+                  height: 50,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        player != null ? player.userId : "",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: "Montserrat",
+                          color: Colors.white
+                        )
+                      ),
+                      GradientText(
+                          player != null ? "Money?" : "",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              fontFamily: "Montserrat",
+                          ),
+                          colors: const [
+                            Color(0xFFFFA800),
+                            Color(0xFFFDFFE0)
+                          ],
+                      )
+                    ],
+                  )
+                )
+              ],
+            ),
           ),
 
           Row(
@@ -751,14 +892,18 @@ class _PlayerCardState extends State<PlayerCard> {
             children: createPlayerCards(),
           ),
 
-          Container(
-              width: 60,
-              height: 30,
-              child: OverflowBox(
-                maxHeight: double.infinity,
-                maxWidth: double.infinity,
-                alignment: Alignment.bottomCenter,
-                child: getBottomWidget(),
+          DeferredPointerHandler(
+              child: SizedBox(
+                  width: 60,
+                  height: 30,
+                  child: DeferPointer(
+                    child: OverflowBox(
+                      maxHeight: double.infinity,
+                      maxWidth: double.infinity,
+                      alignment: Alignment.bottomCenter,
+                      child: getBottomWidget(),
+                    )
+                  )
               )
           )
         ],

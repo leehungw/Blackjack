@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 class PlayerModel {
 
   //String? key;
-  int playerID;
+  String playerID;
   int roomID;
   int seat;
   String? state;
@@ -45,7 +45,7 @@ class PlayerModel {
 
     return PlayerModel(
         //key: key,
-        playerID: json['playerID'] as int,
+        playerID: json['playerID'] as String,
         roomID: json['roomID'] as int,
         seat: json['seat'] as int,
         state: json['state'] as String,

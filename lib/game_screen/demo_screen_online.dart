@@ -18,7 +18,7 @@ class DemoScreenOnline extends StatefulWidget {
 class _DemoScreenOnlineState extends State<DemoScreenOnline> {
   // ====================================
   int roomID = 0;
-  int userID = 21520889;
+  String userID = "21520889";
   // ====================================
 
   GameOnlineManager gameManager = GameOnlineManager.instance;
@@ -51,7 +51,7 @@ class _DemoScreenOnlineState extends State<DemoScreenOnline> {
               actions: [
                 TextButton(
                     onPressed: () {
-                      userID = int.parse(_userIDController.text);
+                      userID = _userIDController.text.trim();
                       roomID = int.parse(_roomIDController.text);
                       Navigator.of(context).pop();
                     },

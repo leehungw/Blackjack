@@ -38,7 +38,7 @@ class Database {
     });
 
     _requestsDoc = instance.collection(RequestModel.collectionName)
-      .doc("${RequestModel.formatRequestCollectionKey(roomID)}")
+      .doc(RequestModel.formatRequestCollectionKey(roomID))
       .collection("Requests");
 
     _requestsFirestoreSubscription = _requestsDoc.snapshots().listen((snapshot) {

@@ -34,7 +34,7 @@ enum PlayerResult {
 }
 
 class GamePlayer {
-  int userId = -1;
+  String userId = "";
   int seat = -1;
   List<GameCard> cards = [];
   PlayerState state = PlayerState.none;

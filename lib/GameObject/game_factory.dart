@@ -33,7 +33,7 @@ abstract final class GameFactory {
   // Create Online Objects
 
   static GamePlayerOnline createPlayerOnline(PlayerModel model, bool isUser){
-    GamePlayerOnline p = GamePlayerOnline(0, 0, 0);
+    GamePlayerOnline p = GamePlayerOnline(0, "", 0);
     p.parseData(model, isUser);
     return p;
   }
@@ -41,7 +41,7 @@ abstract final class GameFactory {
   // Create Request
 
   /// Create a request for asking the host to add this player to room
-  static RequestModel createRequestJoinRoom(int thisPlayerID){
+  static RequestModel createRequestJoinRoom(String thisPlayerID){
     return RequestModel(
       key: RequestModel.formatRequestsKey(thisPlayerID),
       playerID: thisPlayerID,
@@ -50,7 +50,7 @@ abstract final class GameFactory {
     );
   }
 
-  static RequestModel createRequestReady(int thisPlayerID){
+  static RequestModel createRequestReady(String thisPlayerID){
     return RequestModel(
         key: RequestModel.formatRequestsKey(thisPlayerID),
         playerID: thisPlayerID,
@@ -59,7 +59,7 @@ abstract final class GameFactory {
     );
   }
 
-  static RequestModel createRequestCancelReady(int thisPlayerID){
+  static RequestModel createRequestCancelReady(String thisPlayerID){
     return RequestModel(
         key: RequestModel.formatRequestsKey(thisPlayerID),
         playerID: thisPlayerID,
@@ -68,7 +68,7 @@ abstract final class GameFactory {
     );
   }
 
-  static RequestModel createRequestDrawCard(int thisPlayerID){
+  static RequestModel createRequestDrawCard(String thisPlayerID){
     return RequestModel(
         key: RequestModel.formatRequestsKey(thisPlayerID),
         playerID: thisPlayerID,
@@ -77,7 +77,7 @@ abstract final class GameFactory {
     );
   }
 
-  static RequestModel createRequestStand(int thisPlayerID){
+  static RequestModel createRequestStand(String thisPlayerID){
     return RequestModel(
         key: RequestModel.formatRequestsKey(thisPlayerID),
         playerID: thisPlayerID,
@@ -86,4 +86,12 @@ abstract final class GameFactory {
     );
   }
 
+  static RequestModel createRequestLeaveRoom(String thisPlayerID){
+    return RequestModel(
+        key: RequestModel.formatRequestsKey(thisPlayerID),
+        playerID: thisPlayerID,
+        command: RequestModel.reqLeave,
+        params: []
+    );
+  }
 }
