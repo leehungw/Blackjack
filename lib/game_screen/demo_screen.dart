@@ -1,7 +1,6 @@
 import 'package:card/GameObject/game_offline_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 
 import '../GameObject/game_card.dart';
 import '../GameObject/game_player.dart';
@@ -14,7 +13,6 @@ class DemoScreen extends StatefulWidget {
 }
 
 class _DemoScreenState extends State<DemoScreen> {
-
   GameOfflineManager gameManager = GameOfflineManager.instance;
   List<Card> playerSeats = [];
 
@@ -37,11 +35,11 @@ class _DemoScreenState extends State<DemoScreen> {
   Widget build(BuildContext context) {
     playerSeats.clear();
 
-    for (int i = 0; i < gameManager.players.length; i++){
+    for (int i = 0; i < gameManager.players.length; i++) {
       GamePlayer player = gameManager.players[i];
       // Get player Cards
       List<Container> playerCards = [];
-      for (GameCard card in player.cards){
+      for (GameCard card in player.cards) {
         playerCards.add(Container(
           width: 40,
           height: 50,
@@ -51,14 +49,15 @@ class _DemoScreenState extends State<DemoScreen> {
 
       // Create seat
       Card playerSeat = Card(
-        color: player.result == PlayerResult.dealer ? Colors.blueAccent :
-                (player.result == PlayerResult.win ? Colors.greenAccent :
-                  (player.result == PlayerResult.lose ? Colors.black26 :
-                    (player.result == PlayerResult.tie ? Colors.yellow :
-                      Colors.deepPurpleAccent.shade200
-                    )
-                  )
-                ),
+        color: player.result == PlayerResult.dealer
+            ? Colors.blueAccent
+            : (player.result == PlayerResult.win
+                ? Colors.greenAccent
+                : (player.result == PlayerResult.lose
+                    ? Colors.black26
+                    : (player.result == PlayerResult.tie
+                        ? Colors.yellow
+                        : Colors.deepPurpleAccent.shade200))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -71,7 +70,9 @@ class _DemoScreenState extends State<DemoScreen> {
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(13),
-                        color: gameManager.dealerCanExecutePlayer() ? Colors.deepOrange : Colors.black45,
+                        color: gameManager.dealerCanExecutePlayer()
+                            ? Colors.deepOrange
+                            : Colors.black45,
                         // image: DecorationImage(
                         //     image: AssetImage(
                         //         "assets/images/button_background_inactive.png"),
@@ -88,7 +89,7 @@ class _DemoScreenState extends State<DemoScreen> {
                         ),
                       )),
                   onTap: () {
-                    if (gameManager.currentPlayer!.isDealer()){
+                    if (gameManager.currentPlayer!.isDealer()) {
                       gameManager.dealerExecutePlayer(i);
                       setState(() {});
                     }
@@ -100,23 +101,23 @@ class _DemoScreenState extends State<DemoScreen> {
               height: 60,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(13),
-                color: gameManager.players[i].state == PlayerState.onTurn ? Colors.green :
-                        (gameManager.players[i].state == PlayerState.wait ? Colors.red : Colors.black)
-                      ,
+                color: gameManager.players[i].state == PlayerState.onTurn
+                    ? Colors.green
+                    : (gameManager.players[i].state == PlayerState.wait
+                        ? Colors.red
+                        : Colors.black),
                 // image: DecorationImage(
                 //     image: AssetImage(
                 //         "assets/images/button_background_inactive.png"),
                 //     fit: BoxFit.fill),
               ),
-              child: Text(
-                "Người chơi " + player.seat.toString(),
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontFamily: "Montserrat"),
-                textAlign: TextAlign.center
-              ),
+              child: Text("Người chơi " + player.seat.toString(),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontFamily: "Montserrat"),
+                  textAlign: TextAlign.center),
             ),
             Gap(10),
             Row(
@@ -130,7 +131,6 @@ class _DemoScreenState extends State<DemoScreen> {
 
       playerSeats.add(playerSeat);
     }
-
 
     return SafeArea(
       child: Builder(builder: (context) {
@@ -162,7 +162,9 @@ class _DemoScreenState extends State<DemoScreen> {
                                 height: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
-                                  color: gameManager.playerCanDraw() ? Colors.indigo : Colors.black45,
+                                  color: gameManager.playerCanDraw()
+                                      ? Colors.indigo
+                                      : Colors.black45,
                                   // image: DecorationImage(
                                   //     image: AssetImage(
                                   //         "assets/images/button_background_inactive.png"),
@@ -180,7 +182,7 @@ class _DemoScreenState extends State<DemoScreen> {
                                 )),
                             onTap: () {
                               bool test = gameManager.playerCanDraw();
-                              if (gameManager.playerCanDraw()){
+                              if (gameManager.playerCanDraw()) {
                                 gameManager.playerDrawCard();
                                 setState(() {});
                               }
@@ -197,7 +199,9 @@ class _DemoScreenState extends State<DemoScreen> {
                                 height: 90,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(13),
-                                  color: gameManager.playerCanEndTurn() ? Colors.teal : Colors.black45,
+                                  color: gameManager.playerCanEndTurn()
+                                      ? Colors.teal
+                                      : Colors.black45,
                                   // image: DecorationImage(
                                   //     image: AssetImage(
                                   //         "assets/images/button_background_inactive.png"),
@@ -214,7 +218,7 @@ class _DemoScreenState extends State<DemoScreen> {
                                   ),
                                 )),
                             onTap: () {
-                              if (gameManager.playerCanEndTurn()){
+                              if (gameManager.playerCanEndTurn()) {
                                 gameManager.playerEndTurn();
                                 setState(() {});
                               }
@@ -222,7 +226,6 @@ class _DemoScreenState extends State<DemoScreen> {
                       ),
                     ],
                   ),
-
                   Gap(10),
                   Column(
                     children: playerSeats,

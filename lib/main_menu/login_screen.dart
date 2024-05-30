@@ -84,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
         prefs.setInt('level', userData.data()!['level'] as int);
         prefs.setString('startDate',
             (userData.data()!['startDate'] as Timestamp).toDate().toString());
+        prefs.setInt('duration', userData.data()!['duration'] as int);
         prefs.setInt('money', userData.data()!['money'] as int);
         String? avatar = credential.user!.photoURL;
         prefs.setString('avatar', avatar ?? '');

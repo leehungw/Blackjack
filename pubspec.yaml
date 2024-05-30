@@ -38,6 +38,7 @@ dependencies:
   gradient_icon: ^2.0.9
   url_launcher: ^6.2.6
   on_audio_query: ^2.9.0
+  stroke_text: ^0.0.3
   
 dev_dependencies:
   flutter_lints: ^3.0.0

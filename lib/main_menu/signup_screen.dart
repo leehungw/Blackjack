@@ -1,9 +1,9 @@
 import 'dart:io';
 
-
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
@@ -51,7 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isConfirmPasswordValid = true;
 
   void _RegisterButton(context) async {
-    // bool? result;
+    bool? result;
 
     showDialog(
         context: context as BuildContext,
@@ -61,42 +61,42 @@ class _SignupScreenState extends State<SignupScreen> {
         });
     Navigator.of(context).push(_createRoute());
 
-    // result = await _checkIfEmailInUse(emailController.value.text);
-    // Navigator.of(context).pop();
-    // if (result == true) {
-    //   _EmailValidateText = 'Email đã được sử dụng';
-    // }
-    // if (result == false) {
-    //   // Chuyển hướng sang PINCODE page để xác thực tài khoản
-    //   Navigator.of(context).push(_createRoute());
-    // } else if (_ExceptionText != null) {
-    //   String? message = _ExceptionText;
-    //   ScaffoldMessenger.of(context as BuildContext)
-    //       .showSnackBar(SnackBar(content: Text(message.toString())));
-    // }
+    result = await _checkIfEmailInUse(emailController.value.text);
+    Navigator.of(context).pop();
+    if (result == true) {
+      _EmailValidateText = 'Email đã được sử dụng';
+    }
+    if (result == false) {
+      // Chuyển hướng sang PINCODE page để xác thực tài khoản
+      Navigator.of(context).push(_createRoute());
+    } else if (_ExceptionText != null) {
+      String? message = _ExceptionText;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+    }
   }
 
-  // Future<bool?> _checkIfEmailInUse(String emailAddress) async {
-  //   try {
-  //     final credential =
-  //         await FirebaseAuth.instance.createUserWithEmailAndPassword(
-  //       email: emailAddress,
-  //       password: '123456',
-  //     );
-  //     await credential.user?.delete();
-  //     return false;
-  //   } on FirebaseAuthException catch (e) {
-  //     if (e.code == 'email-already-in-use') {
-  //       return true;
-  //     } else {
-  //       _ExceptionText = e.code;
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     _ExceptionText = e.toString();
-  //     return null;
-  //   }
-  // }
+  Future<bool?> _checkIfEmailInUse(String emailAddress) async {
+    try {
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailAddress,
+        password: '123456',
+      );
+      await credential.user?.delete();
+      return false;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        return true;
+      } else {
+        _ExceptionText = e.code;
+        return null;
+      }
+    } catch (e) {
+      _ExceptionText = e.toString();
+      return null;
+    }
+  }
 
   Future<void> _selectImageFromGallery() async {
     final ImagePicker picker = ImagePicker();

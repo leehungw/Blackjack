@@ -59,6 +59,7 @@ class Palette {
   static const Color settingDialogButtonText = Color(0xFF049D00);
   static const Color rollCallIcon = Color(0xFF1102BE);
   static const Color coinGrind = Color(0xFFF4B325);
+  static const Color ranking2nd = Color(0xFFC6C6C6);
 
   //Home Screen
   static const Color labelFunctionText = Color(0xFFF8FFA1);
@@ -70,4 +71,13 @@ class Palette {
   static const Color settingTextButtonGradientRight = Color(0xFF1ABB00);
   static const Color dialogConfirmGradientTop = Color(0xFFB7DEEF);
   static const Color dialogConfirmGradientBottom = Color(0xFF3D99C1);
+
+  //Login Gift Dialog
+  static const Color loginGiftLabel = Color(0xFF927734);
+  static const Color loginGiftButtonGradientTop = Color(0xFF7A53BA);
+  static const Color loginGiftButtonGradientBottom = Color(0xFF390094);
+  static const Color loginGiftOutLineMoney = Color(0xFFFF8A1F);
+  static const Color loginGiftOutLineDay = Color(0xFF790000);
+  static const Color loginGiftCheck = Color(0xFF84FF4B);
+  static const Color loginGiftCheckVip = Color(0xFFC4D500);
 }

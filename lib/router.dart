@@ -3,6 +3,9 @@
 // BSD-style license that can be found in the LICENSE file.
 import 'package:card/game_screen/game_screen.dart';
 import 'package:card/home_features/home_screen.dart';
+import 'package:card/home_features/instruction_screen.dart';
+import 'package:card/home_features/ranking_board.dart';
+import 'package:card/home_features/room_list.dart';
 import 'package:card/main_menu/login_screen.dart';
 import 'package:card/main_menu/signup_screen.dart';
 import 'package:card/setting_screen.dart';
@@ -63,6 +66,36 @@ final router = GoRouter(
           path: 'setting',
           builder: (context, state) => const SettingScreen(key: Key('setting')),
         ),
+        GoRoute(
+          path: 'rank',
+          pageBuilder: (context, state) => buildMyTransition<void>(
+            key: ValueKey('rank'),
+            color: Palette.homeDialogBackgroundGradientTop,
+            child: const RankingScreen(
+              key: Key('rank'),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: 'instruction',
+          pageBuilder: (context, state) => buildMyTransition<void>(
+            key: ValueKey('instruction'),
+            color: Palette.homeBackgroundGradientBottom,
+            child: const InstructionScreen(
+              key: Key('instruction'),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: 'room_list',
+          pageBuilder: (context, state) => buildMyTransition<void>(
+            key: ValueKey('room_list'),
+            color: Palette.homeDialogBackgroundGradientTop,
+            child: const RoomListScreen(
+              key: Key('room_list'),
+            ),
+          ),
+        )
       ],
     ),
   ],
