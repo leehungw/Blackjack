@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:card/GameObject/game_online_manager.dart';
 import 'package:card/main.dart';
 import 'package:card/models/RoomModel.dart';
 import 'package:card/models/user.dart';
@@ -23,6 +24,8 @@ class RoomListScreen extends StatefulWidget {
 class _RoomListScreenState extends State<RoomListScreen> {
   final Stream<QuerySnapshot> _usersStream =
       FirebaseFirestore.instance.collection('Rooms').snapshots();
+  PlayerRepo playerRepo = PlayerRepo();
+
   @override
   void initState() {
     super.initState();
@@ -84,6 +87,12 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                 .map((doc) => RoomModel.fromJson(
                                     doc.id, doc.data() as Map<String, dynamic>))
                                 .toList();
+                            List<Player> hosts = [];
+                            for (RoomModel room in rooms){
+                              Player host = playerRepo.getPlayerById(room.dealer!) as Player;
+                              hosts.add(host);
+                            }
+
                             return SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height - 300,
@@ -157,7 +166,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                             children: [
                                                               Text(
                                                                 //TODO: mức cược của room
-                                                                "Mức cược: ${"1K"}",
+                                                                "Mức cược tối thiểu: ${"1K"}",
                                                                 style: TextStyles
                                                                     .textFieldStyle
                                                                     .copyWith(
@@ -184,7 +193,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                           children: [
                                                             Text(
                                                               //TODO: Tên chủ phòng của room
-                                                              "Chủ phòng:",
+                                                              "Chủ phòng: ${hosts[index].userName}",
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,
@@ -223,7 +232,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                   Column(
                                                     children: [
                                                       GestureDetector(
-                                                        onTap: () {
+                                                        onTap: () async {
                                                           //TODO: handle Vào room
                                                           if (rooms[index]
                                                                       .players
@@ -232,7 +241,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                               rooms[index]
                                                                       .status ==
                                                                   "ready") {
-                                                            print("object");
+                                                              await _joinRoom(rooms[index]);
                                                           }
                                                         },
                                                         child: Container(
@@ -278,10 +287,8 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                         rooms[index].status ==
                                                                 "ready"
                                                             ? "Sẵn sàng..."
-                                                            : rooms[index]
-                                                                        .status ==
-                                                                    "start"
-                                                                ? "Bắt đầu..."
+                                                            : rooms[index].status == "start" || rooms[index].status == "distributing"
+                                                                ? "Đang chơi..."
                                                                 : rooms[index]
                                                                             .status ==
                                                                         "end"
@@ -333,5 +340,34 @@ class _RoomListScreenState extends State<RoomListScreen> {
         },
       ),
     );
+  }
+
+  // TODO: IMPLEMENT JOIN ROOM METHOD
+  Future<void> _joinRoom(RoomModel room) async {
+    String id = FirebaseAuth.instance.currentUser!.uid;
+    bool result = await GameOnlineManager.instance.initialize(id, room.roomID!);
+    if (result) {
+      GoRouter.of(context).go("/home/game_screen");
+    }
+    else {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Thông báo'),
+          content: Text(
+              'Vào phòng thất bại!'),
+          actions: [
+            FilledButton(
+                onPressed: () async {
+                  // exit
+                  Navigator.of(context).pop();
+                }
+                ,
+                child: Text('Quay lại')
+            )
+          ],
+        ),
+      );
+    }
   }
 }
