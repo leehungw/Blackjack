@@ -130,7 +130,7 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                 text: "200.000Đ",
               ),
               if (widget.thisPlayer.money > 200000) const Gap(30),
-              if (widget.thisPlayer.money > 50000) CustomElevatedButtonBig(
+              if (widget.thisPlayer.money > 500000) CustomElevatedButtonBig(
                 width: 150,
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,

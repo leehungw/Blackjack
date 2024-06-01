@@ -1056,24 +1056,24 @@ final class GameOnlineManager{
     switch (player.result){
       case PlayerResult.win:
         {
-          playerRepo.addMoneyToPlayer(player.userId, player.dealAmount * multiplier);
-          playerRepo.drawMoneyFromPlayer(dealer!.userId, player.dealAmount * multiplier);
-          playerRepo.addExpToPlayer(player.userId, ExpGainAmount.win * multiplier);
-          playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerLose);
+          await playerRepo.addMoneyToPlayer(player.userId, player.dealAmount * multiplier);
+          await playerRepo.drawMoneyFromPlayer(dealer!.userId, player.dealAmount * multiplier);
+          await playerRepo.addExpToPlayer(player.userId, ExpGainAmount.win * multiplier);
+          await playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerLose);
           break;
         }
       case PlayerResult.tie:
         {
-          playerRepo.addExpToPlayer(player.userId, ExpGainAmount.tie * multiplier);
-          playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerTie);
+          await playerRepo.addExpToPlayer(player.userId, ExpGainAmount.tie * multiplier);
+          await playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerTie);
           break;
         }
       case PlayerResult.lose:
         {
-          playerRepo.drawMoneyFromPlayer(player.userId, player.dealAmount);
-          playerRepo.addMoneyToPlayer(dealer!.userId, player.dealAmount);
-          playerRepo.addExpToPlayer(player.userId, ExpGainAmount.lose);
-          playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerWin);
+          await playerRepo.drawMoneyFromPlayer(player.userId, player.dealAmount);
+          await playerRepo.addMoneyToPlayer(dealer!.userId, player.dealAmount);
+          await playerRepo.addExpToPlayer(player.userId, ExpGainAmount.lose);
+          await playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerWin);
           break;
         }
       default:
@@ -1081,6 +1081,9 @@ final class GameOnlineManager{
           print("This player has invalid result");
         }
     }
+    await dealer!.connectToUserModel();
+    await player.connectToUserModel();
+    _remoteChanges.add(null);
   }
 
   //================================================================
