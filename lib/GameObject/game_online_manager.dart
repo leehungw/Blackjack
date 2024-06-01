@@ -139,10 +139,6 @@ final class GameOnlineManager{
 
     for (PlayerModel playerModel in model!.players){
 
-      // if (!overwriteUser && playerModel.playerID == _thisUserID){
-      //   continue;
-      // }
-
       GamePlayerOnline player = await GameFactory.createPlayerOnline(playerModel, playerModel.playerID == _thisUserID);
       _players.add(player);
       if (player.userId == _thisUserID){
@@ -200,7 +196,7 @@ final class GameOnlineManager{
     if (showedCount == _players.length){
       _dealer!.flipCards();
     }
-
+    
     _remoteChanges.add(null);
   }
 
@@ -208,6 +204,7 @@ final class GameOnlineManager{
     if (thisUserIsHost() == false){
       print("Not a host! Can't upload data.");
     }
+    print(_players);
 
     switch (_status){
       case RoomStatus.start:
@@ -242,6 +239,9 @@ final class GameOnlineManager{
   }
 
   Future<void> importRequests(List<RequestModel> requestList) async {
+
+    print("code 247");
+    print(_players);
 
     this.requestList = requestList;
 
@@ -300,9 +300,10 @@ final class GameOnlineManager{
       success = await initializeClientRoom(roomID);
     }
 
+
     if (success){
       await FirebaseRequest.setRoom(model!);
-      importRoomData(model!, true);
+      await importRoomData(model!, true);
       _playerChanges.add(null);
     } else {
       dispose();
@@ -352,7 +353,7 @@ final class GameOnlineManager{
     }
     model = roomModel;
     Database.initializeDatabase(roomID);
-
+    print("initialize room success");
     return true;
   }
 
@@ -567,6 +568,7 @@ final class GameOnlineManager{
                 cards: [],
                 deal: 0
             );
+
             _players.add(await GameFactory.createPlayerOnline(newPlayerModel, false));
             await uploadData();
           } else {
