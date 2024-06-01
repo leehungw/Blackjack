@@ -267,8 +267,20 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                               rooms[index]
                                                                       .status ==
                                                                   "ready") {
+                                                            showDialog(
+                                                                context:
+                                                                    context,
+                                                                barrierDismissible:
+                                                                    false,
+                                                                builder:
+                                                                    (context) {
+                                                                  return const Center(
+                                                                      child:
+                                                                          CircularProgressIndicator());
+                                                                });
                                                             await _joinRoom(
                                                                 rooms[index]);
+                                                            context.pop();
                                                           }
                                                         },
                                                         child: Container(
@@ -310,7 +322,6 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                       ),
                                                       const Gap(5),
                                                       Text(
-                                                        //TODO: Tên chủ phòng của room
                                                         rooms[index].status ==
                                                                 "ready"
                                                             ? "Sẵn sàng..."
