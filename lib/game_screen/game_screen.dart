@@ -291,9 +291,8 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
               child: Text('Hủy')),
           FilledButton(
               onPressed: () async {
-                // exit
-                context.pop();
                 if (await gameManager.reqLeaveRoom()){
+                  if (!context.mounted) return;
                   GoRouter.of(context).go("/home");
                 }
               },
@@ -505,13 +504,13 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                               ),
                             ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   gameManager.thisPlayer != null ? (gameManager.thisPlayer?.userModel != null ? gameManager.thisPlayer!.userModel!.money.toString() : "") : "",
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 18,
+                                      fontSize: 38,
                                       fontFamily: "Montserrat",
                                       color: Colors.white
                                   )
