@@ -106,9 +106,10 @@ class _RoomCodeDialogState extends State<RoomCodeDialog> {
                 onPressed: () async {
                   Navigator.of(context).pop();
                   String id = FirebaseAuth.instance.currentUser!.uid;
-                  bool result = await GameOnlineManager.instance.initialize(id, int.parse(roomCodeController.value.toString()));
+                  bool result = await GameOnlineManager.instance.initialize(id, int.parse(roomCodeController.value.text.toString()));
                   if (!context.mounted) return;
                   if (result) {
+                    context.pop();
                     GoRouter.of(context).go("/home/game_screen");
                   }
                   else {

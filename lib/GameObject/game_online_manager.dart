@@ -382,7 +382,6 @@ final class GameOnlineManager{
 
     // Player already joined this room before
     if (thisUserIsInRoom()){
-
       return true;
     }
 
@@ -547,12 +546,16 @@ final class GameOnlineManager{
       case RequestModel.reqJoinRoom:
         {
           // Validate if player already in room or not
+          bool playerExist = false;
           for (GamePlayerOnline player in _players){
             if (player.userId == req.playerID){
               print("Player already joined in room");
+              playerExist = true;
               break;
             }
           }
+          if (playerExist) break;
+
           int availableSeat = getAvailableSeat();
           if (_status == RoomStatus.ready && availableSeat != -1) {
             PlayerModel newPlayerModel = PlayerModel(

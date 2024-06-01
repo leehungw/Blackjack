@@ -298,6 +298,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                     }
                   }
                   if (!context.mounted) return;
+                  context.pop();
                   GoRouter.of(context).go("/home");
                 }
               },

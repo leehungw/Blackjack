@@ -85,6 +85,7 @@ class _StartGameDialogState extends State<StartGameDialog> {
                           FilledButton(
                               onPressed: () async {
                                 // exit
+                                context.pop();
                                 GoRouter.of(context).go("/home");
                               }
                               ,
