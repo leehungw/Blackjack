@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart';

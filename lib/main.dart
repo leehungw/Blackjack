@@ -51,6 +51,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Builder(builder: (context) {
       return MaterialApp.router(
+        debugShowCheckedModeBanner: false,
         title: 'Lucky Card',
         theme: ThemeData.from(
           colorScheme: ColorScheme.fromSeed(

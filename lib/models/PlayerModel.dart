@@ -1,5 +1,3 @@
-
-import 'package:card/models/RoomModel.dart';
 import 'package:flutter/foundation.dart';
 
 class PlayerModel {
