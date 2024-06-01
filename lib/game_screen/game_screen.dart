@@ -48,6 +48,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       if (!gameManager.thisUserIsHost()){
         await gameManager.dispose();
         isManagerDisposed = true;
+        if (!mounted) return;
         await _hostLeaveDialog(context);
       }
     }
@@ -67,9 +68,13 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
   @override
   void dispose() async {
     _gameLocalSubscription?.cancel();
-    if (!isManagerDisposed){
-      gameManager.dispose();
-    }
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      _startGame();
+      if (!isManagerDisposed){
+        gameManager.dispose();
+      }
+    });
     super.dispose();
   }
 
