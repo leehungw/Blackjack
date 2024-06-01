@@ -85,7 +85,7 @@ class _RoomCodeDialogState extends State<RoomCodeDialog> {
                         ),
                         obscureText: false,
                         onEditingComplete: () async {
-                          //TODO: Enter Room code compelted handle
+                          FocusManager.instance.primaryFocus?.unfocus();
                         },
                       ),
                     ),
@@ -104,30 +104,27 @@ class _RoomCodeDialogState extends State<RoomCodeDialog> {
                   ],
                 ),
                 onPressed: () async {
-                  Navigator.of(context).pop();
+                  FocusManager.instance.primaryFocus?.unfocus();
                   String id = FirebaseAuth.instance.currentUser!.uid;
-                  bool result = await GameOnlineManager.instance.initialize(id, int.parse(roomCodeController.value.text.toString()));
+                  bool result = await GameOnlineManager.instance.initialize(
+                      id, int.parse(roomCodeController.value.text.toString()));
                   if (!context.mounted) return;
                   if (result) {
                     context.pop();
                     GoRouter.of(context).go("/home/game_screen");
-                  }
-                  else {
+                  } else {
                     await showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
                         title: Text('Thông báo'),
-                        content: Text(
-                            'Vào phòng thất bại!'),
+                        content: Text('Vào phòng thất bại!'),
                         actions: [
                           FilledButton(
                               onPressed: () async {
                                 // exit
-                                GoRouter.of(context).go("/home");
-                              }
-                              ,
-                              child: Text('Quay lại')
-                          )
+                                context.pop();
+                              },
+                              child: Text('Quay lại'))
                         ],
                       ),
                     );
