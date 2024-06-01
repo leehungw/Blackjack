@@ -302,6 +302,8 @@ final class GameOnlineManager{
 
 
     if (success){
+      //await FirebaseRequest.setRoom(model!);
+      //await importRoomData(model!, true);
       _playerChanges.add(null);
     } else {
       dispose();
@@ -352,8 +354,6 @@ final class GameOnlineManager{
     model = roomModel;
     Database.initializeDatabase(roomID);
     print("initialize room success");
-    await FirebaseRequest.setRoom(model!);
-    await importRoomData(model!, true);
     return true;
   }
 
@@ -367,15 +367,12 @@ final class GameOnlineManager{
 
     Database.initializeDatabase(roomID);
 
-    await importRoomData(model!, true);
-
-    int timeout = 3;
+    int timeout = 300;
 
 
     // Check if Room data has been received.
     while (model == null){
       await Future.delayed(Duration(milliseconds: 50));
-      await importRoomData(model!, true);
       timeout --;
       if (timeout <= 0){
         Database.dispose();
