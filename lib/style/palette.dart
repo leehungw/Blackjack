@@ -80,4 +80,7 @@ class Palette {
   static const Color loginGiftOutLineDay = Color(0xFF790000);
   static const Color loginGiftCheck = Color(0xFF84FF4B);
   static const Color loginGiftCheckVip = Color(0xFFC4D500);
+
+  //border
+  static const Color borderUser = Color(0xFFEAFF66);
 }
