@@ -292,6 +292,11 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
           FilledButton(
               onPressed: () async {
                 if (await gameManager.reqLeaveRoom()){
+                  if (gameManager.thisUserIsHost()){
+                    while (!gameManager.hostCanLeave){
+                      await Future.delayed(Duration(milliseconds: 50));
+                    }
+                  }
                   if (!context.mounted) return;
                   GoRouter.of(context).go("/home");
                 }

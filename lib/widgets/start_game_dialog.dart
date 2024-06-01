@@ -70,9 +70,8 @@ class _StartGameDialogState extends State<StartGameDialog> {
                 onPressed: () async {
                   String id = FirebaseAuth.instance.currentUser!.uid;
                   bool result = await GameOnlineManager.instance.initialize(id, GameOnlineManager.initializeRoomID);
-                  //if (!context.mounted) return;
+                  if (!context.mounted) return;
                   if (result) {
-                    context.pop();
                     GoRouter.of(context).go("/home/game_screen");
                   }
                   else {
@@ -86,7 +85,7 @@ class _StartGameDialogState extends State<StartGameDialog> {
                           FilledButton(
                               onPressed: () async {
                                 // exit
-                                context.pop();
+                                GoRouter.of(context).go("/home");
                               }
                               ,
                               child: Text('Quay lại')

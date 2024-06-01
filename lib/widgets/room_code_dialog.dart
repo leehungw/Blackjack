@@ -122,7 +122,7 @@ class _RoomCodeDialogState extends State<RoomCodeDialog> {
                           FilledButton(
                               onPressed: () async {
                                 // exit
-                                Navigator.of(context).pop();
+                                GoRouter.of(context).go("/home");
                               }
                               ,
                               child: Text('Quay lại')

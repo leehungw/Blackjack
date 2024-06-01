@@ -65,6 +65,7 @@ final class GameOnlineManager{
   bool sentRequest = false;
   bool kickedFlag = false;
   bool outOfMoneyFlag = false;
+  bool hostCanLeave = false;
 
   GamePlayerOnline? get currentPlayer {
     if (_currentPlayer == null){
@@ -113,6 +114,9 @@ final class GameOnlineManager{
     Database.dispose();
     await Future.delayed(Duration(milliseconds: 50));
     _clear();
+    hostCanLeave = false;
+    kickedFlag = false;
+    outOfMoneyFlag = false;
     model = null;
     requestList.clear();
   }
@@ -653,6 +657,7 @@ final class GameOnlineManager{
 
             await FirebaseRequest.deleteRequest(req, model!.roomID!);
             await FirebaseRequest.deleteRoom(model!);
+            hostCanLeave = true;
             return;
           }
 
