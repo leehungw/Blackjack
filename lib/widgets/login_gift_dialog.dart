@@ -18,6 +18,7 @@ class _LoginGiftState extends State<LoginGift> {
   final DateTime _currentDate = DateTime.now();
   int distinct = 0;
   late String userID;
+  late int money;
 
   @override
   void initState() {
@@ -30,6 +31,8 @@ class _LoginGiftState extends State<LoginGift> {
     userID = prefs.getString('userID') ?? '';
     int duration = prefs.getInt('duration') ?? 0;
     String? startDayString = prefs.getString('startDate');
+    money = prefs.getInt('money') ?? 0;
+    print(money);
     DateTime? startDay =
         startDayString != null ? DateTime.parse(startDayString) : null;
 
@@ -59,6 +62,7 @@ class _LoginGiftState extends State<LoginGift> {
     await FirebaseFirestore.instance.collection('Users').doc(userID).update({
       'duration': _duration,
       'startDate': _startDay!,
+      'money': money,
     });
     await _updateSharedPreferences();
   }
@@ -67,8 +71,8 @@ class _LoginGiftState extends State<LoginGift> {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setInt('duration', _duration);
-
     await prefs.setString('startDate', _startDay!.toString());
+    await prefs.setInt('money', money);
   }
 
   @override
@@ -133,6 +137,7 @@ class _LoginGiftState extends State<LoginGift> {
                             onTap: () {
                               setState(() {
                                 _duration = 1;
+                                money += 500000;
                               });
                               _updateDatabase();
                             },
@@ -271,6 +276,7 @@ class _LoginGiftState extends State<LoginGift> {
                             onTap: () {
                               setState(() {
                                 _duration = 2;
+                                money += 500000;
                               });
                               _updateDatabase();
                             },
@@ -409,6 +415,7 @@ class _LoginGiftState extends State<LoginGift> {
                             onTap: () {
                               setState(() {
                                 _duration = 3;
+                                money += 1000000;
                               });
                               _updateDatabase();
                             },
@@ -547,6 +554,7 @@ class _LoginGiftState extends State<LoginGift> {
                             onTap: () {
                               setState(() {
                                 _duration = 4;
+                                money += 1500000;
                               });
                               _updateDatabase();
                             },
@@ -689,6 +697,7 @@ class _LoginGiftState extends State<LoginGift> {
                             onTap: () {
                               setState(() {
                                 _duration = 5;
+                                money += 2000000;
                               });
                               _updateDatabase();
                             },
@@ -827,6 +836,7 @@ class _LoginGiftState extends State<LoginGift> {
                             onTap: () {
                               setState(() {
                                 _duration = 6;
+                                money += 2500000;
                               });
                               _updateDatabase();
                             },
@@ -965,6 +975,7 @@ class _LoginGiftState extends State<LoginGift> {
                             onTap: () {
                               setState(() {
                                 _duration = 7;
+                                money += 5000000;
                                 _startDay = _currentDate;
                               });
                               _updateDatabase();

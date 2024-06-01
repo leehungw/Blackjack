@@ -85,21 +85,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                            color:
-                                                Palette.titleTextGradientBottom,
-                                            width: 2)),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border(
+                                        bottom: BorderSide(
+                                            color: Palette.borderUser,
+                                            width: 2),
+                                        right: BorderSide(
+                                            color: Palette.borderUser,
+                                            width: 2),
+                                      ),
+                                    ),
                                     child: Row(
                                       children: [
                                         Container(
+                                            padding: const EdgeInsets.all(7),
                                             decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                border: Border.all(
-                                                    color: Palette
-                                                        .titleTextGradientBottom,
-                                                    width: 2)),
+                                              border: Border(
+                                                right: BorderSide(
+                                                    color: Palette.borderUser,
+                                                    width: 2),
+                                              ),
+                                            ),
                                             child: Column(
                                               children: [
                                                 CircleAvatar(
@@ -112,7 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                               'https://firebasestorage.googleapis.com/v0/b/lucky-card-42fae.appspot.com/o/avatar.jpg?alt=media&token=e0736d41-b937-44a6-b05e-a08e9096440f')
                                                           .image,
                                                 ),
-                                                Gap(10),
                                                 Text(
                                                   player.userName,
                                                   style: TextStyles.defaultStyle
@@ -123,15 +128,57 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ],
                                             )),
                                         Gap(7),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            RichText(
-                                              text: TextSpan(
+                                        Container(
+                                          padding:
+                                              const EdgeInsets.only(right: 10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              RichText(
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: "Coins: ",
+                                                      style: TextStyles
+                                                          .textFieldStyle
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: Palette
+                                                                  .primaryText),
+                                                    ),
+                                                    TextSpan(
+                                                      text: player.money
+                                                          .toString(),
+                                                      style: TextStyles
+                                                          .textFieldStyle
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: Palette
+                                                                  .numberText),
+                                                    ),
+                                                    TextSpan(
+                                                        text: " VND",
+                                                        style: TextStyles
+                                                            .textFieldStyle
+                                                            .copyWith(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Palette
+                                                                    .black)),
+                                                  ],
+                                                ),
+                                              ),
+                                              Gap(10),
+                                              Row(
                                                 children: [
-                                                  TextSpan(
-                                                    text: "Coins: ",
+                                                  Text(
+                                                    "Level: ",
                                                     style: TextStyles
                                                         .textFieldStyle
                                                         .copyWith(
@@ -140,19 +187,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             color: Palette
                                                                 .primaryText),
                                                   ),
-                                                  TextSpan(
-                                                    text:
-                                                        player.money.toString(),
-                                                    style: TextStyles
-                                                        .textFieldStyle
-                                                        .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Palette
-                                                                .numberText),
+                                                  LinearPercentIndicator(
+                                                    width: 120.0,
+                                                    lineHeight: 14.0,
+                                                    percent: expPercentage,
+                                                    barRadius:
+                                                        Radius.circular(10),
+                                                    backgroundColor: Palette
+                                                        .buttonStartBackgroundGradientTop,
+                                                    progressColor: Palette
+                                                        .buttonStartBackgroundGradientBottom,
                                                   ),
-                                                  TextSpan(
-                                                      text: " VND",
+                                                  Text(" LV.$level",
                                                       style: TextStyles
                                                           .textFieldStyle
                                                           .copyWith(
@@ -160,73 +206,40 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   FontWeight
                                                                       .bold,
                                                               color: Palette
-                                                                  .black)),
+                                                                  .black))
                                                 ],
                                               ),
-                                            ),
-                                            Gap(10),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  "Level: ",
-                                                  style: TextStyles
-                                                      .textFieldStyle
-                                                      .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Palette
-                                                              .primaryText),
-                                                ),
-                                                LinearPercentIndicator(
-                                                  width: 120.0,
-                                                  lineHeight: 14.0,
-                                                  percent: expPercentage,
-                                                  barRadius:
-                                                      Radius.circular(10),
-                                                  backgroundColor: Palette
-                                                      .buttonStartBackgroundGradientTop,
-                                                  progressColor: Palette
-                                                      .buttonStartBackgroundGradientBottom,
-                                                ),
-                                                Text(" LV.$level",
-                                                    style: TextStyles
-                                                        .textFieldStyle
-                                                        .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color:
-                                                                Palette.black))
-                                              ],
-                                            ),
-                                            Gap(10),
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  "ID:  ",
-                                                  style: TextStyles
-                                                      .textFieldStyle
-                                                      .copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Palette
-                                                              .primaryText),
-                                                ),
-                                                SizedBox(
-                                                  width: 160,
-                                                  child: Text(
-                                                    player.playerID,
+                                              Gap(10),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    "ID:  ",
                                                     style: TextStyles
                                                         .textFieldStyle
                                                         .copyWith(
                                                             fontWeight:
                                                                 FontWeight.bold,
                                                             color: Palette
-                                                                .numberText),
+                                                                .primaryText),
                                                   ),
-                                                )
-                                              ],
-                                            ),
-                                          ],
+                                                  SizedBox(
+                                                    width: 160,
+                                                    child: Text(
+                                                      player.playerID,
+                                                      style: TextStyles
+                                                          .textFieldStyle
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: Palette
+                                                                  .numberText),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         )
                                       ],
                                     ),
@@ -347,7 +360,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     builder: (BuildContext context) {
                                       return LoginGift();
                                     },
-                                  );
+                                  ).then((_) {
+                                    GoRouter.of(context).go('/home');
+                                  });
                                 },
                                 text: "Điểm danh",
                               ),
