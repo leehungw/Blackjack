@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:card/GameObject/game_online_manager.dart';
 import 'package:card/main.dart';
 import 'package:card/models/RoomModel.dart';
 import 'package:card/models/user.dart';
@@ -23,6 +24,8 @@ class RoomListScreen extends StatefulWidget {
 class _RoomListScreenState extends State<RoomListScreen> {
   final Stream<QuerySnapshot> _usersStream =
       FirebaseFirestore.instance.collection('Rooms').snapshots();
+  final PlayerRepo _playerRepo = PlayerRepo();
+
   @override
   void initState() {
     super.initState();
@@ -84,7 +87,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                 .map((doc) => RoomModel.fromJson(
                                     doc.id, doc.data() as Map<String, dynamic>))
                                 .toList();
-                            int selectedIndex = 0;
+
                             return SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height - 300,
@@ -154,11 +157,10 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                           padding:
                                                               const EdgeInsets
                                                                   .all(8.0),
-                                                          child: Row(
+                                                          child: Column(
                                                             children: [
                                                               Text(
-                                                                //TODO: mức cược của room
-                                                                "Mức cược: ${"1K"}",
+                                                                "Mức cược tối thiểu:",
                                                                 style: TextStyles
                                                                     .textFieldStyle
                                                                     .copyWith(
@@ -166,65 +168,97 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                                             .black,
                                                                         fontWeight:
                                                                             FontWeight.bold),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
                                                               ),
-                                                              const Gap(10),
-                                                              const Icon(
-                                                                FontAwesomeIcons
-                                                                    .coins,
-                                                                color: Palette
-                                                                    .coinGrind,
-                                                              )
+                                                              const Gap(5),
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    //TODO: mức cược của room
+                                                                    "1k",
+                                                                    style: TextStyles
+                                                                        .textFieldStyle
+                                                                        .copyWith(
+                                                                            color:
+                                                                                Colors.black,
+                                                                            fontWeight: FontWeight.bold),
+                                                                  ),
+                                                                  const Gap(10),
+                                                                  const Icon(
+                                                                    FontAwesomeIcons
+                                                                        .coins,
+                                                                    color: Palette
+                                                                        .coinGrind,
+                                                                  )
+                                                                ],
+                                                              ),
                                                             ],
                                                           ),
                                                         ),
                                                       ),
                                                       const Gap(5),
-                                                      SizedBox(
-                                                        width: 150,
-                                                        child: Column(
-                                                          children: [
-                                                            Text(
-                                                              //TODO: Tên chủ phòng của room
-                                                              "Chủ phòng:",
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyles
-                                                                  .textFieldStyle
-                                                                  .copyWith(
-                                                                      color: Colors
-                                                                          .black,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                            ),
-                                                            StrokeText(
-                                                              text:
-                                                                  "Tài chó điên",
-                                                              textColor:
-                                                                  Colors.black,
-                                                              textStyle: TextStyles
-                                                                  .defaultStyle
-                                                                  .copyWith(
-                                                                      color: Colors
-                                                                          .black,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                              strokeColor:
-                                                                  Palette
-                                                                      .coinGrind,
-                                                              strokeWidth: 1,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
+                                                      FutureBuilder(
+                                                          future: _playerRepo
+                                                              .getPlayerById(
+                                                                  rooms[index]
+                                                                      .dealer!),
+                                                          builder: (BuildContext
+                                                                  context,
+                                                              AsyncSnapshot
+                                                                  snapshot) {
+                                                            if (snapshot
+                                                                .hasData) {
+                                                              return SizedBox(
+                                                                width: 150,
+                                                                child: Column(
+                                                                  children: [
+                                                                    Text(
+                                                                      //TODO: Tên chủ phòng của room
+                                                                      "Chủ phòng:",
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      style: TextStyles.textFieldStyle.copyWith(
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                    ),
+                                                                    StrokeText(
+                                                                      text: (snapshot.data
+                                                                              as Player)
+                                                                          .userName,
+                                                                      textColor:
+                                                                          Colors
+                                                                              .black,
+                                                                      textStyle: TextStyles.defaultStyle.copyWith(
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                      strokeColor:
+                                                                          Palette
+                                                                              .coinGrind,
+                                                                      strokeWidth:
+                                                                          1,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              return const Center(
+                                                                  child:
+                                                                      CircularProgressIndicator());
+                                                            }
+                                                          }),
                                                     ],
                                                   ),
                                                   Column(
                                                     children: [
                                                       GestureDetector(
-                                                        onTap: () {
+                                                        onTap: () async {
                                                           //TODO: handle Vào room
                                                           if (rooms[index]
                                                                       .players
@@ -233,7 +267,20 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                               rooms[index]
                                                                       .status ==
                                                                   "ready") {
-                                                            print("object");
+                                                            showDialog(
+                                                                context:
+                                                                    context,
+                                                                barrierDismissible:
+                                                                    false,
+                                                                builder:
+                                                                    (context) {
+                                                                  return const Center(
+                                                                      child:
+                                                                          CircularProgressIndicator());
+                                                                });
+                                                            await _joinRoom(
+                                                                rooms[index]);
+                                                            context.pop();
                                                           }
                                                         },
                                                         child: Container(
@@ -275,14 +322,15 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                       ),
                                                       const Gap(5),
                                                       Text(
-                                                        //TODO: Tên chủ phòng của room
                                                         rooms[index].status ==
                                                                 "ready"
                                                             ? "Sẵn sàng..."
-                                                            : rooms[index]
-                                                                        .status ==
-                                                                    "start"
-                                                                ? "Bắt đầu..."
+                                                            : rooms[index].status ==
+                                                                        "start" ||
+                                                                    rooms[index]
+                                                                            .status ==
+                                                                        "distributing"
+                                                                ? "Đang chơi..."
                                                                 : rooms[index]
                                                                             .status ==
                                                                         "end"
@@ -334,5 +382,30 @@ class _RoomListScreenState extends State<RoomListScreen> {
         },
       ),
     );
+  }
+
+  // TODO: IMPLEMENT JOIN ROOM METHOD
+  Future<void> _joinRoom(RoomModel room) async {
+    String id = FirebaseAuth.instance.currentUser!.uid;
+    bool result = await GameOnlineManager.instance.initialize(id, room.roomID!);
+    if (result) {
+      GoRouter.of(context).go("/home/game_screen");
+    } else {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Thông báo'),
+          content: Text('Vào phòng thất bại!'),
+          actions: [
+            FilledButton(
+                onPressed: () async {
+                  // exit
+                  Navigator.of(context).pop();
+                },
+                child: Text('Quay lại'))
+          ],
+        ),
+      );
+    }
   }
 }

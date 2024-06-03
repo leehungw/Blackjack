@@ -47,6 +47,11 @@ class FirebaseRequest {
       .doc(model.key)
       .delete();
 
+  static Future<void> deleteRoom(RoomModel model) async {
+    DocumentReference docRef = FirebaseFirestore.instance.collection(RoomModel.collectionName).doc(model.key);
+    await docRef.delete();
+  }
+
   // static void updateRoom(RoomModel model) => FirebaseFirestore.instance
   //     .collection(RoomModel.collectionName)
   //     .doc(model.key)

@@ -5,7 +5,7 @@ class RequestModel{
   static String collectionName = 'RoomRequests';
 
   String? key;
-  int? playerID;
+  String? playerID;
   String? command;
   List<String> params = [];
 
@@ -28,7 +28,7 @@ class RequestModel{
 
     return RequestModel(
         key: key,
-        playerID: json['playerID'] as int,
+        playerID: json['playerID'] as String,
         command:  json['command'] as String,
         params: List.castFrom(dataParams!)
     );
@@ -38,7 +38,7 @@ class RequestModel{
     return "Requests_room${roomID}";
   }
 
-  static String formatRequestsKey(int playerID){
+  static String formatRequestsKey(String playerID){
     return ("request_${DateTime.now()}_p$playerID").replaceAll(" ", "");
   }
 
@@ -58,5 +58,13 @@ class RequestModel{
   static const reqCancelReady = "cancelReady";
   static const reqDrawCard = "reqDrawCard";
   static const reqStand = "reqStand";
-
+  static const reqLeave = "reqLeave";
+  static const reqKick = "reqKick";
 }
+
+abstract final class ReqKickFlag{
+  static const hostKicked = "hostKicked";
+  static const outOfMoney = "outOfMoney";
+}
+
+

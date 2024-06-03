@@ -6,12 +6,14 @@ import 'package:card/models/FirebaseRequest.dart';
 import 'package:card/models/PlayerModel.dart';
 import 'package:card/models/RequestModel.dart';
 import 'package:card/models/RoomModel.dart';
-import 'package:flutter/foundation.dart';
+import 'package:card/models/user.dart';
 
 import '../models/database.dart';
 import 'game_card.dart';
 import 'game_player.dart';
 import 'game_player_online.dart';
+
+// TODO: sửa lỗi duplicated player khi tham gia lại phòng
 
 enum RoomStatus {
   start,
@@ -19,6 +21,7 @@ enum RoomStatus {
   init,
   distributing,
   ready,
+  deleting,
 }
 
 final class GameOnlineManager{
@@ -43,18 +46,26 @@ final class GameOnlineManager{
   Stream<void> get allChanges =>
       StreamGroup.mergeBroadcast([remoteChanges, playerChanges]);
 
+  PlayerRepo playerRepo = PlayerRepo();
+
   RoomModel? model;
   List<RequestModel> requestList = [];
 
-  int _thisUserID = -1;
+  String _thisUserID = "";
 
   List<GamePlayerOnline> _players = [];
+  List<GamePlayerOnline> _left_players = [];
   List<GameCard> _deck = [];
   RoomStatus _status = RoomStatus.end;
   GamePlayerOnline? _currentPlayer;
   GamePlayerOnline? _dealer;
   GamePlayerOnline? _thisPlayer;
   int _revealedCount = 0;
+
+  bool sentRequest = false;
+  bool kickedFlag = false;
+  bool outOfMoneyFlag = false;
+  bool hostCanLeave = false;
 
   GamePlayerOnline? get currentPlayer {
     if (_currentPlayer == null){
@@ -75,12 +86,20 @@ final class GameOnlineManager{
     return _players;
   }
 
-  bool get isStart {
-    return _status == RoomStatus.init || _status == RoomStatus.start;
+  GamePlayerOnline? get thisPlayer {
+    return _thisPlayer;
   }
 
+  RoomStatus get status {
+    return _status;
+  }
+
+  // bool get isStart {
+  //   return _status == RoomStatus.init || _status == RoomStatus.start;
+  // }
+
   void _clear(){
-    _thisUserID = -1;
+    _thisUserID = "";
     _thisPlayer = null;
     _players.clear();
     _currentPlayer = null;
@@ -89,10 +108,17 @@ final class GameOnlineManager{
     _status = RoomStatus.end;
   }
 
-  void dispose() {
+  Future<void> dispose() async {
     _remoteChanges.close();
     _playerChanges.close();
     Database.dispose();
+    await Future.delayed(Duration(milliseconds: 50));
+    _clear();
+    hostCanLeave = false;
+    kickedFlag = false;
+    outOfMoneyFlag = false;
+    model = null;
+    requestList.clear();
   }
 
   //================================================================
@@ -113,11 +139,7 @@ final class GameOnlineManager{
 
     for (PlayerModel playerModel in model!.players){
 
-      // if (!overwriteUser && playerModel.playerID == _thisUserID){
-      //   continue;
-      // }
-
-      GamePlayerOnline player = GameFactory.createPlayerOnline(playerModel, playerModel.playerID == _thisUserID);
+      GamePlayerOnline player = await GameFactory.createPlayerOnline(playerModel, playerModel.playerID == _thisUserID);
       _players.add(player);
       if (player.userId == _thisUserID){
         _thisPlayer = player;
@@ -148,14 +170,19 @@ final class GameOnlineManager{
       case "ready":
         _status = RoomStatus.ready;
         break;
+      case "deleting":
+        _status = RoomStatus.deleting;
+        break;
     }
-
 
     // Show player cards when they have already been executed.
     int showedCount = 0;
     for (GamePlayerOnline player in _players){
       if (player == _dealer){
         showedCount ++;
+        if (player == _thisPlayer){
+          player.flipCards();
+        }
         continue;
       } else {
         if (player.result != PlayerResult.uncheck){
@@ -177,6 +204,7 @@ final class GameOnlineManager{
     if (thisUserIsHost() == false){
       print("Not a host! Can't upload data.");
     }
+    print(_players);
 
     switch (_status){
       case RoomStatus.start:
@@ -194,9 +222,11 @@ final class GameOnlineManager{
       case RoomStatus.ready:
         model!.status = "ready";
         break;
+      case RoomStatus.deleting:
+        model!.status = "deleting";
     }
 
-    model!.currentPlayer = _currentPlayer == null ? -1 : _currentPlayer!.userId;
+    model!.currentPlayer = _currentPlayer == null ? "" : _currentPlayer!.userId;
     model!.dealer = _dealer!.userId;
     model!.players.clear();
 
@@ -208,13 +238,36 @@ final class GameOnlineManager{
     _playerChanges.add(null);
   }
 
-  void importRequests(List<RequestModel> requestList){
+  Future<void> importRequests(List<RequestModel> requestList) async {
+
+    print("code 247");
+    print(_players);
 
     this.requestList = requestList;
 
     if (thisUserIsHost() == false){
-      // This user isn't host. No need to handle requests.
+      // Handle kick request
+      RequestModel? kickRequest = requestList.cast<RequestModel?>().firstWhere((element) =>
+        element!.command == RequestModel.reqKick
+        && element.params[0] == _thisPlayer!.userId
+      , orElse: () => null
+      );
+
+      if (kickRequest != null){
+        await _kickRequestHandler(kickRequest);
+      }
+
+      // This user isn't host. No need to handle other requests.
+
       _remoteChanges.add(null);
+
+      // if the request has been handled, remove the protection
+      // This will avoid multiple pressing problem
+      if (requestList.isEmpty && sentRequest){
+        sentRequest = false;
+      }
+
+
       return;
     }
 
@@ -223,7 +276,7 @@ final class GameOnlineManager{
       return;
     }
 
-    _requestHandler();
+    await _requestHandler();
   }
 
   //================================================================
@@ -235,7 +288,7 @@ final class GameOnlineManager{
   //================================================================
   // INITIALIZE
 
-  Future<bool> initialize(int thisUserID, int roomID) async {
+  Future<bool> initialize(String thisUserID, int roomID) async {
     _clear();
     _playerChanges = StreamController<void>.broadcast();
     _remoteChanges = StreamController<void>.broadcast();
@@ -247,10 +300,13 @@ final class GameOnlineManager{
       success = await initializeClientRoom(roomID);
     }
 
+
     if (success){
-      await FirebaseRequest.setRoom(model!);
-      importRoomData(model!, true);
+      //await FirebaseRequest.setRoom(model!);
+      //await importRoomData(model!, true);
       _playerChanges.add(null);
+    } else {
+      dispose();
     }
 
     return success;
@@ -270,7 +326,8 @@ final class GameOnlineManager{
         seat: 1,
         state: "none",
         result: "dealer",
-        cards: []
+        cards: [],
+        deal: 0
     );
 
     RoomModel roomModel = RoomModel(
@@ -280,7 +337,7 @@ final class GameOnlineManager{
         dealer: _thisUserID,
         // deck: [],
         status: "ready",
-        currentPlayer: -1
+        currentPlayer: ""
     );
 
     await FirebaseRequest.setRoom(roomModel);
@@ -296,7 +353,7 @@ final class GameOnlineManager{
     }
     model = roomModel;
     Database.initializeDatabase(roomID);
-
+    print("initialize room success");
     return true;
   }
 
@@ -326,7 +383,6 @@ final class GameOnlineManager{
 
     // Player already joined this room before
     if (thisUserIsInRoom()){
-
       return true;
     }
 
@@ -414,6 +470,9 @@ final class GameOnlineManager{
   }
 
   Future<void> endOnlineGame() async {
+    if (_status == RoomStatus.end){
+      return;
+    }
     _status = RoomStatus.end;
     await uploadData();
   }
@@ -447,6 +506,34 @@ final class GameOnlineManager{
     return duplicatedReqList.isEmpty;
   }
 
+  Future<void> _kickRequestHandler(RequestModel req) async {
+    // TODO: only non-host player can handle this case
+    switch(req.command) {
+      case RequestModel.reqKick:
+        {
+          if (thisUserIsHost()){
+            return;
+          }
+          switch (req.params[1]){
+            case ReqKickFlag.hostKicked:
+              {
+                await reqLeaveRoom();
+                kickedFlag = true;
+                break;
+              }
+            case ReqKickFlag.outOfMoney:
+              {
+                await reqLeaveRoom();
+                outOfMoneyFlag = true;
+                break;
+              }
+          }
+          break;
+        }
+    }
+    await FirebaseRequest.deleteRequest(req, model!.roomID!);
+  }
+
   Future<void> _requestHandler() async {
     if (requestList.isEmpty){
       return;
@@ -460,12 +547,16 @@ final class GameOnlineManager{
       case RequestModel.reqJoinRoom:
         {
           // Validate if player already in room or not
+          bool playerExist = false;
           for (GamePlayerOnline player in _players){
             if (player.userId == req.playerID){
               print("Player already joined in room");
+              playerExist = true;
               break;
             }
           }
+          if (playerExist) break;
+
           int availableSeat = getAvailableSeat();
           if (_status == RoomStatus.ready && availableSeat != -1) {
             PlayerModel newPlayerModel = PlayerModel(
@@ -474,9 +565,11 @@ final class GameOnlineManager{
                 seat: availableSeat,
                 state: "none",
                 result: "uncheck",
-                cards: []
+                cards: [],
+                deal: 0
             );
-            _players.add(GameFactory.createPlayerOnline(newPlayerModel, false));
+
+            _players.add(await GameFactory.createPlayerOnline(newPlayerModel, false));
             await uploadData();
           } else {
             print("Reject join room request");
@@ -491,9 +584,11 @@ final class GameOnlineManager{
             print("Ready request invalid. This room is not in \"Ready\" state.");
             break;
           }
+
           for (GamePlayerOnline player in _players){
             if (player.userId == req.playerID && player.state == PlayerState.none){
               player.state = PlayerState.ready;
+              player.dealAmount = int.parse(req.params[0]);
               await uploadData();
               break;
             }
@@ -511,6 +606,7 @@ final class GameOnlineManager{
           for (GamePlayerOnline player in _players){
             if (player.userId == req.playerID && player.state == PlayerState.ready){
               player.state = PlayerState.none;
+              player.dealAmount = 0;
               await uploadData();
               break;
             }
@@ -548,6 +644,63 @@ final class GameOnlineManager{
           }
           break;
         }
+
+    // ----------------------------------------------------------
+      case RequestModel.reqLeave:
+        {
+          // TODO: Host handler
+
+          if (_thisPlayer!.userId == req.playerID){
+
+            if (_status == RoomStatus.start){
+              // Handle transaction
+            }
+
+            _status = RoomStatus.deleting;
+            await uploadData();
+            await Future.delayed(Duration(milliseconds: 100));
+
+            await FirebaseRequest.deleteRequest(req, model!.roomID!);
+            await FirebaseRequest.deleteRoom(model!);
+            hostCanLeave = true;
+            return;
+          }
+
+          // TODO: Other player handler
+
+          // Remove player safely because the game isn't started
+          if (_status == RoomStatus.ready){
+            _players.removeWhere((element) => element.userId == req.playerID);
+            await uploadData();
+            break;
+          }
+
+          // Room already started
+          GamePlayerOnline? target = _players.firstWhere((element) => element.userId == req.playerID);
+
+          if (_status == RoomStatus.start){
+            if (_currentPlayer!.userId == req.playerID){
+              _currentPlayer?.lose();
+              _left_players.add(_currentPlayer!);
+              // Handle transaction
+              //
+              await playerEndTurn();
+            }
+            else {
+
+              target.lose();
+              // Handle transaction
+              //
+              _left_players.add(target);
+              await uploadData();
+            }
+            break;
+          }
+
+          // Room already ended
+          _left_players.add(target);
+          break;
+        }
     }
 
     await FirebaseRequest.deleteRequest(req, model!.roomID!);
@@ -560,7 +713,7 @@ final class GameOnlineManager{
   // EXECUTE FUNCTIONS
 
   Future<bool> tryEndOnlineGame() async {
-    if (_revealedCount == _players.length - 1){
+    if (_revealedCount >= _players.length - 1){
       await endOnlineGame();
       return true;
     }
@@ -585,7 +738,7 @@ final class GameOnlineManager{
     List<GamePlayerOnline> normal_players = [];
     PlayerCardState dealerResult = PlayerCardState.normal;
     for (GamePlayerOnline player in _players){
-      PlayerCardState result = player.CheckBlackjack();
+      PlayerCardState result = player.checkBlackjack();
       if (player.isDealer()){
         dealerResult = result;
         continue;
@@ -606,12 +759,15 @@ final class GameOnlineManager{
     if (dealerResult == PlayerCardState.ban_luck){
       for (GamePlayerOnline player in ban_ban_players){
         player.win();
+        await handleTransaction(player, 2);
       }
       for (GamePlayerOnline player in ban_luck_players){
         player.tie();
+        await handleTransaction(player, 2);
       }
       for (GamePlayerOnline player in normal_players){
         player.lose();
+        await handleTransaction(player, 2);
       }
       endOnlineGame();
       return true;
@@ -620,12 +776,15 @@ final class GameOnlineManager{
     if (dealerResult == PlayerCardState.ban_ban){
       for (GamePlayerOnline player in ban_ban_players){
         player.tie();
+        await handleTransaction(player, 3);
       }
       for (GamePlayerOnline player in ban_luck_players){
         player.lose();
+        await handleTransaction(player, 3);
       }
       for (GamePlayerOnline player in normal_players){
         player.lose();
+        await handleTransaction(player, 3);
       }
       await endOnlineGame();
       return true;
@@ -634,10 +793,12 @@ final class GameOnlineManager{
     // player got ban_ban or ban_luck
     for (GamePlayerOnline player in ban_luck_players){
       player.win();
+      await handleTransaction(player, 2);
       _revealedCount++;
     }
     for (GamePlayerOnline player in ban_ban_players){
       player.win();
+      await handleTransaction(player, 3);
       _revealedCount++;
     }
 
@@ -646,7 +807,7 @@ final class GameOnlineManager{
     }
 
     // All is normal
-    uploadData();
+    await uploadData();
     await Future.delayed(Duration(milliseconds: 50));
     return false;
   }
@@ -689,6 +850,29 @@ final class GameOnlineManager{
     return availableSeat;
   }
 
+  GamePlayerOnline? getPlayerBySeat(int seat){
+    for (GamePlayerOnline player in players){
+      if (player.seat == seat){
+        return player;
+      }
+    }
+    return null;
+  }
+
+  GamePlayerOnline? getPlayerBySeatOffset(int seatOffset){
+    if (_thisPlayer == null) {
+      return null;
+    }
+    int seat = _thisPlayer!.seat + seatOffset;
+    seat = seat > 6 ? seat - 6 : seat;
+    for (GamePlayerOnline player in players){
+      if (player.seat == seat){
+        return player;
+      }
+    }
+    return null;
+  }
+
   GamePlayerOnline _getNextPlayer(GamePlayerOnline player){
     GamePlayerOnline result = _players.first;
     for (int i = 0; i < _players.length; i++){
@@ -699,6 +883,9 @@ final class GameOnlineManager{
           result = _players[i + 1];
         }
       }
+    }
+    if (_left_players.contains(result)){
+      return _getNextPlayer(result);
     }
     return result;
   }
@@ -717,6 +904,10 @@ final class GameOnlineManager{
       }
     }
     return false;
+  }
+
+  bool isPlayerLeft(GamePlayerOnline player){
+    return _left_players.contains(player);
   }
 
   bool playerCanEndTurn(){
@@ -740,13 +931,27 @@ final class GameOnlineManager{
           && _thisPlayer!.getTotalValues() != 21;
   }
 
-  bool dealerCanExecutePlayer(){
+  // check all
+  bool dealerCanExecuteAllPlayer(){
     if (_status != RoomStatus.start){
       return false;
     }
     return
       _thisPlayer != null
           && _thisPlayer == _dealer
+          && _thisPlayer?.state == PlayerState.onTurn
+          && _thisPlayer!.getTotalValues() >= 16;
+  }
+
+  bool dealerCanExecutePlayer(GamePlayerOnline player){
+    if (_status != RoomStatus.start){
+      return false;
+    }
+    return
+      _thisPlayer != null
+          && _thisPlayer == _dealer
+          && players.contains(player)
+          && player.result == PlayerResult.uncheck
           && _thisPlayer?.state == PlayerState.onTurn
           && _thisPlayer!.getTotalValues() >= 16;
   }
@@ -778,6 +983,12 @@ final class GameOnlineManager{
           && _thisPlayer!.state == PlayerState.ready;
   }
 
+  bool playerCanLeaveRoom() {
+    return
+      _status != RoomStatus.distributing
+      && _status != RoomStatus.init
+      && _thisPlayer != null;
+  }
 
   // ===========================================================
   // PLAYER BEHAVIOR
@@ -814,8 +1025,15 @@ final class GameOnlineManager{
     if (_thisPlayer != _dealer || _thisPlayer != _currentPlayer){
       return;
     }
-    _players[seatNumber].reveal(_dealer!);
+    GamePlayerOnline? player = getPlayerBySeat(seatNumber);
+    if (player == null){
+      print("Player at seat $seatNumber doesn't exist!");
+      return;
+    }
+    player.reveal(_dealer!);
     _revealedCount ++;
+    await handleTransaction(player, player.isDragon() ? 2 : 1);
+
     await tryEndOnlineGame();
 
     await uploadData();
@@ -828,20 +1046,64 @@ final class GameOnlineManager{
       }
       player.reveal(_dealer!);
       _revealedCount++;
+      await handleTransaction(player, player.isDragon() ? 2 : 1);
     }
-
+    await tryEndOnlineGame();
     await uploadData();
+  }
+
+  Future<void> handleTransaction(GamePlayerOnline player, int multiplier) async {
+    switch (player.result){
+      case PlayerResult.win:
+        {
+          await playerRepo.addMoneyToPlayer(player.userId, player.dealAmount * multiplier);
+          await playerRepo.drawMoneyFromPlayer(dealer!.userId, player.dealAmount * multiplier);
+          await playerRepo.addExpToPlayer(player.userId, ExpGainAmount.win * multiplier);
+          await playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerLose);
+          break;
+        }
+      case PlayerResult.tie:
+        {
+          await playerRepo.addExpToPlayer(player.userId, ExpGainAmount.tie * multiplier);
+          await playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerTie);
+          break;
+        }
+      case PlayerResult.lose:
+        {
+          await playerRepo.drawMoneyFromPlayer(player.userId, player.dealAmount);
+          await playerRepo.addMoneyToPlayer(dealer!.userId, player.dealAmount);
+          await playerRepo.addExpToPlayer(player.userId, ExpGainAmount.lose);
+          await playerRepo.addExpToPlayer(dealer!.userId, ExpGainAmount.dealerWin);
+          break;
+        }
+      default:
+        {
+          print("This player has invalid result");
+        }
+    }
+    await dealer!.connectToUserModel();
+    await player.connectToUserModel();
+    _remoteChanges.add(null);
   }
 
   //================================================================
   // ROOM CONTROL
 
   Future<void> cleanTable() async{
+
+    for (GamePlayerOnline player in _left_players){
+      _players.remove(player);
+    }
+    _left_players.clear();
+
     for (GamePlayerOnline player in _players){
       player.cards.clear();
       player.state = PlayerState.none;
       if (player.isDealer() == false){
         player.result = PlayerResult.uncheck;
+      }
+      if (player.userModel!.money < 10000){
+        await reqKick(player, ReqKickFlag.outOfMoney);
       }
     }
 
@@ -855,51 +1117,59 @@ final class GameOnlineManager{
   // ===================================================================
   // SEND REQUEST
 
+  Future<bool> trySendRequest(RequestModel req) async{
+    try {
+      await FirebaseRequest.sendRequest(req, model!.roomID!);
+      sentRequest = true;
+      return true;
+    }
+    catch (e){
+      print(e);
+      return false;
+    }
+  }
+
   Future<void> reqDrawCard() async {
     RequestModel req = GameFactory.createRequestDrawCard(_thisUserID);
-    await FirebaseRequest.sendRequest(req, model!.roomID!);
+    await trySendRequest(req);
   }
 
   Future<void> reqStand() async {
     RequestModel req = GameFactory.createRequestStand(_thisUserID);
-    await FirebaseRequest.sendRequest(req, model!.roomID!);
+    await trySendRequest(req);
   }
 
   Future<void> reqJoinRoom() async {
     RequestModel req = GameFactory.createRequestJoinRoom(_thisUserID);
-    await FirebaseRequest.sendRequest(req, model!.roomID!);
+    await trySendRequest(req);
   }
 
-  Future<void> reqReady() async {
-    RequestModel req = GameFactory.createRequestReady(_thisUserID);
-    await FirebaseRequest.sendRequest(req, model!.roomID!);
-
-    // importData(true);
-    // await Future.delayed(Duration(milliseconds: 50));
-    // if (_thisPlayer == null){
-    //   return;
-    // }
-    // if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
-    //   if (_thisPlayer!.state == PlayerState.none){
-    //     _thisPlayer!.state = PlayerState.ready;
-    //   }
-    // }
+  Future<void> reqReady(int amount) async {
+    RequestModel req = GameFactory.createRequestReady(_thisUserID, amount);
+    await trySendRequest(req);
   }
 
   Future<void> reqCancelReady() async {
     RequestModel req = GameFactory.createRequestCancelReady(_thisUserID);
-    await FirebaseRequest.sendRequest(req, model!.roomID!);
+    await trySendRequest(req);
+  }
 
-    // importData(true);
-    // await Future.delayed(Duration(milliseconds: 50));
-    // if (_thisPlayer == null){
-    //   return;
-    // }
-    // if (_thisPlayer!.isDealer() == false && _status == RoomStatus.ready){
-    //   if (_thisPlayer!.state == PlayerState.ready) {
-    //     _thisPlayer!.state = PlayerState.none;
-    //   }
-    // }
+  Future<bool> reqLeaveRoom() async {
+    RequestModel req = GameFactory.createRequestLeaveRoom(_thisUserID);
+    return await trySendRequest(req);
+  }
+
+  Future<bool> reqKick(GamePlayerOnline target, String flag) async {
+    RequestModel req = GameFactory.createRequestKick(_thisUserID, target.userId, flag);
+    return await trySendRequest(req);
   }
 }
 
+abstract final class ExpGainAmount{
+  static const win = 400;
+  static const tie = 200;
+  static const lose = 100;
+  static const dealerWin = 200;
+  static const dealerTie = 100;
+  static const dealerLose = 50;
+}

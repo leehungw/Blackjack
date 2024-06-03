@@ -1,7 +1,12 @@
 import 'package:card/style/palette.dart';
 import 'package:card/style/text_styles.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+
+import '../GameObject/game_online_manager.dart';
+import 'custom_elevated_button_big.dart';
 
 class RoomCodeDialog extends StatefulWidget {
   const RoomCodeDialog({super.key});
@@ -77,8 +82,8 @@ class _RoomCodeDialogState extends State<RoomCodeDialog> {
                           ),
                         ),
                         obscureText: false,
-                        onEditingComplete: () {
-                          //TODO: Enter Room code compelted handle
+                        onEditingComplete: () async {
+                          FocusManager.instance.primaryFocus?.unfocus();
                         },
                       ),
                     ),
@@ -86,6 +91,45 @@ class _RoomCodeDialogState extends State<RoomCodeDialog> {
                 ),
               ),
               const Gap(30),
+              CustomElevatedButtonBig(
+                width: 150,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: const [
+                    Palette.homeDialogSecondaryButtonBackgroundGradientBottom,
+                    Palette.homeDialogSecondaryButtonBackgroundGradientTop
+                  ],
+                ),
+                onPressed: () async {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  String id = FirebaseAuth.instance.currentUser!.uid;
+                  bool result = await GameOnlineManager.instance.initialize(
+                      id, int.parse(roomCodeController.value.text.toString()));
+                  if (!context.mounted) return;
+                  if (result) {
+                    context.pop();
+                    GoRouter.of(context).go("/home/game_screen");
+                  } else {
+                    await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Thông báo'),
+                        content: Text('Vào phòng thất bại!'),
+                        actions: [
+                          FilledButton(
+                              onPressed: () async {
+                                // exit
+                                context.pop();
+                              },
+                              child: Text('Quay lại'))
+                        ],
+                      ),
+                    );
+                  }
+                },
+                text: "Vào Phòng",
+              ),
             ],
           ),
         ),

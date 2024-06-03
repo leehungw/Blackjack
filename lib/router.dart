@@ -1,6 +1,7 @@
 // Copyright 2023, the Flutter project authors. Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
+import 'package:card/game_screen/game_screen.dart';
 import 'package:card/home_features/home_screen.dart';
 import 'package:card/home_features/instruction_screen.dart';
 import 'package:card/home_features/ranking_board.dart';
@@ -39,6 +40,9 @@ final router = GoRouter(
               child: const SignupScreen(
                 key: Key('signup'),
               ),
+              // child: const GameScreenOnline(
+              //   key: Key('gamescreen')
+              // )
             ),
             // routes: [
             //   GoRoute(
@@ -58,6 +62,10 @@ final router = GoRouter(
       path: '/home',
       builder: (context, state) => const HomeScreen(key: Key('home')),
       routes: [
+        GoRoute(
+          path: 'game_screen',
+          builder: (context, state) => const GameScreenOnline(key: Key('game_screen'))
+        ),
         GoRoute(
           path: 'setting',
           builder: (context, state) => const SettingScreen(key: Key('setting')),

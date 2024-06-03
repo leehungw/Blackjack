@@ -44,7 +44,7 @@ final class GameOfflineManager{
     _dealer = null;
     _revealedCount = 0;
     for (int i = 0; i < 6; i++){
-      _players.add(GamePlayer(i,i + 1));
+      _players.add(GamePlayer(i.toString(), i + 1));
     }
     _deck = GameFactory.createDeck();
     _players.last.becomeDealer();
@@ -113,7 +113,7 @@ final class GameOfflineManager{
     GamePlayer? dealer;
     PlayerCardState dealerResult = PlayerCardState.normal;
     for (GamePlayer player in _players){
-      PlayerCardState result = player.CheckBlackjack();
+      PlayerCardState result = player.checkBlackjack();
       if (player.isDealer()){
         dealer = player;
         dealerResult = result;

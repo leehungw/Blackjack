@@ -5,39 +5,35 @@ import 'package:card/models/Validator.dart';
 import 'package:flutter/foundation.dart';
 
 class RoomModel {
-
   String? key;
   int? roomID;
   List<PlayerModel> players = [];
-  int? dealer;
+  String? dealer;
   // List<String> deck = [];
   String? status;
-  int? currentPlayer;
+  String? currentPlayer;
 
   static String collectionName = 'Rooms';
 
   RoomModel(
-      {
-        this.key,
-        required this.roomID,
-        required this.players,
-        required this.dealer,
-        // required this.deck,
-        required this.status,
-        this.currentPlayer
-      }
-  );
+      {this.key,
+      required this.roomID,
+      required this.players,
+      required this.dealer,
+      // required this.deck,
+      required this.status,
+      this.currentPlayer});
 
   Map<String, dynamic> toJson() => {
-    'roomID': roomID,
-    'players': players.map((player) => player.toJson()).toList(),
-    'dealer': dealer,
-    // 'deck': deck,
-    'status': status,
-    'currentPlayer': currentPlayer
-  };
+        'roomID': roomID,
+        'players': players.map((player) => player.toJson()).toList(),
+        'dealer': dealer,
+        // 'deck': deck,
+        'status': status,
+        'currentPlayer': currentPlayer
+      };
 
-  RoomModel clone(){
+  RoomModel clone() {
     return RoomModel(
         key: key,
         roomID: roomID,
@@ -45,13 +41,13 @@ class RoomModel {
         dealer: dealer,
         // deck: deck,
         status: status,
-        currentPlayer: currentPlayer
-    );
+        currentPlayer: currentPlayer);
   }
 
   static RoomModel fromJson(String key, Map<String, Object?> json) {
     final dataPlayer = json['players'] as List?;
-    final listPlayer = List.castFrom<Object?, Map<String, Object?>>(dataPlayer!);
+    final listPlayer =
+        List.castFrom<Object?, Map<String, Object?>>(dataPlayer!);
     // playersString = playersString.replaceAll("[", "");
     // playersString = playersString.replaceAll("]", "");
     // playersString = playersString.replaceAll(" ", "");
@@ -68,27 +64,25 @@ class RoomModel {
     return RoomModel(
         key: key,
         roomID: json['roomID'] as int,
-        players:  listPlayer.map((raw) => PlayerModel.fromJson(raw)).toList(),
-        dealer: json['dealer'] as int,
+        players: listPlayer.map((raw) => PlayerModel.fromJson(raw)).toList(),
+        dealer: json['dealer'] as String,
         // deck: List.from(deck),
         status: json['status'] as String,
-        currentPlayer: json['currentPlayer'] as int
-    );
+        currentPlayer: json['currentPlayer'].toString());
   }
 
-  bool isEqual(RoomModel obj){
-    return
-      key == obj.key
-      && roomID == obj.roomID
-      && Validator.validatePlayerList(players, obj.players)
-      && dealer == obj.dealer
-      // && listEquals(deck, obj.deck)
-      && status == obj.status
-      && currentPlayer == obj.currentPlayer
-    ;
+  bool isEqual(RoomModel obj) {
+    return key == obj.key &&
+        roomID == obj.roomID &&
+        Validator.validatePlayerList(players, obj.players) &&
+        dealer == obj.dealer
+        // && listEquals(deck, obj.deck)
+        &&
+        status == obj.status &&
+        currentPlayer == obj.currentPlayer;
   }
 
-  static String formatRoomKey(int roomID){
+  static String formatRoomKey(int roomID) {
     return "room_$roomID";
   }
 }

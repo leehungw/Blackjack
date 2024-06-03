@@ -34,7 +34,7 @@ enum PlayerResult {
 }
 
 class GamePlayer {
-  int userId = -1;
+  String userId = "";
   int seat = -1;
   List<GameCard> cards = [];
   PlayerState state = PlayerState.none;
@@ -46,7 +46,7 @@ class GamePlayer {
     return cards.length;
   }
 
-  PlayerCardState CheckBlackjack(){
+  PlayerCardState checkBlackjack(){
     if (cards.length < 2){
       return PlayerCardState.error;
     }

@@ -1,16 +1,15 @@
-
-import 'package:card/models/RoomModel.dart';
 import 'package:flutter/foundation.dart';
 
 class PlayerModel {
 
   //String? key;
-  int playerID;
+  String playerID;
   int roomID;
   int seat;
   String? state;
   String? result;
   List<String> cards = [];
+  int deal;
 
   static String collectionName = 'Players';
 
@@ -22,7 +21,8 @@ class PlayerModel {
       required this.seat,
       required this.state,
       required this.result,
-      required this.cards
+      required this.cards,
+      required this.deal
     }
   );
 
@@ -32,7 +32,8 @@ class PlayerModel {
     'seat': seat,
     'state': state,
     'result': result,
-    'cards': cards.toString()
+    'cards': cards.toString(),
+    'deal': deal
   };
 
   static PlayerModel fromJson(Map<String, dynamic> json) {
@@ -45,12 +46,13 @@ class PlayerModel {
 
     return PlayerModel(
         //key: key,
-        playerID: json['playerID'] as int,
+        playerID: json['playerID'].toString(),
         roomID: json['roomID'] as int,
         seat: json['seat'] as int,
         state: json['state'] as String,
         result: json['result'] as String,
-        cards: cardsList
+        cards: cardsList,
+        deal: json['deal'] as int
     );
   }
 

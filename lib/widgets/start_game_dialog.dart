@@ -1,9 +1,13 @@
+import 'package:card/GameObject/game_online_manager.dart';
+import 'package:card/models/FirebaseRequest.dart';
 import 'package:card/style/palette.dart';
 import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:card/widgets/role_picker_dialog.dart';
 import 'package:card/widgets/room_code_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 class StartGameDialog extends StatefulWidget {
   const StartGameDialog({super.key});
@@ -63,14 +67,34 @@ class _StartGameDialogState extends State<StartGameDialog> {
                     Palette.homeDialogSecondaryButtonBackgroundGradientTop
                   ],
                 ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return RolePickerDialog();
-                    },
-                  );
+                onPressed: () async {
+                  String id = FirebaseAuth.instance.currentUser!.uid;
+                  bool result = await GameOnlineManager.instance.initialize(id, GameOnlineManager.initializeRoomID);
+                  if (!context.mounted) return;
+                  if (result) {
+                    GoRouter.of(context).go("/home/game_screen");
+                  }
+                  else {
+                    await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Thông báo'),
+                        content: Text(
+                            'Tạo phòng thất bại!'),
+                        actions: [
+                          FilledButton(
+                              onPressed: () async {
+                                // exit
+                                context.pop();
+                                GoRouter.of(context).go("/home");
+                              }
+                              ,
+                              child: Text('Quay lại')
+                          )
+                        ],
+                      ),
+                    );
+                  }
                 },
                 text: "Tạo Phòng",
               ),

@@ -1,16 +1,24 @@
 import 'package:card/GameObject/game_player.dart';
 
 import '../models/PlayerModel.dart';
+import '../models/user.dart';
 import 'game_card.dart';
 import 'game_factory.dart';
 
 class GamePlayerOnline extends GamePlayer {
 
   int roomID;
+  Player? userModel;
+  late int dealAmount = 0;
 
   GamePlayerOnline(this.roomID, super.userId, super.seat);
 
   // Online Method
+
+  Future<void> connectToUserModel() async {
+    PlayerRepo playerRepo = PlayerRepo();
+    userModel = await playerRepo.getPlayerById(userId);
+  }
 
   void parseData(PlayerModel model, bool isUser){
     // if (!Validator.validatePlayer(model)){
@@ -18,6 +26,7 @@ class GamePlayerOnline extends GamePlayer {
     // }
     userId = model.playerID;
     seat = model.seat;
+    dealAmount = model.deal;
 
     // Get state
     switch (model.state){
@@ -149,7 +158,8 @@ class GamePlayerOnline extends GamePlayer {
         seat: seat,
         state: stateStr,
         result: resultStr,
-        cards: cardsData
+        cards: cardsData,
+        deal: dealAmount
     );
   }
 }
