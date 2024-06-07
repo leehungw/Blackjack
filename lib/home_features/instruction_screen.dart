@@ -93,8 +93,8 @@ class _InstructionScreenState extends State<InstructionScreen> {
                               "5. Lưu ý\n" +
                               "Khi tham gia Xì dách, bạn sẽ gặp các tình huống sau và áp dụng cách tính điểm như sau:\n" +
                               "- Cả nhà cái và người chơi có bài quắc (vượt quá 21) hoặc cùng điểm, kết quả là hòa, không ai thua cược.\n" +
-                              "- Cả nhà cái và người chơi có Xì bàng, lúc này nhà cái sẽ giành chiến thắng.\n" +
-                              "- Cả nhà cái và người chơi có Xì dách, nhà cái sẽ là người thắng cuộc.\n" +
+                              "- Cả nhà cái và người chơi có Xì bàng, kết quả là hòa, không ai thua cược.\n" +
+                              "- Cả nhà cái và người chơi có Xì dách, kết quả là hòa, không ai thua cược.\n" +
                               "- Cả nhà cái và người chơi có ngũ linh, người có tổng điểm ít hơn sẽ thắng.\n" +
                               "6. Thuật ngữ Xì dách quan trọng\n" +
                               "Khi tham gia Xì dách trực tuyến, bạn thường xuyên gặp các thuật ngữ sau. Hãy tham khảo để trở thành một cao thủ Xì dách.\n" +
@@ -106,8 +106,6 @@ class _InstructionScreenState extends State<InstructionScreen> {
                           style: TextStyles.instructions,
                         ),
                       ),
-                      const Gap(20),
-                      const Gap(30),
                       CustomElevatedButtonSmall(
                         width: 150,
                         gradient: LinearGradient(
@@ -123,6 +121,7 @@ class _InstructionScreenState extends State<InstructionScreen> {
                         },
                         text: "Đã Hiểu",
                       ),
+                      const Gap(50),
                     ]),
                   ),
                 ]),

@@ -6,6 +6,7 @@ import 'package:card/style/text_styles.dart';
 import 'package:card/widgets/custom_elevated_button_small.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stroke_text/stroke_text.dart';
@@ -257,21 +258,22 @@ class _RankingScreenState extends State<RankingScreen>
     }
     return Row(
       children: [
-        const Gap(5),
-        StrokeText(
-          text: "${index + 1}.",
-          textColor: Colors.white,
-          textStyle: TextStyles.instructions.copyWith(color: Colors.white),
-          strokeColor: index == 0
-              ? Palette.coinGrind
-              : index == 1
-                  ? Palette.ranking2nd
-                  : Palette.accountBackgroundGradientBottom,
-          strokeWidth: (index >= 0 && index < 3) ? 4 : 0,
+        Container(
+          width: 40,
+          alignment: Alignment.centerLeft,
+          child: StrokeText(
+            text: "${index + 1}.",
+            textColor: Colors.white,
+            textStyle: TextStyles.instructions.copyWith(color: Colors.white),
+            strokeColor: index == 0
+                ? Palette.coinGrind
+                : index == 1
+                    ? Palette.ranking2nd
+                    : Palette.accountBackgroundGradientBottom,
+            strokeWidth: (index >= 0 && index < 3) ? 4 : 0,
+          ),
         ),
-        const Gap(10),
-        SizedBox(
-          width: 200,
+        Expanded(
           child: StrokeText(
             text: player.userName,
             textColor: Colors.white,
@@ -284,7 +286,6 @@ class _RankingScreenState extends State<RankingScreen>
             strokeWidth: index >= 0 && index < 3 ? 4 : 0,
           ),
         ),
-        const Gap(10),
         Text(
           rankInfo,
           style: TextStyles.instructions.copyWith(

@@ -62,6 +62,14 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         errorText = "Tài khoản hoặc mật khẩu không chính xác!";
       });
+      String message = "Tài khoảng hoặc mật khẩu không chính xác!";
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            message.toString(),
+          ),
+        ),
+      );
     }
   }
 

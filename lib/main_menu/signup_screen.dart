@@ -59,15 +59,70 @@ class _SignupScreenState extends State<SignupScreen> {
         builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
-    Navigator.of(context).push(_createRoute());
+
+    if (yourNameController.text.isEmpty ||
+        userNameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
+      Navigator.of(context, rootNavigator: true).pop();
+      String message = "Vui lòng điền đầy đủ thông tin";
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+      return;
+    }
+
+    final RegExp nameRegex = RegExp(r'^[a-zA-Z\s]*$');
+    if (!nameRegex.hasMatch(yourNameController.text)) {
+      Navigator.of(context, rootNavigator: true).pop();
+      String message = "Tên không hợp lệ";
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+      return;
+    }
+
+    if (userNameController.text.length > 14) {
+      Navigator.of(context, rootNavigator: true).pop();
+      String message = "Tên trong game không được chứa dấu và tối đa 14 ký tự!";
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+      return;
+    }
+
+    if (EmailValidator.validate(emailController.text) == false) {
+      Navigator.of(context, rootNavigator: true).pop();
+      String message = "Email không hợp lệ";
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+      return;
+    }
+
+    if (passwordController.text.length < 6) {
+      Navigator.of(context, rootNavigator: true).pop();
+      String message = "Mật khẩu phải có ít nhất 6 ký tự!";
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+      return;
+    }
+
+    if (confirmPasswordController.text != passwordController.text) {
+      Navigator.of(context, rootNavigator: true).pop();
+      String message = "Mật khẩu không khớp";
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+      return;
+    }
 
     result = await _checkIfEmailInUse(emailController.value.text);
-    Navigator.of(context).pop();
+    Navigator.of(context, rootNavigator: true).pop();
     if (result == true) {
       _EmailValidateText = 'Email đã được sử dụng';
+      String? message = _EmailValidateText;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message.toString())));
+      return;
     }
     if (result == false) {
-      // Chuyển hướng sang PINCODE page để xác thực tài khoản
       Navigator.of(context).push(_createRoute());
     } else if (_ExceptionText != null) {
       String? message = _ExceptionText;
@@ -373,7 +428,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: const Icon(Icons.lock_outlined),
                           prefixIconColor: Palette.textFieldBorderUnfocus,
                           helperText: isPasswordValid
-                              ? " "
+                              ? ""
                               : "Mật khẩu phải có ít nhất 6 ký tự!",
                           helperStyle: TextStyle(
                             color: isPasswordValid
@@ -425,7 +480,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           prefixIcon: const Icon(Icons.lock_outlined),
                           prefixIconColor: Palette.textFieldBorderUnfocus,
                           helperText: isConfirmPasswordValid
-                              ? " "
+                              ? ""
                               : "Mật khẩu không khớp",
                           helperStyle: TextStyle(
                             color: isConfirmPasswordValid

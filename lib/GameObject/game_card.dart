@@ -1,12 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-enum CardType{
-  clubs,
-  diamonds,
-  hearts,
-  spades,
-  unknown
-}
+enum CardType { clubs, diamonds, hearts, spades, unknown }
 
 class GameCard {
   int _rank = 0;
@@ -14,38 +8,37 @@ class GameCard {
   bool _hide = true;
   bool _alwaysVisible = true;
 
-  GameCard (this._rank,this._type,this._hide,this._alwaysVisible);
+  GameCard(this._rank, this._type, this._hide, this._alwaysVisible);
 
-  int get rank{
+  int get rank {
     return _rank;
   }
 
-  CardType get type{
+  CardType get type {
     return _type;
   }
 
-  bool get hide{
+  bool get hide {
     return _hide;
   }
 
-  int getValue(){
+  int getValue() {
     return _rank <= 10 ? _rank : 10;
   }
 
-  void flip(){
+  void flip() {
     _hide = !_hide;
   }
 
-  Image getImage(double width, double height){
-    if (_hide && !_alwaysVisible){
-      return
-        Image(image: AssetImage("assets/images/cards/card_back.png"),
+  Image getImage(double width, double height) {
+    if (_hide && !_alwaysVisible) {
+      return Image(
+          image: AssetImage("assets/images/cards/card_back.png"),
           width: width,
-          height: height
-        );
+          height: height);
     }
     String rank_text = "";
-    switch (_rank){
+    switch (_rank) {
       case 1:
         rank_text = "ace";
         break;
@@ -62,7 +55,7 @@ class GameCard {
         rank_text = _rank.toString();
     }
     String type_text = "";
-    switch (_type){
+    switch (_type) {
       case CardType.spades:
         type_text = "spades";
         break;
@@ -76,26 +69,24 @@ class GameCard {
         type_text = "clubs";
         break;
       case CardType.unknown:
-        return
-          Image(image: AssetImage("assets/images/cards/card_back.png"),
+        return Image(
+            image: AssetImage("assets/images/cards/card_back.png"),
             width: width,
-            height: height
-          );
+            height: height);
     }
-    return
-      Image(
-        image: AssetImage("assets/images/cards/${rank_text}_of_${type_text}.png"),
-        width: width,
-        height: height,
-      );
+    return Image(
+      image: AssetImage("assets/images/cards/${rank_text}_of_${type_text}.png"),
+      width: width,
+      height: height,
+    );
   }
 
   // Online Method
 
   @override
-  String toString(){
+  String toString() {
     String type;
-    switch(_type) {
+    switch (_type) {
       case CardType.clubs:
         type = "clubs";
         break;
@@ -115,16 +106,16 @@ class GameCard {
     return "${type}_$_rank";
   }
 
-  static GameCard? parse(String cardString, bool hide, bool alwaysVisible){
+  static GameCard? parse(String cardString, bool hide, bool alwaysVisible) {
     CardType type;
     int rank;
 
     List<String> cardData = cardString.split("_");
-    if (cardData.length != 2){
+    if (cardData.length != 2) {
       return null;
     }
 
-    switch(cardData[0]) {
+    switch (cardData[0]) {
       case "clubs":
         type = CardType.clubs;
         break;
@@ -143,8 +134,7 @@ class GameCard {
 
     try {
       rank = int.parse(cardData[1]);
-    }
-    catch (e){
+    } catch (e) {
       return null;
     }
 
