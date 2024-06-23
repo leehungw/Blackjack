@@ -13,7 +13,7 @@ import 'game_card.dart';
 import 'game_player.dart';
 import 'game_player_online.dart';
 
-// TODO: sửa lỗi duplicated player khi tham gia lại phòng
+// TODO: sửa lỗi mọi người thoát hết thì không dọn được phòng
 
 enum RoomStatus {
   start,
@@ -178,9 +178,9 @@ final class GameOnlineManager{
     // Show player cards when they have already been executed.
     int showedCount = 0;
     for (GamePlayerOnline player in _players){
-      if (player == _dealer){
+      if (player == _dealer || player.result == PlayerResult.dealer){
         showedCount ++;
-        if (player == _thisPlayer){
+        if (player == _thisPlayer || _thisPlayer!.result != PlayerResult.uncheck){
           player.flipCards();
         }
         continue;
@@ -193,9 +193,9 @@ final class GameOnlineManager{
         }
       }
     }
-    if (showedCount == _players.length){
-      _dealer!.flipCards();
-    }
+    // if (showedCount == _players.length){
+    //   _dealer!.flipCards();
+    // }
 
     _remoteChanges.add(null);
   }
@@ -239,9 +239,6 @@ final class GameOnlineManager{
   }
 
   Future<void> importRequests(List<RequestModel> requestList) async {
-
-    print("code 247");
-    print(_players);
 
     this.requestList = requestList;
 
@@ -532,6 +529,7 @@ final class GameOnlineManager{
         }
     }
     await FirebaseRequest.deleteRequest(req, model!.roomID!);
+    _remoteChanges.add(null);
   }
 
   Future<void> _requestHandler() async {
@@ -928,7 +926,8 @@ final class GameOnlineManager{
       _thisPlayer != null
           && _thisPlayer! == _currentPlayer
           && _thisPlayer!.isBurn() == false
-          && _thisPlayer!.getTotalValues() != 21;
+          && _thisPlayer!.getTotalValues() != 21
+          && _thisPlayer!.cardCount < 5;
   }
 
   // check all
@@ -988,6 +987,10 @@ final class GameOnlineManager{
       _status != RoomStatus.distributing
       && _status != RoomStatus.init
       && _thisPlayer != null;
+  }
+
+  bool GameIsPlaying(){
+    return status == RoomStatus.start || status == RoomStatus.end || status == RoomStatus.distributing;
   }
 
   // ===========================================================
