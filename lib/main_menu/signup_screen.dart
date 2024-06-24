@@ -250,6 +250,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 35),
                       child: TextField(
+                        onSubmitted: (value) {
+                          setState(() {
+                            isYourNameValid =
+                                _validateName(yourNameController.text);
+                          });
+                          yourNameFocusNode.unfocus();
+                          _checkSignUpButtonState();
+                        },
                         controller: yourNameController,
                         focusNode: yourNameFocusNode,
                         keyboardType: TextInputType.name,
@@ -296,6 +304,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 35),
                       child: TextField(
+                        onSubmitted: (value) {
+                          setState(() {
+                            isUserNameValid =
+                                _validateUserName(userNameController.text);
+                          });
+                          userNameFocusNode.unfocus();
+                          _checkSignUpButtonState();
+                        },
                         controller: userNameController,
                         focusNode: userNameFocusNode,
                         keyboardType: TextInputType.name,
@@ -345,6 +361,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 35),
                       child: TextField(
+                        onSubmitted: (value) {
+                          setState(() {
+                            isEmailValid = _validateEmail(emailController.text);
+                          });
+                          emailFocusNode.unfocus();
+                          _checkSignUpButtonState();
+                        },
                         controller: emailController,
                         focusNode: emailFocusNode,
                         keyboardType: TextInputType.emailAddress,
@@ -394,6 +417,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 35),
                       child: TextField(
+                        onSubmitted: (value) {
+                          setState(() {
+                            isPasswordValid =
+                                passwordController.text.length > 6;
+                          });
+                          passwordFocusNode.unfocus();
+                          _checkSignUpButtonState();
+                        },
                         controller: passwordController,
                         focusNode: passwordFocusNode,
                         onTapOutside: (event) {
@@ -444,6 +475,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 35),
                       child: TextField(
+                        onSubmitted: (value) {
+                          setState(() {
+                            isConfirmPasswordValid =
+                                confirmPasswordController.text.isNotEmpty &&
+                                    confirmPasswordController.text ==
+                                        passwordController.text;
+                          });
+                          confirmPasswordFocusNode.unfocus();
+                          _checkSignUpButtonState();
+                        },
                         controller: confirmPasswordController,
                         focusNode: confirmPasswordFocusNode,
                         onTapOutside: (event) {
