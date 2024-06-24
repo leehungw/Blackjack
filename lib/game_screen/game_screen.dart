@@ -4,6 +4,8 @@ import 'package:card/widgets/deal_picker_dialog.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:gap/gap.dart';
 //import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
@@ -235,7 +237,9 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     }
   }
 
-  // MAIN PLAYER CARDS
+  // =================================================================
+  // TODO: MAIN PLAYER CARDS
+
   List<Container> createThisPlayerCards(){
     if (gameManager.thisPlayer == null){
       return [];
@@ -314,12 +318,17 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
 
   final bool _canPop = false;
   void _backButton(BuildContext context) async {
+    String warn = "";
+    if (gameManager.status == RoomStatus.start){
+      warn = '\n(Lưu ý: Nếu phòng đã bắt đầu, bạn sẽ bị mất tiền)';
+    }
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Cảnh báo'),
         content: Text(
-            'Bạn có chắc muốn rời khỏi phòng không?'),
+            'Bạn có chắc muốn rời khỏi phòng không?$warn'
+            ),
         actions: [
           FilledButton(
               onPressed: () {
@@ -488,6 +497,55 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     return null;
   }
 
+  // =================================================================
+  // TODO: DEAL MONEY
+
+  SizedBox _playerDealMoney(int seatOffset){
+    GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(seatOffset);
+    if (player != null) {
+      String dealMoney = player.dealAmount > 0 ? "${(player.dealAmount / 1000).round()},0K" : "0";
+
+      return SizedBox(
+          width: 60,
+          height: 160,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              if (player.dealAmount > 0)
+                Image.asset("assets/images/game_money_${(player.dealAmount / 1000).round()}.png"
+                  , width: 50, height: 25)
+              else
+                SizedBox(width: 60, height: 25)
+              ,
+              Gap(7),
+              Container(
+                  width: 60,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/images/game_deal_amount_back.png"),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(dealMoney,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: "Montserrat",
+                          color: Colors.amber
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  )
+              )
+            ],
+          ),
+      );
+    }
+    return SizedBox(width: 60, height: 160);
+  }
+
 
   // =================================================================
   // TODO: BUILD FUNCTION
@@ -580,8 +638,38 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const SizedBox(width: 10, height: 60),
-                                    PlayerCard(seat: 2),
-                                    PlayerCard(seat: 1),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.centerLeft,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              PlayerCard(seat: 2),
+                                              _playerDealMoney(2)
+                                            ],
+                                          )
+                                      ),
+                                    ),
+                                    SizedBox(
+                                     width: 120,
+                                     height: 160,
+                                     child: OverflowBox(
+                                       maxHeight: double.infinity,
+                                       maxWidth:  double.infinity,
+                                       alignment: Alignment.centerLeft,
+                                       child: Row(
+                                         mainAxisAlignment: MainAxisAlignment.start,
+                                         children: [
+                                           PlayerCard(seat: 1),
+                                           _playerDealMoney(1)
+                                         ],
+                                       )
+                                     ),
+                                    ),
                                     DeferredPointerHandler(
                                         child: SizedBox(
                                             width: 60,
@@ -604,7 +692,22 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    PlayerCard(seat: 3),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.topCenter,
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              PlayerCard(seat: 3),
+                                              _playerDealMoney(3)
+                                            ],
+                                          )
+                                      ),
+                                    ),
                                     const SizedBox(width: 10, height: 10),
                                     DeferredPointerHandler(
                                       child: Container(
@@ -671,8 +774,39 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     const SizedBox(width: 10, height: 60),
-                                    PlayerCard(seat: 4),
-                                    PlayerCard(seat: 5),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.centerRight,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              _playerDealMoney(4),
+                                              PlayerCard(seat: 4)
+                                            ],
+                                          )
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.centerRight,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              _playerDealMoney(5),
+                                              PlayerCard(seat: 5)
+                                            ],
+                                          )
+                                      ),
+                                    ),
                                     DeferredPointerHandler(
                                         child: SizedBox(
                                             width: 60,
@@ -999,7 +1133,9 @@ class _PlayerCardState extends State<PlayerCard> {
             height: 50,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: const AssetImage("assets/images/game_player_background.png"),
+                image: player == gameManager.currentPlayer ?
+                  const AssetImage("assets/images/game_player_background_onturn.png")
+                    : const AssetImage("assets/images/game_player_background.png"),
                 fit: BoxFit.fill,
               ),
             ),

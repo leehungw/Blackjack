@@ -337,6 +337,7 @@ final class GameOnlineManager{
         currentPlayer: ""
     );
 
+    await FirebaseRequest.deleteRequestCollection(roomID);
     await FirebaseRequest.setRoom(roomModel);
 
     // Check if room is created or not
@@ -652,6 +653,12 @@ final class GameOnlineManager{
 
             if (_status == RoomStatus.start){
               // Handle transaction
+              for (GamePlayerOnline player in _players){
+                if (player.result == PlayerResult.uncheck){
+                  player.win();
+                  await handleTransaction(player, 1);
+                }
+              }
             }
 
             _status = RoomStatus.deleting;
@@ -680,18 +687,25 @@ final class GameOnlineManager{
             if (_currentPlayer!.userId == req.playerID){
               _currentPlayer?.lose();
               _left_players.add(_currentPlayer!);
+
               // Handle transaction
+              await handleTransaction(_currentPlayer!, 1);
               //
               await playerEndTurn();
-            }
-            else {
-
+            } else {
               target.lose();
-              // Handle transaction
-              //
               _left_players.add(target);
+              // Handle transaction
+              await handleTransaction(target, 1);
+              //
               await uploadData();
             }
+
+            if (_left_players.length == _players.length - 1){
+              await endOnlineGame();
+              break;
+            }
+
             break;
           }
 
