@@ -8,12 +8,16 @@ import 'package:card/widgets/custom_elevated_button_big.dart';
 import 'package:card/widgets/custom_icon_button.dart';
 import 'package:card/widgets/login_gift_dialog.dart';
 import 'package:card/widgets/start_game_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+
+import '../models/FirebaseRequest.dart';
+import '../models/RoomModel.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,6 +57,23 @@ class _HomeScreenState extends State<HomeScreen> {
         user = value;
       });
     });
+
+    List<RoomModel> rooms = [];
+    FirebaseRequest.readRooms().listen(
+          (event) async {
+        rooms = event;
+        print("Get rooms in home screen");
+        for (RoomModel room in rooms){
+          if (room.dealer == user!.playerID){
+            await FirebaseRequest.deleteRoom(room);
+          }
+        }
+      },
+      onError: (err) {
+        print("Home/Read room: $err");
+        return;
+      },
+    );
   }
 
   @override
