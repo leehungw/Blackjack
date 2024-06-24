@@ -202,6 +202,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30),
                         child: TextField(
+                          onSubmitted: (value) {
+                            emailFocus.unfocus();
+                            //passwordFocus.unfocus();
+                            _checkLogInButtonState();
+                          },
+                          onEditingComplete: () {
+                            emailFocus.unfocus();
+                            //passwordFocus.unfocus();
+                            _checkLogInButtonState();
+                          },
                           onTapOutside: (event) {
                             emailFocus.unfocus();
                             passwordFocus.unfocus();
@@ -236,6 +246,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30),
                         child: TextField(
+                          onEditingComplete: () {
+                            emailFocus.unfocus();
+                            passwordFocus.unfocus();
+                            _checkLogInButtonState();
+                          },
+                          onSubmitted: (value) {
+                            emailFocus.unfocus();
+                            passwordFocus.unfocus();
+                            _checkLogInButtonState();
+                          },
                           onTapOutside: (event) {
                             emailFocus.unfocus();
                             passwordFocus.unfocus();
