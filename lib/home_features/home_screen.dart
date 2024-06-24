@@ -321,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               onPressed: () {
                                 print(user!.money);
-                                if (user != null && user!.money > 10000) {
+                                if (user != null && user!.money >= 10000) {
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
