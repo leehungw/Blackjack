@@ -26,10 +26,33 @@ class _HomeScreenState extends State<HomeScreen> {
   PlayerRepo _playerRepo = PlayerRepo();
 
   static const double constXExp = 0.05;
+  Player? user;
 
   Future<void> signout() async {
     FirebaseAuth.instance.signOut();
     GoRouter.of(context).go('/login');
+  }
+
+  void _reloadHome() async {
+    await _playerRepo
+        .getPlayerById(FirebaseAuth.instance.currentUser!.uid)
+        .then((value) {
+      setState(() {
+        user = value;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _playerRepo
+        .getPlayerById(FirebaseAuth.instance.currentUser!.uid)
+        .then((value) {
+      setState(() {
+        user = value;
+      });
+    });
   }
 
   @override
@@ -297,12 +320,31 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return StartGameDialog();
-                                  },
-                                );
+                                print(user!.money);
+                                if (user != null && user!.money > 10000) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StartGameDialog();
+                                    },
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: Colors.redAccent,
+                                      content: const Text(
+                                        'Bạn không đủ tiền để chơi!',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      duration:
+                                          const Duration(milliseconds: 1500),
+                                    ),
+                                  );
+                                }
                               },
                               text: "Bắt Đầu",
                             ),
@@ -359,6 +401,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       return LoginGift();
                                     },
                                   ).then((_) {
+                                    setState(() {
+                                      _reloadHome();
+                                    });
                                     GoRouter.of(context).go('/home');
                                   });
                                 },
