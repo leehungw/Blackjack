@@ -54,7 +54,7 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                 ),
               ),
               const Gap(5),
-              if (widget.thisPlayer.money > 10000)
+              if (widget.thisPlayer.money >= 10000)
                 CustomElevatedButtonBig(
                   width: 130,
                   gradient: LinearGradient(
@@ -71,8 +71,8 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                   },
                   text: "10.000 Đ",
                 ),
-              if (widget.thisPlayer.money > 10000) const Gap(15),
-              if (widget.thisPlayer.money > 20000)
+              if (widget.thisPlayer.money >= 10000) const Gap(15),
+              if (widget.thisPlayer.money >= 20000)
                 CustomElevatedButtonBig(
                   width: 130,
                   gradient: LinearGradient(
@@ -89,8 +89,8 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                   },
                   text: "20.000 Đ",
                 ),
-              if (widget.thisPlayer.money > 20000) const Gap(15),
-              if (widget.thisPlayer.money > 50000)
+              if (widget.thisPlayer.money >= 20000) const Gap(15),
+              if (widget.thisPlayer.money >= 50000)
                 CustomElevatedButtonBig(
                   width: 130,
                   gradient: LinearGradient(
@@ -107,8 +107,8 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                   },
                   text: "50.000 Đ",
                 ),
-              if (widget.thisPlayer.money > 50000) const Gap(15),
-              if (widget.thisPlayer.money > 100000)
+              if (widget.thisPlayer.money >= 50000) const Gap(15),
+              if (widget.thisPlayer.money >= 100000)
                 CustomElevatedButtonBig(
                   width: 130,
                   gradient: LinearGradient(
@@ -125,8 +125,8 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                   },
                   text: "100.000 Đ",
                 ),
-              if (widget.thisPlayer.money > 100000) const Gap(15),
-              if (widget.thisPlayer.money > 200000)
+              if (widget.thisPlayer.money >= 100000) const Gap(15),
+              if (widget.thisPlayer.money >= 200000)
                 CustomElevatedButtonBig(
                   width: 130,
                   gradient: LinearGradient(
@@ -143,8 +143,8 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                   },
                   text: "200.000 Đ",
                 ),
-              if (widget.thisPlayer.money > 200000) const Gap(15),
-              if (widget.thisPlayer.money > 500000)
+              if (widget.thisPlayer.money >= 200000) const Gap(15),
+              if (widget.thisPlayer.money >= 500000)
                 CustomElevatedButtonBig(
                   width: 130,
                   gradient: LinearGradient(
@@ -161,7 +161,7 @@ class _DealPickerDialogState extends State<DealPickerDialog> {
                   },
                   text: "500.000 Đ",
                 ),
-              if (widget.thisPlayer.money > 500000) const Gap(15),
+              if (widget.thisPlayer.money >= 500000) const Gap(15),
             ],
           ),
         ),

@@ -60,6 +60,14 @@ class GamePlayer {
     return PlayerCardState.normal;
   }
 
+  PlayerCardState checkCardState(){
+    PlayerCardState result = checkBlackjack();
+    if (result == PlayerCardState.normal && isDragon()){
+      result = PlayerCardState.dragon;
+    }
+    return result;
+  }
+
   int getTotalValues(){
     int sum = 0;
     int acesCount = 0;
@@ -75,6 +83,9 @@ class GamePlayer {
     }
     if (acesCount > 0){
       switch (cards.length){
+        case 1:
+          sum += 11;
+          break;
         case 2:
           sum += 11;
           break;
