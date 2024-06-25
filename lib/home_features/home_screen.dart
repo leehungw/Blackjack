@@ -63,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         user = value;
       });
     });
+
     _loadRewardedAd();
   }
 
@@ -96,7 +97,20 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       );
     } else {
-      print('RewardedAd is not loaded yet.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: const Text(
+            'Bạn không đủ tiền để chơi!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          duration: const Duration(milliseconds: 1500),
+        ),
+      );
     }
   }
 
@@ -117,6 +131,11 @@ class _HomeScreenState extends State<HomeScreen> {
       await _updateSharedPreferences(money);
     }
     _reloadHome();
+    _loadRewardedAd();
+    setState(() {
+      _isRewardedAdLoaded = false;
+      _rewardedAd.dispose();
+    });
   }
 
   @override
