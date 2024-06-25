@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:card/widgets/deal_picker_dialog.dart';
 import 'package:defer_pointer/defer_pointer.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
+//import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
@@ -11,7 +14,7 @@ import '../GameObject/game_card.dart';
 import '../GameObject/game_online_manager.dart';
 import '../GameObject/game_player.dart';
 import '../GameObject/game_player_online.dart';
-import '../models/user.dart';
+// import '../models/user.dart';
 
 class GameScreenOnline extends StatefulWidget {
   const GameScreenOnline({super.key});
@@ -24,6 +27,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
   // ====================================
   int roomID = 0;
   String userID = "21520889";
+  static const double buttonSize = 80;
   // ====================================
 
   bool isManagerDisposed = false;
@@ -51,6 +55,11 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
         if (!mounted) return;
         await _hostLeaveDialog(context);
       }
+    } else if (gameManager.outOfMoneyFlag){
+      await gameManager.dispose();
+      isManagerDisposed = true;
+      if (!mounted) return;
+      await _OutOfMoneyDialog(context);
     }
     setState(() {});
   }
@@ -157,8 +166,8 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
             }
           },
           child: Container(
-          width: 120,
-          height: 120,
+          width: buttonSize,
+          height: buttonSize,
           decoration: BoxDecoration(
             image: DecorationImage(
               image: gameManager.playerCanDraw() ?
@@ -186,8 +195,8 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
             }
           },
           child: Container(
-              width: 120,
-              height: 120,
+              width: buttonSize,
+              height: buttonSize,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: gameManager.dealerCanExecuteAllPlayer()
@@ -211,8 +220,8 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
             }
           },
           child: Container(
-            width: 120,
-            height: 120,
+            width: buttonSize,
+            height: buttonSize,
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: gameManager.playerCanEndTurn()
@@ -228,7 +237,9 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
     }
   }
 
-  // MAIN PLAYER CARDS
+  // =================================================================
+  // TODO: MAIN PLAYER CARDS
+
   List<Container> createThisPlayerCards(){
     if (gameManager.thisPlayer == null){
       return [];
@@ -250,6 +261,31 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       ));
     }
     return playerCards;
+  }
+
+  // =================================================================
+  // TODO: OUT OF MONEY DIALOG
+
+  Future<void> _OutOfMoneyDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Thông báo'),
+        content: Text(
+            'Bạn đã bị đuổi khỏi phòng vì hết tiền!'),
+        actions: [
+          FilledButton(
+              onPressed: () async {
+                // exit
+                context.pop();
+                GoRouter.of(context).go("/home");
+              }
+              ,
+              child: Text('Rời phòng')
+          )
+        ],
+      ),
+    );
   }
 
   // =================================================================
@@ -282,12 +318,17 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
 
   final bool _canPop = false;
   void _backButton(BuildContext context) async {
+    String warn = "";
+    if (gameManager.status == RoomStatus.start){
+      warn = '\n(Lưu ý: Nếu phòng đã bắt đầu, bạn sẽ bị mất tiền)';
+    }
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Cảnh báo'),
         content: Text(
-            'Bạn có chắc muốn rời khỏi phòng không?'),
+            'Bạn có chắc muốn rời khỏi phòng không?$warn'
+            ),
         actions: [
           FilledButton(
               onPressed: () {
@@ -312,6 +353,199 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
       ),
     );
   }
+
+  // =================================================================
+  // TODO: PLAYER CARD POINT COUNTER
+  Align? _thisPlayerScoreCounter(){
+    GamePlayerOnline? player = gameManager.thisPlayer;
+
+    if (player == null){
+      return null;
+    }
+
+    if (player.state == PlayerState.ready){
+      return Align(
+        alignment: Alignment.center,
+        child: Center(
+          child: GradientText(
+            "Sẵn sàng",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: "Montserrat"
+            ),
+            colors: const [
+              Color(0xFF95ff80),
+              Color(0xFF40ff1a),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (gameManager.GameIsPlaying() == false){
+      return null;
+    }
+
+    String specialResult = "";
+    switch (player.checkCardState()){
+      case PlayerCardState.ban_ban:
+        specialResult = "Xì bàn";
+        break;
+      case PlayerCardState.ban_luck:
+        specialResult = "Xì lát";
+        break;
+      case PlayerCardState.dragon:
+        specialResult = "Ngũ linh" "(${player.getTotalValues()})";
+        break;
+      default:
+        break;
+    }
+
+    if (player.result == PlayerResult.win){
+      return Align(
+        alignment: Alignment.center,
+        child: Center(
+          child: GradientText(
+            specialResult != "" ?
+            specialResult
+                : "${player.getTotalValues()} điểm",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: "Montserrat"
+            ),
+            colors: const [
+              Color(0xFFFFA800),
+              Color(0xFFFDFFE0),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (player.result == PlayerResult.tie){
+      return Align(
+        alignment: Alignment.center,
+        child: Center(
+          child: GradientText(
+            specialResult != "" ?
+            specialResult
+                : "${player.getTotalValues()} điểm",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: "Montserrat"
+            ),
+            colors: const [
+              Color(0xFFB9E0F8),
+              Color(0xFF8BCCF4),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (player.result == PlayerResult.lose){
+      return Align(
+        alignment: Alignment.center,
+        child: Center(
+          child: GradientText(
+            player.isBurn() ?
+            "Quắc"
+                : ( specialResult != "" ?
+            specialResult
+                : "${player.getTotalValues()} điểm"),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: "Montserrat"
+            ),
+            colors: const [
+              Color(0xFFF1F1F1),
+              Color(0xFFB1B1B1),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (player.result == PlayerResult.dealer || player.result == PlayerResult.uncheck){
+      return Align(
+        alignment: Alignment.center,
+        child: Center(
+          child: GradientText(
+            player.isBurn() ?
+            "Quắc"
+                : ( specialResult != "" ?
+            specialResult
+                : "${player.getTotalValues()} điểm"),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: "Montserrat"
+            ),
+            colors: const [
+              Color(0xFFFFFFFF),
+              Color(0xFFFFFFFF),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return null;
+  }
+
+  // =================================================================
+  // TODO: DEAL MONEY
+
+  SizedBox _playerDealMoney(int seatOffset){
+    GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(seatOffset);
+    if (player != null) {
+      String dealMoney = player.dealAmount > 0 ? "${(player.dealAmount / 1000).round()},0K" : "0";
+
+      return SizedBox(
+          width: 60,
+          height: 160,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              if (player.dealAmount > 0)
+                Image.asset("assets/images/game_money_${(player.dealAmount / 1000).round()}.png"
+                  , width: 50, height: 25)
+              else
+                SizedBox(width: 60, height: 25)
+              ,
+              Gap(7),
+              Container(
+                  width: 60,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/images/game_deal_amount_back.png"),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(dealMoney,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          fontFamily: "Montserrat",
+                          color: Colors.amber
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  )
+              )
+            ],
+          ),
+      );
+    }
+    return SizedBox(width: 60, height: 160);
+  }
+
 
   // =================================================================
   // TODO: BUILD FUNCTION
@@ -404,8 +638,38 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const SizedBox(width: 10, height: 60),
-                                    PlayerCard(seat: 2),
-                                    PlayerCard(seat: 1),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.centerLeft,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              PlayerCard(seat: 2),
+                                              _playerDealMoney(2)
+                                            ],
+                                          )
+                                      ),
+                                    ),
+                                    SizedBox(
+                                     width: 120,
+                                     height: 160,
+                                     child: OverflowBox(
+                                       maxHeight: double.infinity,
+                                       maxWidth:  double.infinity,
+                                       alignment: Alignment.centerLeft,
+                                       child: Row(
+                                         mainAxisAlignment: MainAxisAlignment.start,
+                                         children: [
+                                           PlayerCard(seat: 1),
+                                           _playerDealMoney(1)
+                                         ],
+                                       )
+                                     ),
+                                    ),
                                     DeferredPointerHandler(
                                         child: SizedBox(
                                             width: 60,
@@ -428,7 +692,22 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    PlayerCard(seat: 3),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.topCenter,
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              PlayerCard(seat: 3),
+                                              _playerDealMoney(3)
+                                            ],
+                                          )
+                                      ),
+                                    ),
                                     const SizedBox(width: 10, height: 10),
                                     DeferredPointerHandler(
                                       child: Container(
@@ -464,11 +743,26 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                         child: OverflowBox(
                                             maxWidth: double.infinity,
                                             maxHeight: double.infinity,
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                              children: createThisPlayerCards(),
+                                            child: Column (
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                SizedBox(
+                                                  width: 120,
+                                                  height: 50,
+                                                  child: OverflowBox(
+                                                    maxWidth: double.infinity,
+                                                    maxHeight: double.infinity,
+                                                    child: _thisPlayerScoreCounter(),
+                                                  ),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                                  children: createThisPlayerCards(),
+                                                )
+                                              ],
                                             )
+
                                         ),
                                       ),
                                     ),
@@ -480,8 +774,39 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     const SizedBox(width: 10, height: 60),
-                                    PlayerCard(seat: 4),
-                                    PlayerCard(seat: 5),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.centerRight,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              _playerDealMoney(4),
+                                              PlayerCard(seat: 4)
+                                            ],
+                                          )
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 120,
+                                      height: 160,
+                                      child: OverflowBox(
+                                          maxHeight: double.infinity,
+                                          maxWidth:  double.infinity,
+                                          alignment: Alignment.centerRight,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              _playerDealMoney(5),
+                                              PlayerCard(seat: 5)
+                                            ],
+                                          )
+                                      ),
+                                    ),
                                     DeferredPointerHandler(
                                         child: SizedBox(
                                             width: 60,
@@ -561,12 +886,48 @@ class _PlayerCardState extends State<PlayerCard> {
     super.initState();
   }
 
-  // CREATE PLAYER CARDS ON HAND
+  // TODO: CREATE PLAYER CARDS ON HAND
   List<Container> createPlayerCards(){
     GameOnlineManager gameManager = GameOnlineManager.instance;
     GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(widget.seat);
-    if (player == null){
+    if (player == null || gameManager.GameIsPlaying() == false
+      || (gameManager.GameIsPlaying() && player.cardCount == 0)){
       return [];
+    }
+
+    if (player.result == PlayerResult.uncheck
+      || (player.result == PlayerResult.dealer && gameManager.thisPlayer!.result == PlayerResult.uncheck)){
+      return [Container(
+        width: 40,
+        height: 50,
+        alignment: Alignment.center,
+        child: Stack(
+          children: [
+            OverflowBox(
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
+              child: player.cards.firstOrNull?.getImage(40, 50),
+            ),
+            Positioned.fill(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: GradientText(
+                    player.cardCount.toString(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 28,
+                        fontFamily: "Montserrat"
+                    ),
+                    colors: const [
+                      Color(0xFF79FFDF),
+                      Color(0xFF79FFDF),
+                    ],
+                  ),
+                )
+            )
+          ],
+        )
+      )];
     }
 
     List<Container> playerCards = [];
@@ -585,7 +946,7 @@ class _PlayerCardState extends State<PlayerCard> {
     return playerCards;
   }
 
-  // CREATE THE EXECUTE BUTTON / RESULT
+  // TODO: CREATE THE EXECUTE BUTTON / RESULT
   Align? getBottomWidget() {
     GameOnlineManager gameManager = GameOnlineManager.instance;
     GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(widget.seat);
@@ -615,7 +976,7 @@ class _PlayerCardState extends State<PlayerCard> {
     }
 
     String specialResult = "";
-    switch (player.checkBlackjack()){
+    switch (player.checkCardState()){
       case PlayerCardState.ban_ban:
         specialResult = "Xì bàn";
         break;
@@ -623,7 +984,7 @@ class _PlayerCardState extends State<PlayerCard> {
         specialResult = "Xì lát";
         break;
       case PlayerCardState.dragon:
-        specialResult = "Ngũ linh";
+        specialResult = "Ngũ linh" "(${player.getTotalValues()})";
         break;
       default:
         break;
@@ -697,7 +1058,31 @@ class _PlayerCardState extends State<PlayerCard> {
       );
     }
 
-    // Execute button
+    if (player.result == PlayerResult.dealer && gameManager.thisPlayer!.result != PlayerResult.uncheck){
+      return Align(
+        alignment: Alignment.center,
+        child: Center(
+          child: GradientText(
+            player.isBurn() ?
+            "Quắc"
+                : ( specialResult != "" ?
+            specialResult
+                : "${player.getTotalValues()} điểm"),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+                fontFamily: "Montserrat"
+            ),
+            colors: const [
+              Color(0xFFFFFFFF),
+              Color(0xFFFFFFFF),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // TODO: Player Execute button
     if (gameManager.dealerCanExecutePlayer(player)){
         return Align(
             alignment: Alignment.center,
@@ -732,6 +1117,10 @@ class _PlayerCardState extends State<PlayerCard> {
     GameOnlineManager gameManager = GameOnlineManager.instance;
     GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(widget.seat);
 
+    if (player == null){
+      return SizedBox(width: 120, height: 160);
+    }
+
     return SizedBox(
       width: 120,
       height: 160,
@@ -744,7 +1133,9 @@ class _PlayerCardState extends State<PlayerCard> {
             height: 50,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: const AssetImage("assets/images/game_player_background.png"),
+                image: player == gameManager.currentPlayer ?
+                  const AssetImage("assets/images/game_player_background_onturn.png")
+                    : const AssetImage("assets/images/game_player_background.png"),
                 fit: BoxFit.fill,
               ),
             ),
@@ -765,7 +1156,7 @@ class _PlayerCardState extends State<PlayerCard> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        player != null ? (player.userModel != null ? player.userModel!.userName : "") : "",
+                        player.userModel != null ? player.userModel!.userName : "",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -775,7 +1166,7 @@ class _PlayerCardState extends State<PlayerCard> {
                         textAlign: TextAlign.start,
                       ),
                       GradientText(
-                          player != null ? (player.userModel != null ? player.userModel!.money.toString() : "") : "",
+                          player.userModel != null ? player.userModel!.money.toString() : "",
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,

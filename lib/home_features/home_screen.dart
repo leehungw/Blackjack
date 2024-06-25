@@ -18,6 +18,9 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/FirebaseRequest.dart';
+import '../models/RoomModel.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -59,6 +62,22 @@ class _HomeScreenState extends State<HomeScreen> {
         user = value;
       });
     });
+    List<RoomModel> rooms = [];
+    FirebaseRequest.readRooms().listen(
+          (event) async {
+        rooms = event;
+        print("Get rooms in home screen");
+        for (RoomModel room in rooms){
+          if (room.dealer == user!.playerID){
+            await FirebaseRequest.deleteRoom(room);
+          }
+        }
+      },
+      onError: (err) {
+        print("Home/Read room: $err");
+        return;
+      },
+    );
     _loadRewardedAd();
   }
 
@@ -381,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               onPressed: () {
                                 print(user!.money);
-                                if (user != null && user!.money > 10000) {
+                                if (user != null && user!.money >= 10000) {
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {

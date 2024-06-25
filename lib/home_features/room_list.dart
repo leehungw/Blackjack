@@ -87,6 +87,7 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                 .map((doc) => RoomModel.fromJson(
                                     doc.id, doc.data() as Map<String, dynamic>))
                                 .toList();
+                            // rooms.removeWhere((element) => element.status == "deleting");
 
                             return SizedBox(
                                 height:
@@ -94,6 +95,9 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                 child: ListView.builder(
                                   itemCount: rooms.length,
                                   itemBuilder: (context, index) {
+                                    if (rooms[index].status == "deleting"){
+                                      return null;
+                                    }
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 30, vertical: 10),

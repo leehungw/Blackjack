@@ -100,7 +100,7 @@ abstract final class GameFactory {
     return RequestModel(
         key: RequestModel.formatRequestsKey(thisPlayerID),
         playerID: thisPlayerID,
-        command: RequestModel.reqLeave,
+        command: RequestModel.reqKick,
         params: [targetID, flag]
     );
   }
