@@ -1124,7 +1124,6 @@ class _PlayerCardState extends State<PlayerCard> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                      margin: const EdgeInsets.only(bottom: 5.0),
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
