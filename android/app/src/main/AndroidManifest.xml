@@ -14,6 +14,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
+            
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -26,6 +27,7 @@
             <meta-data
                 android:name="io.flutter.plugins.googlemobileads.FLUTTER_GAME_TEMPLATE_VERSION"
                 android:value="1.0.0"/>
+            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -36,5 +38,8 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="ca-app-pub-3748879568859086~2906832268"/>
     </application>
 </manifest>

@@ -101,7 +101,7 @@ class _LoginGiftState extends State<LoginGift> {
                   BoxShadow(
                     color: Colors.white,
                     offset: Offset(0, 0),
-                    blurRadius: 20,
+                    blurRadius: 10,
                   ),
                 ],
               ),

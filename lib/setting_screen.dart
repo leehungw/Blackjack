@@ -89,7 +89,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: const [
                     Palette.dialogConfirmGradientTop,
                     Palette.dialogConfirmGradientBottom,
                   ],
@@ -113,7 +113,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
+                          colors: const [
                             Palette.textFieldBackgroundGradientTop,
                             Palette.textFieldBackgroundGradientBottom,
                           ],
@@ -167,7 +167,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: const [
                     Palette.dialogConfirmGradientTop,
                     Palette.dialogConfirmGradientBottom,
                   ],
@@ -191,7 +191,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
+                          colors: const [
                             Palette.textFieldBackgroundGradientTop,
                             Palette.textFieldBackgroundGradientBottom,
                           ],
@@ -245,7 +245,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: const [
                     Palette.dialogConfirmGradientTop,
                     Palette.dialogConfirmGradientBottom,
                   ],
@@ -269,7 +269,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
+                          colors: const [
                             Palette.textFieldBackgroundGradientTop,
                             Palette.textFieldBackgroundGradientBottom,
                           ],
@@ -324,7 +324,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: const [
                     Palette.dialogConfirmGradientTop,
                     Palette.dialogConfirmGradientBottom,
                   ],
@@ -348,7 +348,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
+                          colors: const [
                             Palette.textFieldBackgroundGradientTop,
                             Palette.textFieldBackgroundGradientBottom,
                           ],
@@ -401,7 +401,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
+                  colors: const [
                     Palette.dialogConfirmGradientTop,
                     Palette.dialogConfirmGradientBottom,
                   ],
@@ -425,7 +425,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
+                          colors: const [
                             Palette.textFieldBackgroundGradientTop,
                             Palette.textFieldBackgroundGradientBottom,
                           ],
@@ -487,7 +487,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
+                    colors: const [
                       Palette.dialogConfirmGradientTop,
                       Palette.dialogConfirmGradientBottom,
                     ],
@@ -511,7 +511,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [
+                            colors: const [
                               Palette.textFieldBackgroundGradientTop,
                               Palette.textFieldBackgroundGradientBottom,
                             ],
@@ -561,7 +561,7 @@ class _SettingScreenState extends State<SettingScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
+                colors: const [
                   Palette.dialogConfirmGradientTop,
                   Palette.dialogConfirmGradientBottom,
                 ],
@@ -586,7 +586,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [
+                            colors: const [
                               Palette.textFieldBackgroundGradientTop,
                               Palette.textFieldBackgroundGradientBottom,
                             ],
@@ -622,7 +622,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [
+                            colors: const [
                               Palette
                                   .settingDialogButtonBackgroundGradientBottom,
                               Palette.settingDialogButtonBackgroundGradientTop,

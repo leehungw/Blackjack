@@ -75,7 +75,7 @@ class TextStyles {
     letterSpacing: 0.01,
   );
   static TextStyle settingScreenButton = TextStyle(
-    fontSize: 28,
+    fontSize: 22,
     color: Palette.settingDialogButtonText,
     fontWeight: FontWeight.bold,
     fontFamily: GoogleFonts.inter().fontFamily,

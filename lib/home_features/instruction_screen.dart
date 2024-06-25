@@ -89,7 +89,6 @@ class _InstructionScreenState extends State<InstructionScreen> {
                               "4. Tình huống đặc biệt khi chơi Xì dách\n" +
                               "Người chơi sẽ đối mặt với các tình huống sau:\n" +
                               "- Ngũ linh: Tổng điểm 5 lá bài nhỏ hơn 21 sẽ dẫn đến chiến thắng tuyệt đối. Trong trường hợp cả hai đều có ngũ linh, người có tổng điểm thấp hơn sẽ thắng.\n" +
-                              "- Vượt quá 21 điểm: Nếu cả hai vượt quá, người có tổng điểm thấp hơn sẽ chiến thắng. Trong trường hợp vượt quá 21 điểm, người có tổng điểm dưới 16 điểm sẽ thua.\n" +
                               "5. Lưu ý\n" +
                               "Khi tham gia Xì dách, bạn sẽ gặp các tình huống sau và áp dụng cách tính điểm như sau:\n" +
                               "- Cả nhà cái và người chơi có bài quắc (vượt quá 21) hoặc cùng điểm, kết quả là hòa, không ai thua cược.\n" +
