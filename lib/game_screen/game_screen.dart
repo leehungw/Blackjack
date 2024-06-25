@@ -1099,6 +1099,17 @@ class _PlayerCardState extends State<PlayerCard> {
       return SizedBox(width: 120, height: 160);
     }
 
+    String playerMoney = "";
+    if (player.userModel != null){
+      playerMoney = player.userModel!.money < 1000
+          ? player.userModel!.money.toString()
+          : player.userModel!.money < 1000000
+          ? "${(player.userModel!.money / 1000 * 1.0).toStringAsFixed(1)}K"
+          : player.userModel!.money < 1000000000
+          ? "${(player.userModel!.money / 1000000 * 1.0).toStringAsFixed(1)}M"
+          : "${(player.userModel!.money / 1000000000 * 1.0).toStringAsFixed(1)}B";
+    }
+
     return SizedBox(
         width: 120,
         height: 160,
@@ -1165,9 +1176,7 @@ class _PlayerCardState extends State<PlayerCard> {
                             textAlign: TextAlign.start,
                           ),
                           GradientText(
-                            player.userModel != null
-                                ? player.userModel!.money.toString()
-                                : "",
+                            playerMoney,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
