@@ -63,22 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
         user = value;
       });
     });
-    List<RoomModel> rooms = [];
-    FirebaseRequest.readRooms().listen(
-      (event) async {
-        rooms = event;
-        print("Get rooms in home screen");
-        for (RoomModel room in rooms) {
-          if (room.dealer == user!.playerID) {
-            await FirebaseRequest.deleteRoom(room);
-          }
-        }
-      },
-      onError: (err) {
-        print("Home/Read room: $err");
-        return;
-      },
-    );
+
     _loadRewardedAd();
   }
 
@@ -112,7 +97,20 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       );
     } else {
-      print('RewardedAd is not loaded yet.');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: const Text(
+            'Bạn không đủ tiền để chơi!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          duration: const Duration(milliseconds: 1500),
+        ),
+      );
     }
   }
 
@@ -133,6 +131,11 @@ class _HomeScreenState extends State<HomeScreen> {
       await _updateSharedPreferences(money);
     }
     _reloadHome();
+    _loadRewardedAd();
+    setState(() {
+      _isRewardedAdLoaded = false;
+      _rewardedAd.dispose();
+    });
   }
 
   @override
