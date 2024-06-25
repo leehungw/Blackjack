@@ -1115,6 +1115,7 @@ final class GameOnlineManager{
 
     for (GamePlayerOnline player in _players){
       player.cards.clear();
+      player.dealAmount = 0;
       player.state = PlayerState.none;
       if (player.isDealer() == false){
         player.result = PlayerResult.uncheck;
