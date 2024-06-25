@@ -96,10 +96,12 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                 child: ListView.builder(
                                   itemCount: rooms.length,
                                   itemBuilder: (context, index) {
-                                    if (rooms[index].dealer == FirebaseAuth.instance.currentUser!.uid){
+                                    if (rooms[index].dealer ==
+                                        FirebaseAuth
+                                            .instance.currentUser!.uid) {
                                       FirebaseRequest.deleteRoom(rooms[index]);
                                     }
-                                    if (rooms[index].status == "deleting"){
+                                    if (rooms[index].status == "deleting") {
                                       return null;
                                     }
                                     return Padding(
@@ -152,60 +154,60 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                                 children: [
                                                   Column(
                                                     children: [
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(5),
-                                                          color: Palette
-                                                              .dialogConfirmGradientBottom,
-                                                        ),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Column(
-                                                            children: [
-                                                              Text(
-                                                                "Mức cược tối thiểu:",
-                                                                style: TextStyles
-                                                                    .textFieldStyle
-                                                                    .copyWith(
-                                                                        color: Colors
-                                                                            .black,
-                                                                        fontWeight:
-                                                                            FontWeight.bold),
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .center,
-                                                              ),
-                                                              const Gap(5),
-                                                              Row(
-                                                                children: [
-                                                                  Text(
-                                                                    //TODO: mức cược của room
-                                                                    "1k",
-                                                                    style: TextStyles
-                                                                        .textFieldStyle
-                                                                        .copyWith(
-                                                                            color:
-                                                                                Colors.black,
-                                                                            fontWeight: FontWeight.bold),
-                                                                  ),
-                                                                  const Gap(10),
-                                                                  const Icon(
-                                                                    FontAwesomeIcons
-                                                                        .coins,
-                                                                    color: Palette
-                                                                        .coinGrind,
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
+                                                      // Container(
+                                                      //   decoration:
+                                                      //       BoxDecoration(
+                                                      //     borderRadius:
+                                                      //         BorderRadius
+                                                      //             .circular(5),
+                                                      //     color: Palette
+                                                      //         .dialogConfirmGradientBottom,
+                                                      //   ),
+                                                      //   child: Padding(
+                                                      //     padding:
+                                                      //         const EdgeInsets
+                                                      //             .all(8.0),
+                                                      //     child: Column(
+                                                      //       children: [
+                                                      //         Text(
+                                                      //           "Mức cược tối thiểu:",
+                                                      //           style: TextStyles
+                                                      //               .textFieldStyle
+                                                      //               .copyWith(
+                                                      //                   color: Colors
+                                                      //                       .black,
+                                                      //                   fontWeight:
+                                                      //                       FontWeight.bold),
+                                                      //           textAlign:
+                                                      //               TextAlign
+                                                      //                   .center,
+                                                      //         ),
+                                                      //         const Gap(5),
+                                                      //         Row(
+                                                      //           children: [
+                                                      //             Text(
+                                                      //               //TODO: mức cược của room
+                                                      //               "1k",
+                                                      //               style: TextStyles
+                                                      //                   .textFieldStyle
+                                                      //                   .copyWith(
+                                                      //                       color:
+                                                      //                           Colors.black,
+                                                      //                       fontWeight: FontWeight.bold),
+                                                      //             ),
+                                                      //             const Gap(10),
+                                                      //             const Icon(
+                                                      //               FontAwesomeIcons
+                                                      //                   .coins,
+                                                      //               color: Palette
+                                                      //                   .coinGrind,
+                                                      //             )
+                                                      //           ],
+                                                      //         ),
+                                                      //       ],
+                                                      //     ),
+                                                      //   ),
+                                                      // ),
                                                       const Gap(5),
                                                       FutureBuilder(
                                                           future: _playerRepo
