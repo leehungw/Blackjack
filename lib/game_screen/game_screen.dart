@@ -502,7 +502,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
 
   SizedBox _playerDealMoney(int seatOffset){
     GamePlayerOnline? player = gameManager.getPlayerBySeatOffset(seatOffset);
-    if (player != null) {
+    if (player != null && player != gameManager.dealer) {
       String dealMoney = player.dealAmount > 0 ? "${(player.dealAmount / 1000).round()},0K" : "0";
 
       return SizedBox(
