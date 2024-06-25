@@ -2,11 +2,9 @@ import 'dart:async';
 
 import 'package:card/widgets/deal_picker_dialog.dart';
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gap/gap.dart';
-//import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 
@@ -29,7 +27,7 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
   String userID = "21520889";
   static const double buttonSize = 80;
   // ====================================
-
+  final currencyFormatter = NumberFormat('#,###', "en_US");
   bool isManagerDisposed = false;
 
   GameOnlineManager gameManager = GameOnlineManager.instance;
@@ -828,9 +826,8 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                     gameManager.thisPlayer != null
                                         ? (gameManager.thisPlayer?.userModel !=
                                                 null
-                                            ? gameManager
-                                                .thisPlayer!.userModel!.money
-                                                .toString()
+                                            ? currencyFormatter.format(
+                                                gameManager.thisPlayer!.userModel!.money)
                                             : "")
                                         : "",
                                     style: const TextStyle(
