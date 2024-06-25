@@ -254,8 +254,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   .primaryText),
                                                     ),
                                                     TextSpan(
-                                                      text: player.money
-                                                          .toString(),
+                                                      text: player.money < 1000
+                                                          ? player.money
+                                                              .toString()
+                                                          : player.money <
+                                                                  1000000
+                                                              ? "${(player.money / 1000 * 1.0).toStringAsFixed(1)}K"
+                                                              : player.money <
+                                                                      1000000000
+                                                                  ? "${(player.money / 1000000 * 1.0).toStringAsFixed(1)}M"
+                                                                  : "${(player.money / 1000000000 * 1.0).toStringAsFixed(1)}B",
                                                       style: TextStyles
                                                           .textFieldStyle
                                                           .copyWith(
