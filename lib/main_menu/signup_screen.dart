@@ -595,7 +595,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   bool _validateUserName(String userName) {
-    if (userName.length > 14) {
+    if (userName.length > 10) {
       return false;
     }
 
