@@ -1143,11 +1143,26 @@ class _PlayerCardState extends State<PlayerCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                SizedBox(
+                Container(
+                  margin: const EdgeInsets.only(bottom: 5.0),
                   width: 50,
-                  height: 20,
-                  child: player == gameManager.dealer ? Image.asset("assets/images/game_host_banner.png", width: 50, height: 20) : null,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: const AssetImage("assets/images/game_player_background_onturn.png"), // PLAYER AVATAR
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      width: 50,
+                      height: 20,
+                      child: player == gameManager.dealer ? Image.asset("assets/images/game_host_banner.png", width: 50, height: 20) : null,
+                    ),
+                  )
                 ),
+
                 SizedBox(
                   width: 70,
                   height: 50,
