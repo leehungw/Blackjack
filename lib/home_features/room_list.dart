@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:card/GameObject/game_online_manager.dart';
 import 'package:card/main.dart';
+import 'package:card/models/FirebaseRequest.dart';
 import 'package:card/models/RoomModel.dart';
 import 'package:card/models/user.dart';
 import 'package:card/style/palette.dart';
@@ -95,6 +96,9 @@ class _RoomListScreenState extends State<RoomListScreen> {
                                 child: ListView.builder(
                                   itemCount: rooms.length,
                                   itemBuilder: (context, index) {
+                                    if (rooms[index].dealer == FirebaseAuth.instance.currentUser!.uid){
+                                      FirebaseRequest.deleteRoom(rooms[index]);
+                                    }
                                     if (rooms[index].status == "deleting"){
                                       return null;
                                     }

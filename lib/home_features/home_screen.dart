@@ -63,22 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
         user = value;
       });
     });
-    List<RoomModel> rooms = [];
-    FirebaseRequest.readRooms().listen(
-      (event) async {
-        rooms = event;
-        print("Get rooms in home screen");
-        for (RoomModel room in rooms) {
-          if (room.dealer == user!.playerID) {
-            await FirebaseRequest.deleteRoom(room);
-          }
-        }
-      },
-      onError: (err) {
-        print("Home/Read room: $err");
-        return;
-      },
-    );
     _loadRewardedAd();
   }
 
