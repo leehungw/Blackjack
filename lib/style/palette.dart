@@ -33,8 +33,8 @@ class Palette {
   static const Color accountBackgroundGradientBottom = Color(0xFFDD4444);
   static const Color buttonConfirmBackground = Color(0xFF440682);
   static const Color black = Color(0xFF000101);
-  static const Color homeBackgroundGradientBottom = Color(0xFF8A88FE);
-  static const Color homeBackgroundGradientTop = Color(0xFFFF6D6D);
+  static const Color homeBackgroundGradientBottom = Color(0xFF2E6FBA);
+  static const Color homeBackgroundGradientTop = Color(0xFF1BD5FE);
   static const Color numberText = Color(0xFF262398);
   static const Color buttonStartBackgroundGradientTop = Color(0xFF02C9E5);
   static const Color buttonStartBackgroundGradientBottom = Color(0xFF054A7B);

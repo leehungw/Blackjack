@@ -14,7 +14,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/FirebaseRequest.dart';
 import '../models/RoomModel.dart';
@@ -31,6 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const double constXExp = 0.05;
   Player? user;
+
+  late RewardedAd _rewardedAd;
+  bool _isRewardedAdLoaded = false;
 
   Future<void> signout() async {
     FirebaseAuth.instance.signOut();
@@ -57,7 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
         user = value;
       });
     });
-
     List<RoomModel> rooms = [];
     FirebaseRequest.readRooms().listen(
           (event) async {
@@ -74,6 +78,60 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       },
     );
+    _loadRewardedAd();
+  }
+
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId:
+          'ca-app-pub-3748879568859086/9656412758', // Thay thế bằng ID đơn vị quảng cáo của bạn
+      request: AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (RewardedAd ad) {
+          setState(() {
+            _rewardedAd = ad;
+            _isRewardedAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print('RewardedAd failed to load: $error');
+          setState(() {
+            _isRewardedAdLoaded = false;
+          });
+        },
+      ),
+    );
+  }
+
+  void _showRewardedAd() {
+    if (_isRewardedAdLoaded) {
+      _rewardedAd.show(
+        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+          _updateUserBalance();
+        },
+      );
+    } else {
+      print('RewardedAd is not loaded yet.');
+    }
+  }
+
+  _updateSharedPreferences(int money) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('money', money);
+  }
+
+  void _updateUserBalance() async {
+    if (user != null) {
+      int money = user!.money + 500000;
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user!.playerID)
+          .update({
+        'money': money,
+      });
+      await _updateSharedPreferences(money);
+    }
+    _reloadHome();
   }
 
   @override
@@ -495,7 +553,168 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 size: 40,
                                 onPressed: () {
-                                  //TODO: coin onpressed handle
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        contentPadding: EdgeInsets.all(0),
+                                        content: Container(
+                                          padding: EdgeInsets.all(15),
+                                          height: 150,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.8,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: const [
+                                                Palette
+                                                    .dialogConfirmGradientTop,
+                                                Palette
+                                                    .dialogConfirmGradientBottom,
+                                              ],
+                                            ),
+                                          ),
+                                          child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'Xem video để nhận 500k?',
+                                                  style: TextStyles.dialogText
+                                                      .copyWith(
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Container(
+                                                      width: 140,
+                                                      height: 40,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
+                                                        gradient:
+                                                            LinearGradient(
+                                                          begin:
+                                                              Alignment.topLeft,
+                                                          end: Alignment
+                                                              .bottomRight,
+                                                          colors: const [
+                                                            Palette
+                                                                .textFieldBackgroundGradientTop,
+                                                            Palette
+                                                                .textFieldBackgroundGradientBottom,
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      child: ElevatedButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          shadowColor: Colors
+                                                              .transparent,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                          ),
+                                                          padding:
+                                                              EdgeInsets.zero,
+                                                          tapTargetSize:
+                                                              MaterialTapTargetSize
+                                                                  .shrinkWrap,
+                                                        ),
+                                                        child: Text(
+                                                          'Hủy',
+                                                          style: TextStyles
+                                                              .settingScreenButton
+                                                              .copyWith(
+                                                            color: Colors
+                                                                .redAccent,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      width: 140,
+                                                      height: 40,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
+                                                        gradient:
+                                                            LinearGradient(
+                                                          begin:
+                                                              Alignment.topLeft,
+                                                          end: Alignment
+                                                              .bottomRight,
+                                                          colors: const [
+                                                            Palette
+                                                                .settingDialogButtonBackgroundGradientBottom,
+                                                            Palette
+                                                                .settingDialogButtonBackgroundGradientTop,
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      child: ElevatedButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          _showRewardedAd();
+                                                        },
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                          shadowColor: Colors
+                                                              .transparent,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                          ),
+                                                          padding:
+                                                              EdgeInsets.zero,
+                                                          tapTargetSize:
+                                                              MaterialTapTargetSize
+                                                                  .shrinkWrap,
+                                                        ),
+                                                        child: Text(
+                                                          'Xác nhận',
+                                                          style: TextStyles
+                                                              .settingScreenButton,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ]),
+                                        ),
+                                      );
+                                    },
+                                  );
                                 },
                                 text: "Tìm xu",
                               ),
