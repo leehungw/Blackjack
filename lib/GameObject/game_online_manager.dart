@@ -180,7 +180,7 @@ final class GameOnlineManager{
     for (GamePlayerOnline player in _players){
       if (player == _dealer || player.result == PlayerResult.dealer){
         showedCount ++;
-        if (player == _thisPlayer || _thisPlayer!.result != PlayerResult.uncheck){
+        if (player == _thisPlayer || (_thisPlayer != null && _thisPlayer!.result != PlayerResult.uncheck)){
           player.flipCards();
         }
         continue;
