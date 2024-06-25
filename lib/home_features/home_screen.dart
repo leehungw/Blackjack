@@ -11,6 +11,7 @@ import 'package:card/widgets/start_game_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -64,11 +65,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     List<RoomModel> rooms = [];
     FirebaseRequest.readRooms().listen(
-          (event) async {
+      (event) async {
         rooms = event;
         print("Get rooms in home screen");
-        for (RoomModel room in rooms){
-          if (room.dealer == user!.playerID){
+        for (RoomModel room in rooms) {
+          if (room.dealer == user!.playerID) {
             await FirebaseRequest.deleteRoom(room);
           }
         }
@@ -731,7 +732,166 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Palette.buttonExitBackgroundGradientTop
                                 ],
                               ),
-                              onPressed: signout,
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      contentPadding: EdgeInsets.all(0),
+                                      content: Container(
+                                        padding: EdgeInsets.all(15),
+                                        height: 150,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.8,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: const [
+                                              Palette.dialogConfirmGradientTop,
+                                              Palette
+                                                  .dialogConfirmGradientBottom,
+                                            ],
+                                          ),
+                                        ),
+                                        child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceEvenly,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                'Bạn muốn thoát ứng dụng?',
+                                                style: TextStyles.dialogText
+                                                    .copyWith(
+                                                  fontSize: 20,
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Container(
+                                                    width: 140,
+                                                    height: 40,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15),
+                                                      gradient: LinearGradient(
+                                                        begin:
+                                                            Alignment.topLeft,
+                                                        end: Alignment
+                                                            .bottomRight,
+                                                        colors: const [
+                                                          Palette
+                                                              .textFieldBackgroundGradientTop,
+                                                          Palette
+                                                              .textFieldBackgroundGradientBottom,
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    child: ElevatedButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        shadowColor:
+                                                            Colors.transparent,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                        ),
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        tapTargetSize:
+                                                            MaterialTapTargetSize
+                                                                .shrinkWrap,
+                                                      ),
+                                                      child: Text(
+                                                        'Hủy',
+                                                        style: TextStyles
+                                                            .settingScreenButton
+                                                            .copyWith(
+                                                          color:
+                                                              Colors.redAccent,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    width: 140,
+                                                    height: 40,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15),
+                                                      gradient: LinearGradient(
+                                                        begin:
+                                                            Alignment.topLeft,
+                                                        end: Alignment
+                                                            .bottomRight,
+                                                        colors: const [
+                                                          Palette
+                                                              .settingDialogButtonBackgroundGradientBottom,
+                                                          Palette
+                                                              .settingDialogButtonBackgroundGradientTop,
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    child: ElevatedButton(
+                                                      onPressed: () async {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                        await SystemChannels
+                                                            .platform
+                                                            .invokeMethod(
+                                                                'SystemNavigator.pop');
+                                                      },
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        shadowColor:
+                                                            Colors.transparent,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                        ),
+                                                        padding:
+                                                            EdgeInsets.zero,
+                                                        tapTargetSize:
+                                                            MaterialTapTargetSize
+                                                                .shrinkWrap,
+                                                      ),
+                                                      child: Text(
+                                                        'Xác nhận',
+                                                        style: TextStyles
+                                                            .settingScreenButton,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ]),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                               text: "Thoát",
                             ),
                           ),
