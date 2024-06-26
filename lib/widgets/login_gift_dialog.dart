@@ -32,7 +32,7 @@ class _LoginGiftState extends State<LoginGift> {
     int duration = prefs.getInt('duration') ?? 0;
     String? startDayString = prefs.getString('startDate');
     money = prefs.getInt('money') ?? 0;
-    print(money);
+
     DateTime? startDay =
         startDayString != null ? DateTime.parse(startDayString) : null;
 
