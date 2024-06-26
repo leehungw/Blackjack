@@ -827,7 +827,8 @@ class _GameScreenOnlineState extends State<GameScreenOnline> {
                                         ? (gameManager.thisPlayer?.userModel !=
                                                 null
                                             ? currencyFormatter.format(
-                                                gameManager.thisPlayer!.userModel!.money)
+                                                gameManager.thisPlayer!
+                                                    .userModel!.money)
                                             : "")
                                         : "",
                                     style: const TextStyle(
@@ -1097,14 +1098,14 @@ class _PlayerCardState extends State<PlayerCard> {
     }
 
     String playerMoney = "";
-    if (player.userModel != null){
+    if (player.userModel != null) {
       playerMoney = player.userModel!.money < 1000
           ? player.userModel!.money.toString()
           : player.userModel!.money < 1000000
-          ? "${(player.userModel!.money / 1000 * 1.0).toStringAsFixed(1)}K"
-          : player.userModel!.money < 1000000000
-          ? "${(player.userModel!.money / 1000000 * 1.0).toStringAsFixed(1)}M"
-          : "${(player.userModel!.money / 1000000000 * 1.0).toStringAsFixed(1)}B";
+              ? "${(player.userModel!.money / 1000 * 1.0).toStringAsFixed(1)}K"
+              : player.userModel!.money < 1000000000
+                  ? "${(player.userModel!.money / 1000000 * 1.0).toStringAsFixed(1)}M"
+                  : "${(player.userModel!.money / 1000000000 * 1.0).toStringAsFixed(1)}B";
     }
 
     return SizedBox(
@@ -1168,7 +1169,7 @@ class _PlayerCardState extends State<PlayerCard> {
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
-                                //fontFamily: "Montserrat",
+                                // fontFamily: "Montserrat",
                                 color: Colors.white),
                             textAlign: TextAlign.start,
                           ),
