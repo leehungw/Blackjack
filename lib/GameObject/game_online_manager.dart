@@ -687,7 +687,7 @@ final class GameOnlineManager{
             if (_currentPlayer!.userId == req.playerID){
               _currentPlayer?.lose();
               _left_players.add(_currentPlayer!);
-
+              _revealedCount ++;
               // Handle transaction
               await handleTransaction(_currentPlayer!, 1);
               //
@@ -695,6 +695,7 @@ final class GameOnlineManager{
             } else {
               target.lose();
               _left_players.add(target);
+              _revealedCount ++;
               // Handle transaction
               await handleTransaction(target, 1);
               //

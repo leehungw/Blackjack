@@ -1168,7 +1168,7 @@ class _PlayerCardState extends State<PlayerCard> {
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
-                                fontFamily: "Montserrat",
+                                //fontFamily: "Montserrat",
                                 color: Colors.white),
                             textAlign: TextAlign.start,
                           ),
