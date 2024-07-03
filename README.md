@@ -1,225 +1,195 @@
-A starter Flutter project with a minimal shell of a board game
-including the following features:
+<div id="top">
+</div>
+<h1>LUCKY CARD</h1>
+<!-- LUCKY CARD -->
+<a style="text-decoration: none;" href="#Top">
+    <img src="assets/images/logoApp.png" alt="Logo LUCKY CARD" width="250"/>
+</a>
 
-- main menu screen
-- basic navigation
-- game-y theming
-- settings
-- sound
-- drag and drop
-- minimal game state management
+## Danh mục
 
-You can jump directly into building your game in `lib/play_session/`.
+ [I. Mở đầu](#Modau)
 
-When you're ready for things like ads, in-app purchases, achievements,
-analytics, crash reporting, and so on, 
-there are resources ready for you
-at [flutter.dev/games](https://flutter.dev/games).
+ [II. Mô tả](#Mota)
 
+> [1. Ý tưởng](#Ytuong)
+>
+> [2. Công nghệ](#Congnghe)
+>
+> [3. Đối tượng sử dụng](#Doituongsudung)
+>
+> [4. Mục tiêu](#Muctieu)
+>
+> [5. Tính năng](#Tinhnang)
 
-# Development
 
-To run the app in debug mode:
+[III. Cài đặt](#CaiDat)
 
-    flutter run
+[IV. Tác giả](#Tacgia)
 
-It is often convenient to develop your game as a desktop app.
-For example, you can run `flutter run -d macOS`, and get the same UI
-in a desktop window on a Mac. That way, you don't need to use a
-simulator/emulator or attach a mobile device.
+[V. Người hướng dẫn](#Nguoihuongdan)
 
+[VI. Tổng kết](#Tongket)
 
-## Code organization
 
-Code is organized in a loose and shallow feature-first fashion.
-In `lib/`, you'll therefore find directories such as `audio`,
-`main_menu` or `settings`. Nothing fancy, but usable.
+<!-- MỞ ĐẦU -->
+<div id="Modau"></div>
 
-```text
-lib
-├── app_lifecycle
-├── audio
-├── game_internals
-├── main_menu
-├── play_session
-├── player_progress
-├── settings
-├── style
-├── win_game
-│
-├── main.dart
-└── router.dart
-```
+## I. Mở đầu
+Trong bối cảnh công nghệ phát triển mạnh mẽ và xu hướng giải trí kỹ thuật số ngày càng phổ biến, các ứng dụng trò chơi di động đã trở thành một phần không thể thiếu trong đời sống hàng ngày của nhiều người. Trong số đó, Blackjack - một trò chơi bài cổ điển và nổi tiếng trên toàn thế giới, đã thu hút được sự quan tâm lớn từ cộng đồng.
 
-The state management approach is intentionally low-level. That way, it's easy to
-take this project and run with it, without having to learn new paradigms, or having
-to remember to run `flutter pub run build_runner watch`. You are,
-of course, encouraged to use whatever paradigm, helper package or code generation
-scheme that you prefer.
+Mục tiêu của đề tài là phát triển một ứng dụng trò chơi Blackjack nhiều người chơi trên thiết bị di động, giúp người dùng có thể trải nghiệm cảm giác hồi hộp và thú vị của trò chơi này mọi lúc, mọi nơi. Ứng dụng sẽ không chỉ tập trung vào việc tái hiện chính xác luật chơi và các chiến lược của trò chơi Blackjack cổ điển mà còn chú trọng đến trải nghiệm người dùng thông qua giao diện thân thiện, tính năng tương tác cao và khả năng kết nối với người chơi khác trên toàn cầu.
 
+Với đối tượng được hướng đến là người dùng di động ở mọi lứa tuổi có nhu cầu giải trí, đầu tiên, ứng dụng cần có lối chơi bám sát với trò chơi Blackjack truyền thống, bao gồm các luật chơi cũng như điều kiện thắng. 
 
-## Building for production
+Để tăng tính cạnh tranh và khuyến khích người chơi tiếp tục sử dụng ứng dụng, ứng dụng cần tích hợp hệ thống tiền tệ để trao đổi giữa các người chơi khi thắng hoặc thua, hệ thống kinh nghiệm để xếp hạng người chơi theo cấp độ và lượng tiền.
 
-To build the app for iOS (and open Xcode when finished):
+Để giúp người dùng có lượng tiền để bắt đầu chơi và tiếp tục chơi, ứng dụng cung cấp chức năng điểm danh và chức năng xem quảng cáo để có thể tăng lượng tiền cho người chơi.
+Ngoài ra, ứng dụng cần cung cấp một số tiện ích hỗ trợ người dùng như quản lý tài khoản (bao gồm đăng ký, đăng nhập, cập nhật tài khoản), góp ý về ứng dụng và trang hướng dẫn luật chơi.
 
-```shell
-flutter build ipa && open build/ios/archive/Runner.xcarchive
-```
 
-To build the app for Android (and open the folder with the bundle when finished):
 
-```shell
-flutter build appbundle && open build/app/outputs/bundle/release
-```
+<!-- MÔ TẢ -->
+<div id="Mota"></div>
 
-While the template is primarily meant for mobile games, you can also publish
-for the web. This might be useful for web-based demos, for example,
-or for rapid play-testing. The following command requires installing
-[`peanut`](https://pub.dev/packages/peanut/install).
+## II. Mô tả
 
-```bash
-flutter pub global run peanut \
---web-renderer canvaskit \
---extra-args "--base-href=/name_of_your_github_repo/" \
-&& git push origin --set-upstream gh-pages
-```
+<!-- Ý TƯỞNG -->
 
-The last line of the command above automatically pushes
-your newly built web game to GitHub pages, assuming that you have
-that set up.
+<div id="Ytuong"></div>
 
-Lastly, it is of course possible to build your game for desktop platforms:
-Windows, Linux and macOS. 
-Follow the [standard instructions](https://docs.flutter.dev/platform-integration/desktop).
+### 1. Ý tưởng
 
+* Giao diện ứng dụng thân thiện, dễ sử dụng đối với người dùng.
 
-# Integrations
+* Đáp ứng các tính năng của một trò chơi trực tuyến nhiều người chơi.
 
-Focus on making your core gameplay fun first. Don't worry about
-integrations like ads, in-app purchases, analytics, and so on.
-It's easy to add them later, and you can find recipes and codelabs
-for them at [flutter.dev/games](https://flutter.dev/games).
+* Có thể mở rộng thêm các chức năng, đặc trưng mới trong tương lai.
 
-Change the package name of your game
-before you start any of the deeper integrations.
-[StackOverflow has instructions](https://stackoverflow.com/a/51550358/1416886)
-for this, and the [`rename`](https://pub.dev/packages/rename) tool
-(on pub.dev) automates the process.
 
+<div id="Congnghe"></div>
 
-## Audio
+### 2. Công nghệ
+<ul>
+    <li>Công cụ : Flutter</li>
+    <li>IDE: Visual Studio Code</li>
+    <li>Cơ sở dữ liệu: Firebase</li>
+    <li>Các công cụ quản lý: Git, GitHub</li>
+</ul>
 
-Audio is enabled by default and ready to go. You can modify code
-in `lib/audio/` to your liking.
 
-You can find some music
-tracks in `assets/music` — these are Creative Commons Attribution (CC-BY)
-licensed, and are included in this repository with permission. If you decide
-to keep these tracks in your game, please don't forget to give credit
-to the musician, [Mr Smith][].
+<div id="Doituongsudung"></div>
 
-[Mr Smith]: https://freemusicarchive.org/music/mr-smith
+### 3. Đối tượng sử dụng
+Đối tượng sử dụng của ứng dụng bao gồm:
+* Người dùng có nhu cầu giải trí ở mọi lứa tuổi
 
-The repository also includes a few sound effect samples in `assets/sfx`.
-These are public domain (CC0) and you will almost surely want to replace
-them because they're just recordings of a developer doing silly sounds
-with their mouth.
 
-## Logging
+<div id="Muctieu"></div>
 
-The template uses the [`logging`](https://pub.dev/packages/logging) package
-to log messages to the console. This makes it very easy to log messages
-from anywhere with something like the following:
+### 4. Mục tiêu
 
-```dart
-import 'package:logging/logging.dart';
+ * <strong>Ứng dụng thực tế</strong>
+ 
+    *	Tạo ra một ứng dụng giải trí cho người dùng trên điện thoại di dộng.
+   
+    *	Hỗ trợ nhiều người chơi trực tuyến cùng lúc.
+    	
+    *	Tăng sự gắn kết, thư giãn cho mọi người.
 
-final _log = Logger('Foo');
 
-void foo() {
-  _log.info('Hello, world!');
-}
-```
 
-This will show up in the console as:
+ * <strong>Yêu cầu ứng dụng</strong>
+ 
+    * Đáp ứng các tính năng cơ bản cần có của một ứng dụng trò chơi.
+    
+    * Nâng cao trải nghiệm của người sử dụng.
+    
+    * Dễ dàng tra cứu các thông tin cần thiết.
+    
+    * Giao diện thân thiện, dễ sử dụng, bố cục hợp lý, hài hoà về màu sắc và mang tính đồng bộ cao, phân quyền cho người dùng thông qua tài khoản.
+    
+    * Ứng dụng phải tương thích với đa số các thiết bị sử dụng hệ điều hành Android.
 
-```text
-[Foo] Hello, world!
-```
+    * Có thể mở rộng thêm các chức năng, đặc trưng mới trong tương lai.
 
-When using Flutter DevTools, all the metadata of the log message is preserved, 
-so you can filter by logger name, log level, and so on.
 
-Later, when you're closer to production, you can gather these log messages
-(see `lib/main.dart`) and send them to a service like Firebase Crashlytics
-when appropriate.
-See [`firebase_crashlytics`](https://pub.dev/packages/firebase_crashlytics)
-for more information.
+<div id="Tinhnang"></div>
 
+### 5. Tính năng
 
-## Settings
+<img src="https://github.com/leehungw/Blackjack/assets/110316749/396ad4a9-58bb-4d9b-ae20-ab03ac9d79c1" alt="Logo LUCKY CARD" width="250"/>
 
-The settings page is enabled by default, and accessible both
-from the main menu and through the "gear" button in the play session screen.
+ * <strong>Danh sách tính năng</strong>
 
-Settings are saved to local storage using the 
-[`shared_preferences`](https://pub.dev/packages/shared_preferences)
-package.
-To change what preferences are saved and how, edit files in
-`lib/src/settings/persistence`.
+    * Đăng nhập, đăng ký, đăng xuất, quên mật khẩu, cập nhật thông tin cá nhân.
+    
+    * Điểm danh hằng ngày.
+    
+    * Bảng xếp hạng.
+    
+    * Xem quảng cáo để kiếm thêm xu.
+    
+    * Hướng dẫn.
 
+    * Tạo phòng chơi mới.
 
-# Icon
+    * Vào phòng chơi đã có bằng cách nhập mã phòng.
 
-To update the launcher icon, first change the files
-`assets/icon-adaptive-foreground.png` and `assets/icon.png`.
-Then, run the following:
+    * Xem danh sách các phòng đang có.
 
-```bash
-flutter pub run flutter_launcher_icons:main
-```
+<div id="CaiDat"></div>
 
-You can [configure](https://github.com/fluttercommunity/flutter_launcher_icons#book-guide)
-the look of the icon in the `flutter_icons:` section of `pubspec.yaml`.
+## III. Hướng dẫn cài đặt
+### Yêu cầu
 
+* Flutter SDK
+* Dart SDK
+* A code editor (e.g. Visual Studio Code, IntelliJ IDEA)
 
-# Troubleshooting
+### Cài Đặt
 
-## CocoaPods
+1. Tải Flutter SDK từ [the Flutter website](https://flutter.dev/sdk/).
+2. Cài đặt Dart SDK từ [the Dart website](https://dart.dev/get-dart).
+3. Tải Lucky Card Source : [Lucky Card Game App](https://github.com/leehungw/Blackjack)
+4. Trong dự án, chạy các lệnh sau để khởi chạy những thư viện cần thiết:
+   
++ flutter pub get
+5. Chạy ứng dụng bằng cách nháy chọn nút "Run" trên IDE của bạn.
+  
+  Ứng dụng sẽ được chạy trên thiết bị (thật hoặc ảo) của bạn.
 
-When upgrading to higher versions of Flutter or plugins, you might encounter an error when
-building the iOS or macOS app. A good first thing to try is to delete the `ios/Podfile.lock`
-file (or `macos/Podfile.lock`, respectively), then trying to build again. (You can achieve
-a more thorough cleanup by running `flutter clean` instead.)
+<div id="Tacgia"></div>
 
-If this doesn't help, here are some more methods:
+## IV. Tác giả
 
-- See if everything is still okay with your Flutter and CocoaPods installation
-  by running `flutter doctor`. Revisit the macOS 
-  [Flutter installation guide](https://docs.flutter.dev/get-started/install/macos)
-  if needed.
-- Update CocoaPods specs directory:
+* [Phạm Thanh Tường](https://github.com/TuongPhamCT)
 
-  ```sh
-  cd ios
-  pod repo update
-  cd ..
-  ```
+* [Lê Ngọc Hưng](https://github.com/leehungw)
 
-  (Substitute `ios` for `macos` when appropriate.)
-- Open the project in Xcode, 
-  [increase the build target](https://stackoverflow.com/a/38602597/1416886),
-  then select _Product_ > _Clean Build Folder_.
+* [Huỳnh Đăng Quang](https://github.com/HuynhDangQuang)
 
-## Warnings in console
 
-When running the game for the first time, you might see warnings like the following:
+<!-- NGƯỜI HƯỚNG DẪN -->
+<div id="Nguoihuongdan"></div>
 
-> Note: Some input files use or override a deprecated API.
+## V. Người hướng dẫn
+* Giảng viên: Huỳnh Tuấn Anh
 
-or
 
-> warning: 'viewState' was deprecated in macOS 11.0: Use -initWithState: instead
 
-These warning come from the various plugins that are used by the template. They are not harmful 
-and can be ignored. The warnings are meant for the plugin authors, not for you, the game developer.
+<!-- TỔNG KẾT -->
+<div id="Tongket"></div>
+
+## VI. Tổng kết
+Sản phẩm là kết quả sau quá trình cùng nhau thực hiện đồ án của những thành viên trong nhóm. Thông qua quá trình này, các thành viên đã có cho mình những lượng kiến thức và kỹ năng chuyên môn nhất định về quy trình lập trình thực tế, hiểu hơn về lập trình và có riêng cho mình những bài học quý giá làm hành trang cho công việc sau này.
+
+Ngoài ra, nhóm cũng muốn gửi lời cảm ơn chân thành và sự tri ân sâu sắc đến giảng viên giảng dạy, thầy Huỳnh Tuấn Anh đã cùng đồng hành với nhóm trong suốt quá trình thực hiện đồ án để có được thành quả như hôm nay.
+
+Sản phẩm của nhóm có thể còn nhiều thiếu sót trong quá trình xây dựng và phát triển. Vì vậy, đừng ngần ngại gửi những đóng góp hoặc ý kiến của bạn đến với chúng tôi. Mỗi đóng góp của các bạn đều sẽ được ghi nhận và sẽ là động lực để nhóm có thể hoàn thiện sản phẩm hơn nữa.
+
+Cảm ơn bạn đã quan tâm!
+
+---
+
+<p align="right"><a href="#Top">Quay lại đầu trang</a></p>
