@@ -167,7 +167,7 @@ Ngoài ra, ứng dụng cần cung cấp một số tiện ích hỗ trợ ngư�
 
 * [Lê Ngọc Hưng](https://github.com/leehungw)
 
-* [Huỳnh Đăng Quang](https://github.com/HuynhDangQuang)
+* [Huỳnh Đăng Quang](https://github.com/hdquang437)
 
 
 <!-- NGƯỜI HƯỚNG DẪN -->
